@@ -59,9 +59,11 @@ class _MyHomePageState extends State<MyHomePage> {
                   theme: theme,
                   tileProvider: MemoryCacheVectorTileProvider(
                       delegate: NetworkVectorTileProvider(
-                        urlTemplate:
-                            'https://tiles.stadiamaps.com/data/openmaptiles/{z}/{x}/{y}.pbf?api_key=$apiKey',
-                      ),
+                          urlTemplate:
+                              'https://tiles.stadiamaps.com/data/openmaptiles/{z}/{x}/{y}.pbf?api_key=$apiKey',
+                          // this is the maximum zoom of the provider, not the
+                          // maximum of the map
+                          maximumZoom: 14),
                       maxSizeBytes: 1024 * 1024 * 2)),
             ],
           ))

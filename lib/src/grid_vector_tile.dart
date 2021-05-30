@@ -3,6 +3,7 @@ import 'package:vector_map_tiles/src/tile_identity.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import 'disposable_state.dart';
+import 'slippy_map_translator.dart';
 import 'vector_tile_provider.dart';
 
 class GridVectorTile extends StatefulWidget {
@@ -25,11 +26,14 @@ class GridVectorTile extends StatefulWidget {
 
 class _GridVectorTile extends DisposableState<GridVectorTile> {
   VectorTile? _tile;
+  late TileTranslation _translation;
 
   @override
   void initState() {
     super.initState();
-    widget.tileProvider.provide(widget.tileIdentity).then((bytes) {
+    _translation = SlippyMapTranslator(widget.tileProvider.maximumZoom)
+        .translate(widget.tileIdentity);
+    widget.tileProvider.provide(_translation.translated).then((bytes) {
       if (!disposed) {
         setState(() {
           this._tile = VectorTileReader().read(bytes);
@@ -47,21 +51,31 @@ class _GridVectorTile extends DisposableState<GridVectorTile> {
       return Container();
     }
     return CustomPaint(
-        painter: _VectorTilePainter(widget.tileIdentity, _tile!, widget.theme));
+        painter: _VectorTilePainter(_translation, _tile!, widget.theme));
   }
 }
 
 class _VectorTilePainter extends CustomPainter {
-  final TileIdentity _tileIdentity;
+  final TileTranslation _translation;
   final VectorTile _tile;
   final Theme _theme;
 
-  _VectorTilePainter(this._tileIdentity, this._tile, this._theme);
+  _VectorTilePainter(this._translation, this._tile, this._theme);
 
   @override
   void paint(Canvas canvas, Size size) {
+    if (_translation.isTranslated) {
+      canvas.save();
+      double dx = -(_translation.xOffset * size.width);
+      double dy = -(_translation.yOffset * size.height);
+      canvas.translate(dx, dy);
+      canvas.scale(_translation.fraction.toDouble());
+    }
     Renderer(theme: _theme)
-        .render(canvas, _tile, zoom: _tileIdentity.z.toInt());
+        .render(canvas, _tile, zoom: _translation.original.z.toInt());
+    if (_translation.isTranslated) {
+      canvas.restore();
+    }
   }
 
   @override

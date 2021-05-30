@@ -8,15 +8,29 @@ import 'package:http/retry.dart';
 abstract class VectorTileProvider {
   /// provides a tile as a `pbf` or `mvt` format
   Future<Uint8List> provide(TileIdentity tile);
+
+  int get maximumZoom;
 }
 
 class NetworkVectorTileProvider extends VectorTileProvider {
   final _UrlProvider _urlProvider;
   final Map<String, String>? httpHeaders;
   final RetryClient _retryClient = RetryClient(Client());
+  final int _maximumZoom;
 
-  NetworkVectorTileProvider({required String urlTemplate, this.httpHeaders})
-      : _urlProvider = _UrlProvider(urlTemplate);
+  int get maximumZoom => _maximumZoom;
+
+  /// [urlTemplate] the URL template, e.g. `'https://tiles.stadiamaps.com/data/openmaptiles/{z}/{x}/{y}.pbf?api_key=$apiKey'`
+  /// [httpHeaders] HTTP headers to include in requests, suitable for passing
+  ///  `Authentication` header instead of an `api_key` in the URL template
+  /// [maximumZoom] the maximum zoom supported by the tile provider, not to be
+  ///  confused with the maximum zoom of the map widget. The map widget will
+  ///  automatically use vector tiles from lower zoom levels once the maximum
+  ///  supported by this provider is reached.
+  NetworkVectorTileProvider(
+      {required String urlTemplate, this.httpHeaders, int maximumZoom = 16})
+      : _urlProvider = _UrlProvider(urlTemplate),
+        _maximumZoom = maximumZoom;
 
   @override
   Future<Uint8List> provide(TileIdentity tile) async {
@@ -35,6 +49,8 @@ class MemoryCacheVectorTileProvider extends VectorTileProvider {
   final int maxSizeBytes;
   int _currentSizeBytes = 0;
   final LinkedHashMap<TileIdentity, Uint8List> _cache = LinkedHashMap();
+
+  int get maximumZoom => delegate.maximumZoom;
 
   MemoryCacheVectorTileProvider(
       {required this.delegate, required this.maxSizeBytes});
