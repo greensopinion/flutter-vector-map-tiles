@@ -70,11 +70,13 @@ packages:
     source: sdk
     version: "0.0.0"
   flutter_map:
-    dependency: "direct main"
+    dependency: transitive
     description:
-      path: "../../flutter_map"
-      relative: true
-    source: path
+      path: "."
+      ref: "issues/829-nullsafety"
+      resolved-ref: d9674b5c4fec7d759462a417c8acc548a3e720e1
+      url: "https://github.com/fleaflet/flutter_map.git"
+    source: git
     version: "0.13.0"
   flutter_test:
     dependency: "direct dev"
