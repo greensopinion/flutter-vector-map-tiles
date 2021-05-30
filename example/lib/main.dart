@@ -31,7 +31,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final theme = renderer.ThemeReader(null).read(renderer.lightTheme());
+  final theme = renderer.ThemeReader().read(renderer.lightTheme());
   @override
   Widget build(BuildContext context) {
     return Scaffold(
