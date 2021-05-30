@@ -33,6 +33,10 @@ class _MyMapPageState extends State<MyMapPage> {
                       delegate: NetworkVectorTileProvider(
                         urlTemplate:
                             'https://tiles.stadiamaps.com/data/openmaptiles/{z}/{x}/{y}.pbf?api_key=$apiKey',
+                        // this is the maximum zoom of the provider, not the
+                        // maximum of the map. vector tiles are rendered
+                        // to larger sizes to support higher zoom levels
+                        maximumZoom: 14
                       ),
                       maxSizeBytes: 1024 * 1024 * 2)),
             ],
