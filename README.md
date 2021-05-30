@@ -4,7 +4,45 @@ A plugin for `flutter_map` that enables the use of vector tiles.
 
 ## Usage
 
-See the [example](example).
+```dart
+
+class _MyMapPageState extends State<MyMapPage> {
+  // provide a map theme
+  final theme = renderer.ThemeReader().read(renderer.lightTheme());
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: Text(widget.title),
+        ),
+        body: SafeArea(
+            child: Column(children: [
+          Flexible(
+              child: FlutterMap(
+            options: MapOptions(
+                center: LatLng(49.246292, -123.116226),
+                zoom: 10,
+                plugins: [VectorMapTilesPlugin()]), // be sure to register the plugin
+            layers: [
+              // normally you would see TileLayerOptions which provides raster tiles
+              // instead this vector tile layer replaces the standard tile layer
+              VectorTileLayerOptions(
+                  theme: theme,
+                  tileProvider: MemoryCacheVectorTileProvider(
+                      delegate: NetworkVectorTileProvider(
+                        urlTemplate:
+                            'https://tiles.stadiamaps.com/data/openmaptiles/{z}/{x}/{y}.pbf?api_key=$apiKey',
+                      ),
+                      maxSizeBytes: 1024 * 1024 * 2)),
+            ],
+          ))
+        ])));
+  }
+}
+```
+
+See the [example](example) for details.
 
 ## Status
 
