@@ -6,6 +6,18 @@ A plugin for `flutter_map` that enables the use of vector tiles.
 
 See the [example](example).
 
+## Status
+
+This plugin is in its very early stages, and is not ready for production use.
+
+Outstanding issues:
+
+* bugs at higher zoom levels
+* no map labels
+* performance
+* smooth scrolling/zooming
+* the unknown unknowns
+
 ## License
 
 Copyright 2021 David Green
