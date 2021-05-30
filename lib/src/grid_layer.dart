@@ -4,34 +4,42 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map/plugin_api.dart';
-import 'package:vector_map_tiles/src/debounce.dart';
-import 'package:vector_map_tiles/src/tile_widgets.dart';
+import 'package:vector_tile_renderer/vector_tile_renderer.dart';
+import 'disposable_state.dart';
 import 'tile_identity.dart';
+import 'vector_tile_provider.dart';
+import 'debounce.dart';
+import 'tile_widgets.dart';
 
-class GridLayerOptions extends LayerOptions {}
+class VectorTileLayerOptions extends LayerOptions {
+  final VectorTileProvider tileProvider;
+  final Theme theme;
 
-class GridLayer extends StatefulWidget {
-  final LayerOptions options;
+  VectorTileLayerOptions({required this.tileProvider, required this.theme});
+}
+
+class VectorTileLayer extends StatefulWidget {
+  final VectorTileLayerOptions options;
   final MapState mapState;
   final Stream<Null> stream;
 
-  const GridLayer(this.options, this.mapState, this.stream);
+  const VectorTileLayer(this.options, this.mapState, this.stream);
 
   @override
   State<StatefulWidget> createState() {
-    return _GridLayerState();
+    return _VectorTileLayerState();
   }
 }
 
-class _GridLayerState extends State<GridLayer> {
+class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
   StreamSubscription<Null>? _subscription;
   late ScheduledDebounce _debounce;
-  final TileWidgets _tileWidgets = TileWidgets();
+  late final TileWidgets _tileWidgets;
 
   MapState get _mapState => widget.mapState;
   double get _clampedZoom => _mapState.zoom.roundToDouble();
 
-  _GridLayerState() {
+  _VectorTileLayerState() {
     _debounce = ScheduledDebounce(
         _update, Duration(milliseconds: 100), Duration(milliseconds: 200));
   }
@@ -39,6 +47,8 @@ class _GridLayerState extends State<GridLayer> {
   @override
   void initState() {
     super.initState();
+    _tileWidgets =
+        TileWidgets(widget.options.tileProvider, widget.options.theme);
     _subscription = widget.stream.listen((event) {
       _debounce.update();
     });
@@ -60,6 +70,9 @@ class _GridLayerState extends State<GridLayer> {
   }
 
   void _update() {
+    if (disposed) {
+      return;
+    }
     final center = _mapState.center;
     final pixelBounds = _tiledPixelBounds(center);
     final tileRange = _pixelBoundsToTileRange(pixelBounds);
@@ -84,8 +97,8 @@ class _GridLayerState extends State<GridLayer> {
   List<TileIdentity> _expand(Bounds range) {
     final zoom = _clampedZoom;
     final tiles = <TileIdentity>[];
-    for (num x = range.min.x; x < range.max.x; ++x) {
-      for (num y = range.min.y; y < range.max.y; ++y) {
+    for (num x = range.min.x; x <= range.max.x; ++x) {
+      for (num y = range.min.y; y <= range.max.y; ++y) {
         tiles.add(TileIdentity(zoom, x, y));
       }
     }
@@ -102,7 +115,8 @@ class _GridLayerState extends State<GridLayer> {
     final tilePosition =
         tile.scaleBy(_tileSize).multiplyBy(zoomScale) - origin + translate;
     return Positioned(
-        key: Key('tilePosition_${tile.z}_${tile.x}_${tile.y}'),
+        key: Key(
+            'PositionedGridTile_${tile.z.toInt()}_${tile.x.toInt()}_${tile.y.toInt()}'),
         top: tilePosition.y.toDouble(),
         left: tilePosition.x.toDouble(),
         width: (_tileSize.x * zoomScale),

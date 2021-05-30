@@ -8,14 +8,14 @@ class VectorMapTilesPlugin extends MapPlugin {
   @override
   Widget createLayer(
       LayerOptions options, MapState mapState, Stream<Null> stream) {
-    if (options is GridLayerOptions) {
-      return GridLayer(options, mapState, stream);
+    if (options is VectorTileLayerOptions) {
+      return VectorTileLayer(options, mapState, stream);
     }
     throw Exception('not supported: $options');
   }
 
   @override
   bool supportsLayer(LayerOptions options) {
-    return options is GridLayerOptions;
+    return options is VectorTileLayerOptions;
   }
 }

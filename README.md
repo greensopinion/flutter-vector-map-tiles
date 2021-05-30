@@ -2,6 +2,9 @@
 
 A plugin for `flutter_map` that enables the use of vector tiles.
 
+## Usage
+
+See the [example](example).
 
 ## License
 
