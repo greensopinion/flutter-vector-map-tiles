@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:vector_map_tiles/vector_map_tiles.dart';
-import 'package:vector_tile_renderer/vector_tile_renderer.dart' as renderer;
+import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 import 'api_key.dart';
 
 void main() {
@@ -31,7 +31,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final theme = renderer.ThemeReader().read(renderer.lightTheme());
+  final theme = ProvidedThemes.lightTheme();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,6 +46,10 @@ class _MyHomePageState extends State<MyHomePage> {
             options: MapOptions(
                 center: LatLng(49.246292, -123.116226),
                 zoom: 10,
+                interactiveFlags: InteractiveFlag.doubleTapZoom |
+                    InteractiveFlag.drag |
+                    InteractiveFlag.pinchZoom |
+                    InteractiveFlag.pinchMove,
                 plugins: [VectorMapTilesPlugin()]),
             layers: <LayerOptions>[
               // TileLayerOptions(
