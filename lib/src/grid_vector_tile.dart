@@ -6,15 +6,19 @@ import 'disposable_state.dart';
 import 'slippy_map_translator.dart';
 import 'vector_tile_provider.dart';
 
+typedef ZoomScaleFunction = double Function();
+
 class GridVectorTile extends StatefulWidget {
   final TileIdentity tileIdentity;
   final VectorTileProvider tileProvider;
   final Theme theme;
+  final ZoomScaleFunction zoomScaleFunction;
 
   const GridVectorTile(
       {required Key key,
       required this.tileIdentity,
       required this.tileProvider,
+      required this.zoomScaleFunction,
       required this.theme})
       : super(key: key);
 
@@ -51,31 +55,37 @@ class _GridVectorTile extends DisposableState<GridVectorTile> {
       return Container();
     }
     return CustomPaint(
-        painter: _VectorTilePainter(_translation, _tile!, widget.theme));
+        painter: _VectorTilePainter(
+            _translation, _tile!, widget.zoomScaleFunction, widget.theme));
   }
 }
 
 class _VectorTilePainter extends CustomPainter {
   final TileTranslation _translation;
   final VectorTile _tile;
+  final ZoomScaleFunction _zoomScaleFunction;
   final Theme _theme;
 
-  _VectorTilePainter(this._translation, this._tile, this._theme);
+  _VectorTilePainter(
+      this._translation, this._tile, this._zoomScaleFunction, this._theme);
 
   @override
   void paint(Canvas canvas, Size size) {
+    double scale = _zoomScaleFunction();
+    canvas.save();
     if (_translation.isTranslated) {
-      canvas.save();
       double dx = -(_translation.xOffset * size.width);
       double dy = -(_translation.yOffset * size.height);
       canvas.translate(dx, dy);
       canvas.scale(_translation.fraction.toDouble());
     }
+    if (scale != 1.0) {
+      canvas.scale(scale);
+    }
     Renderer(theme: _theme)
         .render(canvas, _tile, zoom: _translation.original.z.toInt());
-    if (_translation.isTranslated) {
-      canvas.restore();
-    }
+
+    canvas.restore();
   }
 
   @override

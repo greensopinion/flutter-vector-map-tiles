@@ -8,9 +8,10 @@ import 'grid_vector_tile.dart';
 class TileWidgets {
   Map<TileIdentity, Widget> _idToWidget = {};
   final VectorTileProvider _tileProvider;
+  final ZoomScaleFunction _zoomScaleFunction;
   final Theme _theme;
 
-  TileWidgets(this._tileProvider, this._theme);
+  TileWidgets(this._tileProvider, this._zoomScaleFunction, this._theme);
 
   void update(List<TileIdentity> tiles) {
     if (tiles.isEmpty) {
@@ -30,6 +31,7 @@ class TileWidgets {
         key: Key('GridTile_${tile.z}_${tile.x}_${tile.y}'),
         tileIdentity: tile,
         tileProvider: _tileProvider,
+        zoomScaleFunction: _zoomScaleFunction,
         theme: _theme);
   }
 }

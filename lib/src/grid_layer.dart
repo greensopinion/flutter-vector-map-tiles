@@ -38,6 +38,7 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
 
   MapState get _mapState => widget.mapState;
   double get _clampedZoom => _mapState.zoom.roundToDouble();
+  double _paintZoomScale = 1.0;
 
   _VectorTileLayerState() {
     _debounce = ScheduledDebounce(
@@ -47,8 +48,8 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
   @override
   void initState() {
     super.initState();
-    _tileWidgets =
-        TileWidgets(widget.options.tileProvider, widget.options.theme);
+    _tileWidgets = TileWidgets(widget.options.tileProvider,
+        () => _paintZoomScale, widget.options.theme);
     _subscription = widget.stream.listen((event) {
       _debounce.update();
     });
@@ -63,6 +64,10 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
 
   @override
   Widget build(BuildContext context) {
+    if (_tileWidgets.all.isEmpty) {
+      return Container();
+    }
+    _updatePaintZoomScale();
     final tileWidgets = _tileWidgets.all.entries
         .map((entry) => _positionTile(entry.key, entry.value))
         .toList();
@@ -106,14 +111,14 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
   }
 
   Widget _positionTile(TileIdentity tile, Widget tileWidget) {
-    final zoomScale = _zoomScale(_mapState.zoom, tile.z.toDouble());
+    final zoomScale = _paintZoomScale;
     final pixelOrigin =
         _mapState.getNewPixelOrigin(_mapState.center, _mapState.zoom).round();
     final origin =
         _mapState.project(_mapState.unproject(pixelOrigin), _mapState.zoom);
     final translate = origin.multiplyBy(zoomScale) - pixelOrigin;
     final tilePosition =
-        tile.scaleBy(_tileSize).multiplyBy(zoomScale) - origin + translate;
+        (tile.scaleBy(_tileSize) - origin).multiplyBy(zoomScale) + translate;
     return Positioned(
         key: Key(
             'PositionedGridTile_${tile.z.toInt()}_${tile.x.toInt()}_${tile.y.toInt()}'),
@@ -126,7 +131,12 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
 
   double _zoomScale(double mapZoom, double tileZoom) {
     final crs = _mapState.options.crs;
-    return crs.scale(tileZoom) / crs.scale(mapZoom);
+    return crs.scale(mapZoom) / crs.scale(tileZoom);
+  }
+
+  void _updatePaintZoomScale() {
+    final tileZoom = _tileWidgets.all.keys.first.z;
+    _paintZoomScale = _zoomScale(_mapState.zoom, tileZoom.toDouble());
   }
 }
 
