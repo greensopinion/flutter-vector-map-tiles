@@ -1,3 +1,6 @@
+## 0.0.6
+
+* remove debounce because it's not needed and adds jitter
 ## 0.0.5
 
 * improve performance

@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:vector_map_tiles/vector_map_tiles.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 import 'api_key.dart';
+import 'test_style.dart';
 
 void main() {
   runApp(MyApp());
@@ -31,7 +32,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final theme = ProvidedThemes.lightTheme();
+  final theme = ThemeReader().read(testStyle());
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +47,7 @@ class _MyHomePageState extends State<MyHomePage> {
             options: MapOptions(
                 center: LatLng(49.246292, -123.116226),
                 zoom: 10,
+                maxZoom: 18,
                 interactiveFlags: InteractiveFlag.doubleTapZoom |
                     InteractiveFlag.drag |
                     InteractiveFlag.pinchZoom |

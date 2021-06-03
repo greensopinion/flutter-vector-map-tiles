@@ -8,7 +8,6 @@ import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 import 'disposable_state.dart';
 import 'tile_identity.dart';
 import 'vector_tile_provider.dart';
-import 'debounce.dart';
 import 'tile_widgets.dart';
 
 class VectorTileLayerOptions extends LayerOptions {
@@ -33,17 +32,11 @@ class VectorTileLayer extends StatefulWidget {
 
 class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
   StreamSubscription<Null>? _subscription;
-  late ScheduledDebounce _debounce;
   late final TileWidgets _tileWidgets;
 
   MapState get _mapState => widget.mapState;
   double get _clampedZoom => _mapState.zoom.roundToDouble();
   double _paintZoomScale = 1.0;
-
-  _VectorTileLayerState() {
-    _debounce = ScheduledDebounce(
-        _update, Duration(milliseconds: 100), Duration(milliseconds: 200));
-  }
 
   @override
   void initState() {
@@ -51,9 +44,9 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
     _tileWidgets = TileWidgets(widget.options.tileProvider,
         () => _paintZoomScale, () => _mapState.zoom, widget.options.theme);
     _subscription = widget.stream.listen((event) {
-      _debounce.update();
+      _update();
     });
-    _debounce.update();
+    _update();
   }
 
   @override
