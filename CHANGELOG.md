@@ -1,3 +1,6 @@
+## 0.0.4
+
+* improve line size interpolation
 ## 0.0.2
 
 * support zoom levels higher than the maximum supported by
