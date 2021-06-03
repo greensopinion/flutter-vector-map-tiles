@@ -87,7 +87,7 @@ class _VectorTilePainter extends CustomPainter {
       canvas.scale(scale);
     }
     Renderer(theme: _theme).render(canvas, _tile,
-        zoomScaleFactor: _translation.fraction.toDouble(),
+        zoomScaleFactor: _translation.fraction.toDouble() * scale,
         zoom: zoomFunction());
     canvas.restore();
   }

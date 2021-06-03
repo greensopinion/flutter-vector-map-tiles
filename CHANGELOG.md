@@ -1,3 +1,7 @@
+## 0.0.5
+
+* improve performance
+* reduce zoom scalling oversize effect on lines such as roads
 ## 0.0.4
 
 * improve line size interpolation
