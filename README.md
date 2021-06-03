@@ -58,6 +58,7 @@ Outstanding issues:
 * no map labels
 * performance
 * smooth scrolling/zooming
+* transition between zoom levels when tiles are not cached
 * the unknown unknowns
 
 ## License

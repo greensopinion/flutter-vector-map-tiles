@@ -7,18 +7,21 @@ import 'slippy_map_translator.dart';
 import 'vector_tile_provider.dart';
 
 typedef ZoomScaleFunction = double Function();
+typedef ZoomFunction = double Function();
 
 class GridVectorTile extends StatefulWidget {
   final TileIdentity tileIdentity;
   final VectorTileProvider tileProvider;
   final Theme theme;
   final ZoomScaleFunction zoomScaleFunction;
+  final ZoomFunction zoomFunction;
 
   const GridVectorTile(
       {required Key key,
       required this.tileIdentity,
       required this.tileProvider,
       required this.zoomScaleFunction,
+      required this.zoomFunction,
       required this.theme})
       : super(key: key);
 
@@ -55,8 +58,8 @@ class _GridVectorTile extends DisposableState<GridVectorTile> {
       return Container();
     }
     return CustomPaint(
-        painter: _VectorTilePainter(
-            _translation, _tile!, widget.zoomScaleFunction, widget.theme));
+        painter: _VectorTilePainter(_translation, _tile!,
+            widget.zoomScaleFunction, widget.zoomFunction, widget.theme));
   }
 }
 
@@ -64,27 +67,26 @@ class _VectorTilePainter extends CustomPainter {
   final TileTranslation _translation;
   final VectorTile _tile;
   final ZoomScaleFunction _zoomScaleFunction;
+  final ZoomFunction zoomFunction;
   final Theme _theme;
 
-  _VectorTilePainter(
-      this._translation, this._tile, this._zoomScaleFunction, this._theme);
+  _VectorTilePainter(this._translation, this._tile, this._zoomScaleFunction,
+      this.zoomFunction, this._theme);
 
   @override
   void paint(Canvas canvas, Size size) {
-    double scale = _zoomScaleFunction();
+    final scale = _zoomScaleFunction();
     canvas.save();
     if (_translation.isTranslated) {
-      double dx = -(_translation.xOffset * size.width);
-      double dy = -(_translation.yOffset * size.height);
+      final dx = -(_translation.xOffset * size.width);
+      final dy = -(_translation.yOffset * size.height);
       canvas.translate(dx, dy);
       canvas.scale(_translation.fraction.toDouble());
     }
     if (scale != 1.0) {
       canvas.scale(scale);
     }
-    Renderer(theme: _theme)
-        .render(canvas, _tile, zoom: _translation.original.z.toInt());
-
+    Renderer(theme: _theme).render(canvas, _tile, zoom: zoomFunction());
     canvas.restore();
   }
 

@@ -49,7 +49,7 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
   void initState() {
     super.initState();
     _tileWidgets = TileWidgets(widget.options.tileProvider,
-        () => _paintZoomScale, widget.options.theme);
+        () => _paintZoomScale, () => _mapState.zoom, widget.options.theme);
     _subscription = widget.stream.listen((event) {
       _debounce.update();
     });

@@ -9,9 +9,11 @@ class TileWidgets {
   Map<TileIdentity, Widget> _idToWidget = {};
   final VectorTileProvider _tileProvider;
   final ZoomScaleFunction _zoomScaleFunction;
+  final ZoomFunction _zoomFunction;
   final Theme _theme;
 
-  TileWidgets(this._tileProvider, this._zoomScaleFunction, this._theme);
+  TileWidgets(this._tileProvider, this._zoomScaleFunction, this._zoomFunction,
+      this._theme);
 
   void update(List<TileIdentity> tiles) {
     if (tiles.isEmpty) {
@@ -32,6 +34,7 @@ class TileWidgets {
         tileIdentity: tile,
         tileProvider: _tileProvider,
         zoomScaleFunction: _zoomScaleFunction,
+        zoomFunction: _zoomFunction,
         theme: _theme);
   }
 }
