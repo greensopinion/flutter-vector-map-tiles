@@ -1,3 +1,7 @@
+## 0.0.7
+
+* improve transition between tile sizes by rendering larger tiles while zooming smaller tiles
+* improve performance by retaining some parsed vector tile data in memory
 ## 0.0.6
 
 * remove debounce because it's not needed and adds jitter
