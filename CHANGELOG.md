@@ -1,3 +1,7 @@
+## 0.0.8
+
+* improve rendering speed with a repaint boundary
+* reduce memory overhead by caching fewer tiles
 ## 0.0.7
 
 * improve transition between tile sizes by rendering larger tiles while zooming smaller tiles

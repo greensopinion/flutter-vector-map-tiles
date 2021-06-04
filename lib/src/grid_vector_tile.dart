@@ -76,9 +76,10 @@ class _GridVectorTile extends DisposableState<GridVectorTile> {
     if (_tile == null) {
       return Container();
     }
-    return CustomPaint(
-        painter: _VectorTilePainter(_translation!, _tile!,
-            widget.zoomScaleFunction, widget.zoomFunction, widget.theme));
+    return RepaintBoundary(
+        child: CustomPaint(
+            painter: _VectorTilePainter(_translation!, _tile!,
+                widget.zoomScaleFunction, widget.zoomFunction, widget.theme)));
   }
 }
 
@@ -94,6 +95,8 @@ class _VectorTilePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    print(
+        "painting tile ${_translation.original} at ${_translation.translated}");
     final scale = _zoomScaleFunction();
     canvas.save();
     if (_translation.isTranslated) {

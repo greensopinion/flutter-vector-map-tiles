@@ -6,7 +6,7 @@ import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 class VectorTiles {
   final _map = LinkedHashMap<TileIdentity, VectorTile>();
   final _fetching = Map<TileIdentity, Future<VectorTile>>();
-  final _maxSize = 200;
+  final _maxSize = 50;
   final VectorTileProvider provider;
 
   VectorTiles(this.provider);
