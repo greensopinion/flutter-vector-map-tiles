@@ -4,7 +4,6 @@ import 'package:latlong2/latlong.dart';
 import 'package:vector_map_tiles/vector_map_tiles.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 import 'api_key.dart';
-import 'test_style.dart';
 
 void main() {
   runApp(MyApp());
@@ -32,7 +31,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final theme = ThemeReader().read(testStyle());
+  final theme = ProvidedThemes.lightTheme();
 
   @override
   Widget build(BuildContext context) {
