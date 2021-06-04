@@ -4,14 +4,14 @@ import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import 'disposable_state.dart';
 import 'slippy_map_translator.dart';
-import 'vector_tile_provider.dart';
+import 'vector_tiles.dart';
 
 typedef ZoomScaleFunction = double Function();
 typedef ZoomFunction = double Function();
 
 class GridVectorTile extends StatefulWidget {
   final TileIdentity tileIdentity;
-  final VectorTileProvider tileProvider;
+  final VectorTiles vectorTiles;
   final Theme theme;
   final ZoomScaleFunction zoomScaleFunction;
   final ZoomFunction zoomFunction;
@@ -19,7 +19,7 @@ class GridVectorTile extends StatefulWidget {
   const GridVectorTile(
       {required Key key,
       required this.tileIdentity,
-      required this.tileProvider,
+      required this.vectorTiles,
       required this.zoomScaleFunction,
       required this.zoomFunction,
       required this.theme})
@@ -38,12 +38,12 @@ class _GridVectorTile extends DisposableState<GridVectorTile> {
   @override
   void initState() {
     super.initState();
-    _translation = SlippyMapTranslator(widget.tileProvider.maximumZoom)
+    _translation = SlippyMapTranslator(widget.vectorTiles.provider.maximumZoom)
         .translate(widget.tileIdentity);
-    widget.tileProvider.provide(_translation.translated).then((bytes) {
+    widget.vectorTiles.getTile(_translation.translated).then((tile) {
       if (!disposed) {
         setState(() {
-          this._tile = VectorTileReader().read(bytes);
+          this._tile = tile;
         });
       }
     }).onError((error, stackTrace) {
