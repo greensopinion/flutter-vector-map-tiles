@@ -11,7 +11,9 @@ class VectorTiles {
 
   VectorTiles(this.provider);
 
-  Future<VectorTile> getTile(TileIdentity tile) {
+  VectorTile? getTile(TileIdentity tile) => _map[tile];
+
+  Future<VectorTile> retrieveTile(TileIdentity tile) {
     VectorTile? vectorTile = _map[tile];
     if (vectorTile == null) {
       var future = _fetching[tile];

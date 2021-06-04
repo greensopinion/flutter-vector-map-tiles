@@ -44,13 +44,21 @@ class SlippyMapTranslator {
     if (tile.z <= maxZoom) {
       return TileTranslation.identity(tile);
     }
-    final zoomDifference = tile.z.toInt() - maxZoom;
+    return _translate(tile, maxZoom);
+  }
+
+  TileTranslation lowerZoomAlternative(TileIdentity tile, int levels) {
+    return _translate(tile, tile.z.toInt() - levels);
+  }
+
+  TileTranslation _translate(TileIdentity tile, int targetZoom) {
+    final zoomDifference = tile.z.toInt() - targetZoom;
     final divisor = pow(2, zoomDifference).toInt();
     final translatedX = tile.x ~/ divisor;
     final translatedY = tile.y ~/ divisor;
     final xOffset = (tile.x % divisor).toInt();
     final yOffset = (tile.y % divisor).toInt();
-    final translated = TileIdentity(maxZoom, translatedX, translatedY);
+    final translated = TileIdentity(targetZoom, translatedX, translatedY);
     return TileTranslation(tile, translated, divisor, xOffset, yOffset);
   }
 }

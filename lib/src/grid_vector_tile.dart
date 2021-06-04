@@ -33,23 +33,42 @@ class GridVectorTile extends StatefulWidget {
 
 class _GridVectorTile extends DisposableState<GridVectorTile> {
   VectorTile? _tile;
-  late TileTranslation _translation;
+  TileTranslation? _translation;
 
   @override
   void initState() {
     super.initState();
-    _translation = SlippyMapTranslator(widget.vectorTiles.provider.maximumZoom)
-        .translate(widget.tileIdentity);
-    widget.vectorTiles.getTile(_translation.translated).then((tile) {
-      if (!disposed) {
-        setState(() {
-          this._tile = tile;
-        });
+    final slippyMap =
+        SlippyMapTranslator(widget.vectorTiles.provider.maximumZoom);
+    final originalTranslation = slippyMap.translate(widget.tileIdentity);
+    _translation = originalTranslation;
+    _tile = widget.vectorTiles.getTile(originalTranslation.translated);
+    if (_tile == null) {
+      int difference = widget.tileIdentity.z.toInt() -
+          originalTranslation.translated.z.toInt() +
+          1;
+      final alternativeTranslation = slippyMap.lowerZoomAlternative(
+          originalTranslation.translated, difference);
+      final alternativeTile =
+          widget.vectorTiles.getTile(alternativeTranslation.translated);
+      if (alternativeTile != null) {
+        _translation = alternativeTranslation;
+        _tile = alternativeTile;
       }
-    }).onError((error, stackTrace) {
-      print(error);
-      print(stackTrace);
-    });
+      widget.vectorTiles
+          .retrieveTile(originalTranslation.translated)
+          .then((tile) {
+        if (!disposed) {
+          setState(() {
+            this._translation = originalTranslation;
+            this._tile = tile;
+          });
+        }
+      }).onError((error, stackTrace) {
+        print(error);
+        print(stackTrace);
+      });
+    }
   }
 
   @override
@@ -58,7 +77,7 @@ class _GridVectorTile extends DisposableState<GridVectorTile> {
       return Container();
     }
     return CustomPaint(
-        painter: _VectorTilePainter(_translation, _tile!,
+        painter: _VectorTilePainter(_translation!, _tile!,
             widget.zoomScaleFunction, widget.zoomFunction, widget.theme));
   }
 }
