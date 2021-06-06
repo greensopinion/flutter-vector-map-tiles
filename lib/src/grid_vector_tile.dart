@@ -95,8 +95,6 @@ class _VectorTilePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    print(
-        "painting tile ${_translation.original} at ${_translation.translated}");
     final scale = _zoomScaleFunction();
     canvas.save();
     if (_translation.isTranslated) {

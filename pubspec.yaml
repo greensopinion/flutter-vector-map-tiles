@@ -15,9 +15,9 @@ dependencies:
     git:
       url: https://github.com/fleaflet/flutter_map.git
       ref: issues/829-nullsafety
-  vector_tile_renderer: ^0.1.9
-  #vector_tile_renderer: 
-  #  path: ../dart-vector-tile-renderer
+  #vector_tile_renderer: ^0.1.10
+  vector_tile_renderer: 
+    path: ../dart-vector-tile-renderer
 
 dev_dependencies:
   test: ^1.17.5
