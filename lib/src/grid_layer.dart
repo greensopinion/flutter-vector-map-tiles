@@ -97,7 +97,7 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
     final tiles = <TileIdentity>[];
     for (num x = range.min.x; x <= range.max.x; ++x) {
       for (num y = range.min.y; y <= range.max.y; ++y) {
-        tiles.add(TileIdentity(zoom, x, y));
+        tiles.add(TileIdentity(zoom.toInt(), x.toInt(), y.toInt()));
       }
     }
     return tiles;
@@ -113,8 +113,7 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
     final tilePosition =
         (tile.scaleBy(_tileSize) - origin).multiplyBy(zoomScale) + translate;
     return Positioned(
-        key: Key(
-            'PositionedGridTile_${tile.z.toInt()}_${tile.x.toInt()}_${tile.y.toInt()}'),
+        key: Key('PositionedGridTile_${tile.z}_${tile.x}_${tile.y}'),
         top: tilePosition.y.toDouble(),
         left: tilePosition.x.toDouble(),
         width: (_tileSize.x * zoomScale),
