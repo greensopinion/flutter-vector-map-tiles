@@ -18,6 +18,9 @@ class _VectorTileLoader extends Loader<TileCacheKey, VectorTile> {
   @override
   Future<VectorTile> load(TileCacheKey key) {
     final tile = TileIdentity(key.z, key.x, key.y);
+    if (key.x < 0 || key.y < 0 || key.z > _provider.maximumZoom) {
+      return Future.error('tile out of range: $key');
+    }
     return _provider
         .provide(tile)
         .then((bytes) => VectorTileReader().read(bytes));
