@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map/plugin_api.dart';
+import 'package:vector_map_tiles/src/tile_pair_cache.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 import 'disposable_state.dart';
 import 'tile_identity.dart';
@@ -39,6 +40,7 @@ class VectorTileLayer extends StatefulWidget {
 class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
   StreamSubscription<Null>? _subscription;
   late final TileWidgets _tileWidgets;
+  TilePairCache? _cache;
 
   MapState get _mapState => widget.mapState;
   double get _clampedZoom => _mapState.zoom.roundToDouble();
@@ -47,12 +49,15 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
   @override
   void initState() {
     super.initState();
+    final cache = TilePairCache(widget.options.theme,
+        widget.options.tileProvider, widget.options.renderMode);
+    _cache = cache;
     _tileWidgets = TileWidgets(
         widget.options.tileProvider,
         () => _paintZoomScale,
         () => _mapState.zoom,
         widget.options.theme,
-        widget.options.renderMode);
+        cache);
     _subscription = widget.stream.listen((event) {
       _update();
     });
@@ -62,6 +67,8 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
   @override
   void dispose() {
     super.dispose();
+    _cache?.dispose();
+    _cache = null;
     _subscription?.cancel();
   }
 

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/widgets.dart';
 import 'package:vector_map_tiles/src/debounce.dart';
 import 'package:vector_map_tiles/src/tile_identity.dart';
@@ -37,7 +39,8 @@ class GridVectorTile extends StatefulWidget {
 class VectorTileModel extends ChangeNotifier {
   bool _disposed = false;
   bool get disposed => _disposed;
-  final TilePair tile;
+  late final VectorTile vector;
+  late final ui.Image? image;
   final TileTranslation translation;
   final ZoomScaleFunction zoomScaleFunction;
   final ZoomFunction zoomFunction;
@@ -45,8 +48,11 @@ class VectorTileModel extends ChangeNotifier {
   double lastRenderedZoom = double.negativeInfinity;
   double lastRenderedZoomScale = double.negativeInfinity;
 
-  VectorTileModel(this.tile, this.translation, this.zoomScaleFunction,
-      this.zoomFunction, this.theme);
+  VectorTileModel(TilePair tile, this.translation, this.zoomScaleFunction,
+      this.zoomFunction, this.theme) {
+    vector = tile.vector;
+    image = tile.image?.clone();
+  }
 
   bool updateRendering() {
     final lastRenderedZoom = zoomFunction();
@@ -67,6 +73,7 @@ class VectorTileModel extends ChangeNotifier {
   @override
   void dispose() {
     super.dispose();
+    image?.dispose();
     _disposed = true;
   }
 
@@ -102,9 +109,7 @@ class _GridVectorTile extends DisposableState<GridVectorTile> {
           .retrieveTile(
               originalTranslation.toCacheKey(widget.tileIdentity.z.toInt()))
           .then((tile) {
-        if (!disposed) {
-          _updateTileState(tile, originalTranslation);
-        }
+        _updateTileState(tile, originalTranslation);
       }).onError((error, stackTrace) {
         print(error);
         print(stackTrace);
@@ -112,12 +117,13 @@ class _GridVectorTile extends DisposableState<GridVectorTile> {
     }
   }
 
-  void _updateTileState(TilePair tile, TileTranslation translation) {
+  void _updateTileState(TilePair tile, TileTranslation translation) async {
     if (!disposed) {
+      VectorTileModel model = VectorTileModel(tile, translation,
+          widget.zoomScaleFunction, widget.zoomFunction, widget.theme);
       setState(() {
         _model?.dispose();
-        _model = VectorTileModel(tile, translation, widget.zoomScaleFunction,
-            widget.zoomFunction, widget.theme);
+        _model = model;
       });
     }
   }
@@ -143,14 +149,13 @@ class _GridVectorTile extends DisposableState<GridVectorTile> {
     int difference = widget.tileIdentity.z.toInt() -
         originalTranslation.translated.z.toInt() +
         1;
-    for (int x = 0; x < 3; ++x) {
-      final translation =
-          slippyMap.lowerZoomAlternative(widget.tileIdentity, difference + x);
-      final vectorTile = widget.cache.vectorTiles
-          .getValue(translation.translated.toCacheKey());
-      if (vectorTile != null) {
-        return _AlternativeTile(translation, TilePair(vectorTile));
-      }
+    final translation =
+        slippyMap.lowerZoomAlternative(widget.tileIdentity, difference);
+    final alternativeKey = TilePairCacheKey(translation.translated.toCacheKey(),
+        translation.translated.z.toInt(), 1.0);
+    final vectorTile = widget.cache.getValue(alternativeKey);
+    if (vectorTile != null) {
+      return _AlternativeTile(translation, vectorTile);
     }
   }
 }
@@ -170,7 +175,7 @@ class _VectorTilePainter extends CustomPainter {
       : this.model = model,
         super(repaint: model) {
     debounce = ScheduledDebounce(
-        _notify, Duration(milliseconds: 50), Duration(milliseconds: 500));
+        _notify, Duration(milliseconds: 200), Duration(seconds: 10));
   }
 
   @override
@@ -187,13 +192,18 @@ class _VectorTilePainter extends CustomPainter {
       canvas.scale(scale);
     }
     bool changed = model.updateRendering();
-    final image = model.tile.image;
-    if (changed && image != null) {
-      canvas.scale(1 / _scale.toDouble());
-      canvas.drawImage(image, Offset.zero, Paint());
-      debounce.update();
-    } else {
-      Renderer(theme: model.theme).render(canvas, model.tile.vector,
+    bool renderVector = true;
+    if (changed) {
+      final image = model.image;
+      if (image != null) {
+        renderVector = false;
+        canvas.scale(1 / _scale.toDouble());
+        canvas.drawImage(image, Offset.zero, Paint());
+        debounce.update();
+      }
+    }
+    if (renderVector) {
+      Renderer(theme: model.theme).render(canvas, model.vector,
           zoomScaleFactor: model.translation.fraction.toDouble() * scale,
           zoom: model.lastRenderedZoom);
     }

@@ -12,13 +12,10 @@ class TileWidgets {
   final ZoomScaleFunction _zoomScaleFunction;
   final ZoomFunction _zoomFunction;
   final Theme _theme;
-  final RenderMode _renderMode;
-  late final TilePairCache _cache;
+  final TilePairCache _cache;
 
   TileWidgets(VectorTileProvider tileProvider, this._zoomScaleFunction,
-      this._zoomFunction, this._theme, this._renderMode) {
-    _cache = TilePairCache(_theme, tileProvider, _renderMode);
-  }
+      this._zoomFunction, this._theme, this._cache);
 
   void update(List<TileIdentity> tiles) {
     if (tiles.isEmpty) {

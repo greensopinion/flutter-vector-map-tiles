@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:isolate';
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:vector_map_tiles/src/abstract_loading_cache.dart';
@@ -38,29 +39,23 @@ class TilePairLoader extends Loader<TilePairCacheKey, TilePair> {
 
   @override
   Future<TilePair> load(TilePairCacheKey key) async {
-    return vectorTiles.retrieveTile(key.tileKey).then((vector) {
-      final pair = TilePair(vector);
+    return vectorTiles.retrieveTile(key.tileKey).then((vector) async {
       if (renderMode == RenderMode.mixed) {
-        scheduleMicrotask(() {
-          renderer
-              .render(vector,
-                  zoomScaleFactor: key.zoomScaleFactor,
-                  zoom: key.zoom.toDouble())
-              .then((image) {
-            pair.image = image;
-          });
-        });
+        final image = await renderer.render(vector,
+            zoomScaleFactor: key.zoomScaleFactor, zoom: key.zoom.toDouble());
+        return TilePair(vector, image);
+      } else {
+        return TilePair(vector, null);
       }
-      return pair;
     });
   }
 }
 
 class TilePair {
   final VectorTile vector;
-  Image? image;
+  final Image? image;
 
-  TilePair(this.vector);
+  TilePair(this.vector, this.image);
 }
 
 class TilePairCacheKey {

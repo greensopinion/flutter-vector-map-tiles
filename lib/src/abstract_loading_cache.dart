@@ -11,12 +11,14 @@ class AbstractLoadingCache<K, T> {
   final _maxSize;
   final Loader<K, T> loader;
   int accessCount = 0;
+  bool _disposed = false;
 
   AbstractLoadingCache(this.loader, this._maxSize);
 
   Iterable<K> keys() => _map.keys;
 
   T? getValue(K key) {
+    _checkDisposed();
     final bucket = _map[key];
     if (bucket != null) {
       ++accessCount;
@@ -27,6 +29,7 @@ class AbstractLoadingCache<K, T> {
   }
 
   Future<T> retrieveTile(K key) async {
+    _checkDisposed();
     _CacheBucket<T>? bucket = _map[key];
     if (bucket == null) {
       var future = _fetching[key];
@@ -35,6 +38,11 @@ class AbstractLoadingCache<K, T> {
         _fetching[key] = completer.future;
         future = completer.future;
         loader.load(key).then((loaded) {
+          if (_disposed) {
+            disposeEntry(loaded);
+            completer.completeError('disposed');
+            return;
+          }
           _fetching.remove(key);
           completer.complete(loaded);
           ++accessCount;
@@ -57,7 +65,7 @@ class AbstractLoadingCache<K, T> {
 
   void _constrainCacheSize() {
     while (_map.length > _maxSize) {
-      _map.remove(_map.keys.first);
+      _remove(_map.keys.first);
     }
     if (_map.isNotEmpty) {
       var it = _map.entries.iterator;
@@ -66,12 +74,33 @@ class AbstractLoadingCache<K, T> {
         final entry = it.current;
         final age = accessCount - entry.value.accessCount;
         if (age > maxAge) {
-          _map.remove(entry.key);
+          _remove(entry.key);
           it = _map.entries.iterator;
         } else {
           break;
         }
       }
+    }
+  }
+
+  void dispose() {
+    while (_map.isNotEmpty) {
+      _remove(_map.keys.first);
+    }
+    _disposed = true;
+  }
+
+  void _remove(K key) {
+    final removed = _map.remove(key);
+    if (removed != null) {
+      disposeEntry(removed.value);
+    }
+  }
+
+  void disposeEntry(T removed) {}
+  void _checkDisposed() {
+    if (_disposed) {
+      throw 'disposed';
     }
   }
 }
