@@ -10,11 +10,17 @@ import 'tile_identity.dart';
 import 'vector_tile_provider.dart';
 import 'tile_widgets.dart';
 
+enum RenderMode { vector, mixed }
+
 class VectorTileLayerOptions extends LayerOptions {
   final VectorTileProvider tileProvider;
   final Theme theme;
+  final RenderMode renderMode;
 
-  VectorTileLayerOptions({required this.tileProvider, required this.theme});
+  VectorTileLayerOptions(
+      {required this.tileProvider,
+      required this.theme,
+      this.renderMode = RenderMode.mixed});
 }
 
 class VectorTileLayer extends StatefulWidget {
@@ -41,8 +47,12 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
   @override
   void initState() {
     super.initState();
-    _tileWidgets = TileWidgets(widget.options.tileProvider,
-        () => _paintZoomScale, () => _mapState.zoom, widget.options.theme);
+    _tileWidgets = TileWidgets(
+        widget.options.tileProvider,
+        () => _paintZoomScale,
+        () => _mapState.zoom,
+        widget.options.theme,
+        widget.options.renderMode);
     _subscription = widget.stream.listen((event) {
       _update();
     });

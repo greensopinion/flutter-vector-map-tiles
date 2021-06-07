@@ -21,6 +21,7 @@ class TileTranslation {
   /// the offset into the translated tile, starting at 0
   final int yOffset;
 
+  int get zoomDifference => original.z.toInt() - translated.z.toInt();
   bool get isTranslated => fraction > 1;
 
   TileTranslation(this.original, this.translated, this.fraction, this.xOffset,
