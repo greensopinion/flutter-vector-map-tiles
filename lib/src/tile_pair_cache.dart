@@ -35,18 +35,16 @@ class _TilePairLoader extends Loader<TilePairCacheKey, TilePair> {
 
   @override
   Future<TilePair> load(TilePairCacheKey key) async {
-    return tileProvider
-        .provide(key.tileKey.toTileIdentity())
-        .then((vectorBytes) async {
-      final vector = VectorTileReader().read(vectorBytes);
-      if (renderMode == RenderMode.mixed) {
-        final image = await pipeline.renderImage(vector,
-            zoomScaleFactor: key.zoomScaleFactor, zoom: key.zoom.toDouble());
-        return TilePair(vector, image);
-      } else {
-        return TilePair(vector, null);
-      }
-    });
+    final vectorBytes =
+        await tileProvider.provide(key.tileKey.toTileIdentity());
+    final vector = VectorTileReader().read(vectorBytes);
+    if (renderMode == RenderMode.mixed) {
+      final image = await pipeline.renderImage(vector,
+          zoomScaleFactor: key.zoomScaleFactor, zoom: key.zoom.toDouble());
+      return TilePair(vector, image);
+    } else {
+      return TilePair(vector, null);
+    }
   }
 }
 
