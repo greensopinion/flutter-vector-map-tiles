@@ -1,48 +1,46 @@
 import 'dart:async';
-import 'dart:isolate';
-import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:vector_map_tiles/src/abstract_loading_cache.dart';
+import 'package:vector_map_tiles/src/renderer_pipeline.dart';
 import 'package:vector_map_tiles/src/tile_cache_key.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../vector_map_tiles.dart';
 import 'vector_tile_provider.dart';
-import 'vector_tiles.dart';
 
 class TilePairCache extends AbstractLoadingCache<TilePairCacheKey, TilePair> {
   final VectorTileProvider provider;
-  final VectorTiles vectorTiles;
 
-  TilePairCache._(Theme theme, VectorTiles vectorTiles,
-      VectorTileProvider provider, RenderMode renderMode, int maxSize)
+  TilePairCache._(Theme theme, VectorTileProvider provider,
+      _TilePairLoader loader, int maxSize)
       : this.provider = provider,
-        this.vectorTiles = vectorTiles,
-        super(TilePairLoader(theme, vectorTiles, renderMode), maxSize);
+        super(loader, maxSize);
 
-  factory TilePairCache(
-      Theme theme, VectorTileProvider provider, RenderMode renderMode,
-      {required int maxSize}) {
-    final vectorTiles = VectorTiles(provider);
-    return TilePairCache._(theme, vectorTiles, provider, renderMode, maxSize);
+  factory TilePairCache(VectorTileLayerOptions options) {
+    final loader = _TilePairLoader(
+        options.theme, options.tileProvider, options.renderMode);
+    return TilePairCache._(
+        options.theme, options.tileProvider, loader, options.maxCachedTiles);
   }
 }
 
-class TilePairLoader extends Loader<TilePairCacheKey, TilePair> {
-  final Theme theme;
-  final VectorTiles vectorTiles;
-  final ImageRenderer renderer;
+class _TilePairLoader extends Loader<TilePairCacheKey, TilePair> {
+  final VectorTileProvider tileProvider;
   final RenderMode renderMode;
+  final RendererPipeline pipeline;
 
-  TilePairLoader(this.theme, this.vectorTiles, this.renderMode)
-      : this.renderer = ImageRenderer(theme: theme, scale: _imageScale);
+  _TilePairLoader(Theme theme, this.tileProvider, this.renderMode)
+      : this.pipeline = RendererPipeline(theme);
 
   @override
   Future<TilePair> load(TilePairCacheKey key) async {
-    return vectorTiles.retrieveTile(key.tileKey).then((vector) async {
+    return tileProvider
+        .provide(key.tileKey.toTileIdentity())
+        .then((vectorBytes) async {
+      final vector = VectorTileReader().read(vectorBytes);
       if (renderMode == RenderMode.mixed) {
-        final image = await renderer.render(vector,
+        final image = await pipeline.renderImage(vector,
             zoomScaleFactor: key.zoomScaleFactor, zoom: key.zoom.toDouble());
         return TilePair(vector, image);
       } else {
@@ -79,5 +77,3 @@ class TilePairCacheKey {
   String toString() =>
       'TilePairCacheKey(tileKey=$tileKey,zoom=$zoom,zoomScaleFactor=$zoomScaleFactor)';
 }
-
-int _imageScale = 3;

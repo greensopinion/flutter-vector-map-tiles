@@ -17,6 +17,8 @@ class TileCacheKey {
 
   @override
   String toString() => 'Tile(z=$z,x=$x,y=$y)';
+
+  TileIdentity toTileIdentity() => TileIdentity(z, x, y);
 }
 
 extension TileIdentityExtension on TileIdentity {

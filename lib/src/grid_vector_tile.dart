@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/widgets.dart';
 import 'package:vector_map_tiles/src/debounce.dart';
 import 'package:vector_map_tiles/src/tile_identity.dart';

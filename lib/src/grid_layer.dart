@@ -53,9 +53,7 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer>
   void initState() {
     super.initState();
     WidgetsBinding.instance?.addObserver(this);
-    final cache = TilePairCache(widget.options.theme,
-        widget.options.tileProvider, widget.options.renderMode,
-        maxSize: widget.options.maxCachedTiles);
+    final cache = TilePairCache(widget.options);
     _cache = cache;
     _tileWidgets = TileWidgets(
         widget.options.tileProvider,
