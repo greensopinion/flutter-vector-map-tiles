@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
-import 'grid_layer.dart';
 import 'tile_identity.dart';
 import 'tile_pair_cache.dart';
 import 'vector_tile_provider.dart';

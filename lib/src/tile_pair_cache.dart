@@ -16,15 +16,16 @@ class TilePairCache extends AbstractLoadingCache<TilePairCacheKey, TilePair> {
   final VectorTiles vectorTiles;
 
   TilePairCache._(Theme theme, VectorTiles vectorTiles,
-      VectorTileProvider provider, RenderMode renderMode)
+      VectorTileProvider provider, RenderMode renderMode, int maxSize)
       : this.provider = provider,
         this.vectorTiles = vectorTiles,
-        super(TilePairLoader(theme, vectorTiles, renderMode), 20);
+        super(TilePairLoader(theme, vectorTiles, renderMode), maxSize);
 
   factory TilePairCache(
-      Theme theme, VectorTileProvider provider, RenderMode renderMode) {
+      Theme theme, VectorTileProvider provider, RenderMode renderMode,
+      {required int maxSize}) {
     final vectorTiles = VectorTiles(provider);
-    return TilePairCache._(theme, vectorTiles, provider, renderMode);
+    return TilePairCache._(theme, vectorTiles, provider, renderMode, maxSize);
   }
 }
 

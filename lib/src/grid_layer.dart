@@ -17,10 +17,12 @@ class VectorTileLayerOptions extends LayerOptions {
   final VectorTileProvider tileProvider;
   final Theme theme;
   final RenderMode renderMode;
+  final int maxCachedTiles;
 
   VectorTileLayerOptions(
       {required this.tileProvider,
       required this.theme,
+      this.maxCachedTiles = 40,
       this.renderMode = RenderMode.mixed});
 }
 
@@ -37,7 +39,8 @@ class VectorTileLayer extends StatefulWidget {
   }
 }
 
-class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
+class _VectorTileLayerState extends DisposableState<VectorTileLayer>
+    with WidgetsBindingObserver {
   StreamSubscription<Null>? _subscription;
   late final TileWidgets _tileWidgets;
   TilePairCache? _cache;
@@ -49,8 +52,10 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance?.addObserver(this);
     final cache = TilePairCache(widget.options.theme,
-        widget.options.tileProvider, widget.options.renderMode);
+        widget.options.tileProvider, widget.options.renderMode,
+        maxSize: widget.options.maxCachedTiles);
     _cache = cache;
     _tileWidgets = TileWidgets(
         widget.options.tileProvider,
@@ -67,9 +72,15 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
   @override
   void dispose() {
     super.dispose();
+    WidgetsBinding.instance?.removeObserver(this);
     _cache?.dispose();
     _cache = null;
     _subscription?.cancel();
+  }
+
+  @override
+  void didHaveMemoryPressure() {
+    _cache?.releaseMemory();
   }
 
   @override

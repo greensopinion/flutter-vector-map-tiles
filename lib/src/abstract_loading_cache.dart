@@ -97,6 +97,13 @@ class AbstractLoadingCache<K, T> {
     }
   }
 
+  void releaseMemory() {
+    final targetSize = (_map.length / 2).floor();
+    while (_map.length > targetSize) {
+      _remove(_map.keys.first);
+    }
+  }
+
   void disposeEntry(T removed) {}
   void _checkDisposed() {
     if (_disposed) {
