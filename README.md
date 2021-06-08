@@ -1,6 +1,6 @@
 # vector_map_tiles
 
-A plugin for `flutter_map` that enables the use of vector tiles.
+A plugin for [`flutter_map`](https://pub.dev/packages/flutter_map) that enables the use of vector tiles.
 
 ## Usage
 
