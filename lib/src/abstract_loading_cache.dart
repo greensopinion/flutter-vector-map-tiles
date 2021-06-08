@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'dart:math';
+
 abstract class Loader<K, T> {
   Future<T> load(K key);
 }
@@ -8,7 +10,7 @@ abstract class Loader<K, T> {
 class AbstractLoadingCache<K, T> {
   final _map = LinkedHashMap<K, _CacheBucket<T>>();
   final _fetching = Map<K, Future<T>>();
-  final _maxSize;
+  int _maxSize;
   final Loader<K, T> loader;
   int accessCount = 0;
   bool _disposed = false;
@@ -98,10 +100,11 @@ class AbstractLoadingCache<K, T> {
   }
 
   void releaseMemory() {
-    final targetSize = (_map.length / 2).floor();
+    final targetSize = (_map.length / 3).floor();
     while (_map.length > targetSize) {
       _remove(_map.keys.first);
     }
+    _maxSize = max(10, (_maxSize * 0.7).floor());
   }
 
   void disposeEntry(T removed) {}
