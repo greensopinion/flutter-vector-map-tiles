@@ -11,19 +11,42 @@ import 'tile_identity.dart';
 import 'vector_tile_provider.dart';
 import 'tile_widgets.dart';
 
-enum RenderMode { vector, mixed }
+enum RenderMode {
+  /// tiles are rendered using vectors only
+  vector,
+
+  /// tiles are rendered using vectors when idle, and raster images when
+  /// zooming. Can improve the frame rate and reduce jank.
+  mixed
+}
 
 class VectorTileLayerOptions extends LayerOptions {
+  /// provides vector tiles
   final VectorTileProvider tileProvider;
+
+  /// the theme used to render tiles
   final Theme theme;
+
+  /// determines how tiles are rendered to the canvas.
+  /// `vector` - exclusively uses vector rendering. Produces the sharpest map
+  /// images.
+  /// `mixed` - uses raster tiles while zooming and renders using vectors when
+  /// idle. Makes for smooth animations while the user interacts with the map
+  /// and reduces CPU overhead.
   final RenderMode renderMode;
+
+  /// the maximum number of rendered tiles to cache. Increasing this number improves
+  /// the transition between tiles when zooming and panning at the expense of memory.
+  /// If memory pressure is experienced, this the provided number is reduced automatically
+  /// however setting this value too high can cause performance problems due to memory
+  /// pressure.
   final int maxCachedTiles;
 
   VectorTileLayerOptions(
       {required this.tileProvider,
       required this.theme,
       this.maxCachedTiles = 40,
-      this.renderMode = RenderMode.mixed});
+      this.renderMode = RenderMode.vector});
 }
 
 class VectorTileLayer extends StatefulWidget {
