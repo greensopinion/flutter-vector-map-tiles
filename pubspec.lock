@@ -114,12 +114,10 @@ packages:
   flutter_map:
     dependency: "direct main"
     description:
-      path: "."
-      ref: "issues/829-nullsafety"
-      resolved-ref: d9674b5c4fec7d759462a417c8acc548a3e720e1
-      url: "https://github.com/fleaflet/flutter_map.git"
-    source: git
-    version: "0.13.0"
+      name: flutter_map
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.13.1"
   frontend_server_client:
     dependency: transitive
     description:
@@ -443,10 +441,10 @@ packages:
   vector_tile_renderer:
     dependency: "direct main"
     description:
-      path: "../dart-vector-tile-renderer"
-      relative: true
-    source: path
-    version: "0.1.11"
+      name: vector_tile_renderer
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.12"
   vm_service:
     dependency: transitive
     description:

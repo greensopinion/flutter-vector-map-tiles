@@ -31,7 +31,7 @@ class _TilePairLoader extends Loader<TilePairCacheKey, TilePair> {
   final RendererPipeline pipeline;
 
   _TilePairLoader(Theme theme, this.tileProvider, this.renderMode)
-      : this.pipeline = RendererPipeline(theme);
+      : this.pipeline = RendererPipeline(theme, scale: 3.0);
 
   @override
   Future<TilePair> load(TilePairCacheKey key) async {

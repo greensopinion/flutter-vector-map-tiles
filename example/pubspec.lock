@@ -72,12 +72,10 @@ packages:
   flutter_map:
     dependency: transitive
     description:
-      path: "."
-      ref: "issues/829-nullsafety"
-      resolved-ref: d9674b5c4fec7d759462a417c8acc548a3e720e1
-      url: "https://github.com/fleaflet/flutter_map.git"
-    source: git
-    version: "0.13.0"
+      name: flutter_map
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.13.1"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -262,7 +260,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "0.0.8"
+    version: "0.1.0"
   vector_math:
     dependency: transitive
     description:
@@ -280,10 +278,10 @@ packages:
   vector_tile_renderer:
     dependency: transitive
     description:
-      path: "../../dart-vector-tile-renderer"
-      relative: true
-    source: path
-    version: "0.1.10"
+      name: vector_tile_renderer
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.12"
   wkt_parser:
     dependency: transitive
     description:

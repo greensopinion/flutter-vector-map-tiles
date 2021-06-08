@@ -5,10 +5,9 @@ A plugin for `flutter_map` that enables the use of vector tiles.
 ## Usage
 
 ```dart
-
-class _MyMapPageState extends State<MyMapPage> {
+class _MyHomePageState extends State<MyHomePage> {
   // provide a map theme
-  final theme = renderer.ThemeReader().read(renderer.lightTheme());
+  final theme = ProvidedThemes.lightTheme();
 
   @override
   Widget build(BuildContext context) {
@@ -23,21 +22,25 @@ class _MyMapPageState extends State<MyMapPage> {
             options: MapOptions(
                 center: LatLng(49.246292, -123.116226),
                 zoom: 10,
+                maxZoom: 18,
+                interactiveFlags: InteractiveFlag.doubleTapZoom |
+                    InteractiveFlag.drag |
+                    InteractiveFlag.pinchZoom |
+                    InteractiveFlag.pinchMove,
                 plugins: [VectorMapTilesPlugin()]), // be sure to register the plugin
-            layers: [
+            layers: <LayerOptions>[
               // normally you would see TileLayerOptions which provides raster tiles
               // instead this vector tile layer replaces the standard tile layer
               VectorTileLayerOptions(
                   theme: theme,
                   tileProvider: MemoryCacheVectorTileProvider(
                       delegate: NetworkVectorTileProvider(
-                        urlTemplate:
-                            'https://tiles.stadiamaps.com/data/openmaptiles/{z}/{x}/{y}.pbf?api_key=$apiKey',
+                          urlTemplate:
+                              'https://tiles.stadiamaps.com/data/openmaptiles/{z}/{x}/{y}.pbf?api_key=$apiKey',
                         // this is the maximum zoom of the provider, not the
                         // maximum of the map. vector tiles are rendered
                         // to larger sizes to support higher zoom levels
-                        maximumZoom: 14
-                      ),
+                          maximumZoom: 14),
                       maxSizeBytes: 1024 * 1024 * 2)),
             ],
           ))
@@ -54,8 +57,6 @@ This plugin is in its very early stages, and is not ready for production use.
 
 Outstanding issues:
 
-* bugs at higher zoom levels
-* no map labels
 * performance
 * smooth scrolling/zooming
 * transition between zoom levels when tiles are not cached

@@ -4,10 +4,11 @@ import 'dart:ui';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 class RendererPipeline {
-  final ImageRenderer _renderer;
+  late final ImageRenderer _renderer;
   final queue = ListQueue<_RenderingJob>();
-  RendererPipeline(Theme theme)
-      : _renderer = ImageRenderer(theme: theme, scale: _imageScale);
+  RendererPipeline(Theme theme, {required double scale}) {
+    _renderer = ImageRenderer(theme: theme, scale: scale);
+  }
 
   Future<Image> renderImage(VectorTile tile,
       {required double zoomScaleFactor, required double zoom}) async {
@@ -50,5 +51,3 @@ class _RenderingJob {
 
   _RenderingJob(this.tile, this.zoomScaleFactor, this.zoom);
 }
-
-int _imageScale = 3;

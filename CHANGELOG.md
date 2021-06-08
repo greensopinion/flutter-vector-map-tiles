@@ -1,3 +1,6 @@
+## 0.1.0
+
+* add mixed mode rendering
 ## 0.0.8
 
 * improve rendering speed with a repaint boundary
