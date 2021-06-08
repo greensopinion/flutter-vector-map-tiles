@@ -18,8 +18,8 @@ class TilePairCache extends AbstractLoadingCache<TilePairCacheKey, TilePair> {
         super(loader, maxSize);
 
   factory TilePairCache(VectorTileLayerOptions options) {
-    final loader = _TilePairLoader(
-        options.theme, options.tileProvider, options.renderMode);
+    final loader = _TilePairLoader(options.theme, options.tileProvider,
+        options.renderMode, options.rasterImageScale);
     return TilePairCache._(
         options.theme, options.tileProvider, loader, options.maxCachedTiles);
   }
@@ -30,8 +30,8 @@ class _TilePairLoader extends Loader<TilePairCacheKey, TilePair> {
   final RenderMode renderMode;
   final RendererPipeline pipeline;
 
-  _TilePairLoader(Theme theme, this.tileProvider, this.renderMode)
-      : this.pipeline = RendererPipeline(theme, scale: 3.0);
+  _TilePairLoader(Theme theme, this.tileProvider, this.renderMode, double scale)
+      : this.pipeline = RendererPipeline(theme, scale: scale);
 
   @override
   Future<TilePair> load(TilePairCacheKey key) async {

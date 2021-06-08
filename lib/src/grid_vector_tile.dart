@@ -195,7 +195,7 @@ class _VectorTilePainter extends CustomPainter {
       final image = model.image;
       if (image != null) {
         renderVector = false;
-        canvas.scale(1 / _scale.toDouble());
+        canvas.scale(_tileSize / image.height.toDouble());
         canvas.drawImage(image, Offset.zero, Paint());
         debounce.update();
       }
@@ -224,4 +224,4 @@ extension _TileTranslationExtension on TileTranslation {
           (specifiedFraction ?? fraction).toDouble());
 }
 
-int _scale = 3;
+final _tileSize = 256.0;

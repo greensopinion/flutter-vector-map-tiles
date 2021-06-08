@@ -42,11 +42,20 @@ class VectorTileLayerOptions extends LayerOptions {
   /// pressure.
   final int maxCachedTiles;
 
+  /// the scale of raster images when using `mixed` [renderMode].
+  /// best quality corresponds to the device pixel ratio, at the expense of
+  /// memory. Set to 1.0 to have lowest memory usage.
+  final double rasterImageScale;
+
   VectorTileLayerOptions(
       {required this.tileProvider,
       required this.theme,
-      this.maxCachedTiles = 40,
-      this.renderMode = RenderMode.vector});
+      this.maxCachedTiles = 20,
+      this.rasterImageScale = 1.0,
+      this.renderMode = RenderMode.vector}) {
+    assert(rasterImageScale >= 1.0 && rasterImageScale <= 5.0);
+    assert(maxCachedTiles >= 1 && maxCachedTiles <= 60);
+  }
 }
 
 class VectorTileLayer extends StatefulWidget {
