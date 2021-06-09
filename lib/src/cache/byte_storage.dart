@@ -39,7 +39,6 @@ class ByteStorage {
 
   Future<void> write(String path, List<int> bytes) async {
     final file = await fileOf(path);
-    print('writing ${file.absolute.path}');
     await file.writeAsBytes(bytes);
   }
 

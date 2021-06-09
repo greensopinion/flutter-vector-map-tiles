@@ -27,8 +27,7 @@ class ImageTileLoadingCache {
     return image;
   }
 
-  Future<Image?> getIfPresent(TileIdentity identity, VectorTile tile,
-      {required double zoom}) {
+  Future<Image?> getIfPresent(TileIdentity identity, {required double zoom}) {
     return _delegate.retrieve(identity, _toModifier(zoom));
   }
 

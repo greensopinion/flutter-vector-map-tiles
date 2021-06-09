@@ -45,6 +45,7 @@ class VectorTileModel extends ChangeNotifier {
   double lastRenderedZoom = double.negativeInfinity;
   double lastRenderedZoomScale = double.negativeInfinity;
   late final TileTranslation translation;
+  late TileTranslation imageTranslation;
   VectorTile? vector;
   ui.Image? image;
 
@@ -52,34 +53,51 @@ class VectorTileModel extends ChangeNotifier {
       this.zoomFunction) {
     final slippyMap = SlippyMapTranslator(caches.vectorTileCache.maximumZoom);
     translation = slippyMap.translate(tile);
+    imageTranslation = translation;
   }
 
   void startLoading() async {
-    vector = await caches.vectorTileCache.retrieve(translation.translated);
-    if (!_disposed) {
-      var image = await caches.imageTileCache.getIfPresent(
-          translation.translated, vector!,
-          zoom: tile.z.toDouble());
-      if (_disposed) {
-        image?.dispose();
-        return;
-      } else {
-        this.image = image;
-      }
-      notifyListeners();
-      if (this.image == null) {
-        var image = await caches.imageTileCache
-            .retrieve(translation.translated, vector!, zoom: tile.z.toDouble());
-        if (_disposed) {
-          image.dispose();
-          return;
-        } else {
-          this.image?.dispose();
-          this.image = image;
-        }
-        notifyListeners();
+    final vectorFuture =
+        caches.vectorTileCache.retrieve(translation.translated);
+    bool loadImage = false;
+    await _updateImage(
+        caches.imageTileCache
+            .getIfPresent(translation.translated, zoom: tile.z.toDouble()),
+        translation);
+    if (!_disposed && this.image == null) {
+      final slippyMap = SlippyMapTranslator(caches.vectorTileCache.maximumZoom);
+      final alternativeTranslation = slippyMap.lowerZoomAlternative(tile, 1);
+      if (alternativeTranslation.translated != translation.translated) {
+        loadImage = await _updateImage(
+            caches.imageTileCache.getIfPresent(
+                alternativeTranslation.translated,
+                zoom: alternativeTranslation.translated.z.toDouble()),
+            alternativeTranslation);
       }
     }
+    if (this.image != null) {
+      notifyListeners();
+    }
+    vector = await vectorFuture;
+    if (!_disposed && (this.image == null || loadImage)) {
+      await _updateImage(
+          caches.imageTileCache.retrieve(translation.translated, vector!,
+              zoom: tile.z.toDouble()),
+          translation);
+    }
+    notifyListeners();
+  }
+
+  Future<bool> _updateImage(
+      Future<ui.Image?> future, TileTranslation effectiveTranslation) async {
+    final image = await future;
+    if (_disposed) {
+      image?.dispose();
+      return false;
+    }
+    this.image = image;
+    this.imageTranslation = effectiveTranslation;
+    return this.image != null;
   }
 
   bool updateRendering() {
@@ -172,32 +190,31 @@ class _VectorTilePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    bool changed = model.updateRendering();
+    final image = model.image;
+    final renderImage = (changed || model.vector == null) && image != null;
+    final translation =
+        renderImage ? model.imageTranslation : model.translation;
+
     final scale = model.zoomScaleFunction();
     canvas.save();
-    if (model.translation.isTranslated) {
-      final dx = -(model.translation.xOffset * size.width);
-      final dy = -(model.translation.yOffset * size.height);
+    if (translation.isTranslated) {
+      final dx = -(translation.xOffset * size.width);
+      final dy = -(translation.yOffset * size.height);
       canvas.translate(dx, dy);
-      canvas.scale(model.translation.fraction.toDouble());
+      canvas.scale(translation.fraction.toDouble());
     }
     if (scale != 1.0) {
       canvas.scale(scale);
     }
-    bool changed = model.updateRendering();
-    bool renderVector = true;
-    if (changed || model.vector == null) {
-      final image = model.image;
-      if (image != null) {
-        renderVector = false;
-        canvas.scale(_tileSize / image.height.toDouble());
-        canvas.drawImage(image, Offset.zero, Paint());
-        _lastPainted = _PaintMode.raster;
-        debounce.update();
-      }
-    }
-    if (renderVector) {
+    if (renderImage) {
+      canvas.scale(_tileSize / image!.height.toDouble());
+      canvas.drawImage(image, Offset.zero, Paint());
+      _lastPainted = _PaintMode.raster;
+      debounce.update();
+    } else {
       Renderer(theme: model.theme).render(canvas, model.vector!,
-          zoomScaleFactor: model.translation.fraction.toDouble() * scale,
+          zoomScaleFactor: translation.fraction.toDouble() * scale,
           zoom: model.lastRenderedZoom);
       _lastPainted = _PaintMode.vector;
     }
