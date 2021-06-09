@@ -60,19 +60,13 @@ class VectorTileModel extends ChangeNotifier {
     final vectorFuture =
         caches.vectorTileCache.retrieve(translation.translated);
     bool loadImage = false;
-    await _updateImage(
-        caches.imageTileCache
-            .getIfPresent(translation.translated, zoom: tile.z.toDouble()),
-        translation);
+    await _updateImageIfPresent(translation, zoom: tile.z.toDouble());
     if (!_disposed && this.image == null) {
       final slippyMap = SlippyMapTranslator(caches.vectorTileCache.maximumZoom);
       final alternativeTranslation = slippyMap.lowerZoomAlternative(tile, 1);
       if (alternativeTranslation.translated != translation.translated) {
-        loadImage = await _updateImage(
-            caches.imageTileCache.getIfPresent(
-                alternativeTranslation.translated,
-                zoom: alternativeTranslation.translated.z.toDouble()),
-            alternativeTranslation);
+        loadImage = await _updateImageIfPresent(alternativeTranslation,
+            zoom: tile.z.toDouble());
       }
     }
     if (this.image != null) {
@@ -80,23 +74,39 @@ class VectorTileModel extends ChangeNotifier {
     }
     vector = await vectorFuture;
     if (!_disposed && (this.image == null || loadImage)) {
-      await _updateImage(
-          caches.imageTileCache.retrieve(translation.translated, vector!,
-              zoom: tile.z.toDouble()),
-          translation);
+      await _updateImage(translation, vector!, zoom: tile.z.toDouble());
     }
     notifyListeners();
   }
 
-  Future<bool> _updateImage(
-      Future<ui.Image?> future, TileTranslation effectiveTranslation) async {
-    final image = await future;
+  Future<bool> _updateImage(TileTranslation translation, VectorTile tile,
+      {required double zoom}) async {
+    final id = translation.translated;
+    final image = await caches.imageTileCache.retrieve(id, tile, zoom: zoom);
+    caches.memoryImageCache.putImage(id, zoom: zoom, image: image);
+    return _applyImage(translation, image);
+  }
+
+  Future<bool> _updateImageIfPresent(TileTranslation translation,
+      {required double zoom}) async {
+    final id = translation.translated;
+    var image = caches.memoryImageCache.getImage(id, zoom: zoom);
+    if (image == null) {
+      image = await caches.imageTileCache.getIfPresent(id, zoom: zoom);
+      if (image != null) {
+        caches.memoryImageCache.putImage(id, zoom: zoom, image: image);
+      }
+    }
+    return _applyImage(translation, image);
+  }
+
+  bool _applyImage(TileTranslation translation, ui.Image? image) {
     if (_disposed) {
       image?.dispose();
       return false;
     }
     this.image = image;
-    this.imageTranslation = effectiveTranslation;
+    this.imageTranslation = translation;
     return this.image != null;
   }
 

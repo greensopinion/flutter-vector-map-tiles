@@ -34,6 +34,7 @@ class NetworkVectorTileProvider extends VectorTileProvider {
 
   @override
   Future<Uint8List> provide(TileIdentity tile) async {
+    _checkTile(tile);
     final uri = Uri.parse(_urlProvider.url(tile));
     final response = await _retryClient.get(uri, headers: httpHeaders);
     if (response.statusCode == 200) {
@@ -41,6 +42,12 @@ class NetworkVectorTileProvider extends VectorTileProvider {
     }
     throw Exception(
         'Cannot retrieve tile: HTTP ${response.statusCode}: $uri ${response.body}');
+  }
+
+  void _checkTile(TileIdentity tile) {
+    if (tile.z < 0 || tile.z > _maximumZoom || tile.x < 0 || tile.y < 0) {
+      throw Exception('out of range');
+    }
   }
 }
 

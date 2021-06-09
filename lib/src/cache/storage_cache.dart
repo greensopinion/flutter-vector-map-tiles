@@ -49,8 +49,12 @@ class StorageCache {
     final random = Random();
     while (size > _maxSizeInBytes && entries.isNotEmpty) {
       final toRemove = entries.removeAt(random.nextInt(entries.length));
-      size -= toRemove.value.size;
-      await toRemove.key.delete();
+      try {
+        await toRemove.key.delete();
+        size -= toRemove.value.size;
+      } catch (e) {
+        // ignore, race condition file was deleted
+      }
     }
   }
 

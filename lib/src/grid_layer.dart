@@ -119,6 +119,7 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
   @override
   void dispose() {
     super.dispose();
+    _caches.dispose();
     _subscription?.cancel();
   }
 
@@ -164,7 +165,9 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
     final tiles = <TileIdentity>[];
     for (num x = range.min.x; x <= range.max.x; ++x) {
       for (num y = range.min.y; y <= range.max.y; ++y) {
-        tiles.add(TileIdentity(zoom.toInt(), x.toInt(), y.toInt()));
+        if (x.toInt() >= 0 && y.toInt() >= 0) {
+          tiles.add(TileIdentity(zoom.toInt(), x.toInt(), y.toInt()));
+        }
       }
     }
     return tiles;
