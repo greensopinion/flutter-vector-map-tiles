@@ -83,7 +83,8 @@ class VectorTileLayer extends StatefulWidget {
   }
 }
 
-class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
+class _VectorTileLayerState extends DisposableState<VectorTileLayer>
+    with WidgetsBindingObserver {
   StreamSubscription<Null>? _subscription;
   late final TileWidgets _tileWidgets;
   late final Caches _caches;
@@ -121,6 +122,11 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
     super.dispose();
     _caches.dispose();
     _subscription?.cancel();
+  }
+
+  @override
+  void didHaveMemoryPressure() {
+    _caches.didHaveMemoryPressure();
   }
 
   @override

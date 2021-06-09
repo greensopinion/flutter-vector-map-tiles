@@ -5,10 +5,10 @@ import 'dart:ui';
 import '../tile_identity.dart';
 
 class MemoryImageCache {
-  final int maxSize;
+  int _maxSize;
   final _cache = LinkedHashMap<String, Image>();
 
-  MemoryImageCache(this.maxSize);
+  MemoryImageCache(this._maxSize);
 
   void putImage(TileIdentity id, {required double zoom, required Image image}) {
     final key = _toKey(id, zoom);
@@ -27,13 +27,22 @@ class MemoryImageCache {
   }
 
   void _applyMaxSize() {
-    while (_cache.length > maxSize) {
+    while (_cache.length > _maxSize) {
       final removed = _cache.remove(_cache.keys.first)!;
       removed.dispose();
     }
   }
 
+  void didHaveMemoryPressure() {
+    _clear();
+    _maxSize = _maxSize ~/ 2;
+  }
+
   void dispose() {
+    _clear();
+  }
+
+  void _clear() {
     _cache.values.forEach((image) {
       image.dispose();
     });

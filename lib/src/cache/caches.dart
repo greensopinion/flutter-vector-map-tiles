@@ -36,4 +36,8 @@ class Caches {
   void dispose() {
     memoryImageCache.dispose();
   }
+
+  void didHaveMemoryPressure() {
+    memoryImageCache.didHaveMemoryPressure();
+  }
 }
