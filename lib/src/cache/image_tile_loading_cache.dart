@@ -17,6 +17,7 @@ class ImageTileLoadingCache {
   Future<Image> retrieve(TileIdentity identity, VectorTile tile,
       {required double zoom}) async {
     final modifier = _toModifier(zoom);
+
     final image = await _delegate.retrieve(identity, modifier);
     if (image == null) {
       final rendered = await _pipeline.renderImage(identity, tile, zoom);

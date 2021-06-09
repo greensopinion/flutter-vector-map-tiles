@@ -1,19 +1,27 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'memory_cache.dart';
 import 'storage_cache.dart';
 import '../tile_identity.dart';
 
 class TileImageCache {
   final StorageCache _delegate;
+  final MemoryCache _memoryCache = MemoryCache(maxSizeBytes: 10 * 1024 * 1024);
 
   TileImageCache(this._delegate);
 
   Future<Image?> retrieve(TileIdentity tile, String modifier) async {
-    final bytes = await _delegate.retrieve(_toKey(tile, modifier));
+    final key = _toKey(tile, modifier);
+    var bytes = _memoryCache.getItem(key);
+    if (bytes == null) {
+      final cached = await _delegate.retrieve(key);
+      if (cached != null) {
+        bytes = Uint8List.fromList(cached);
+      }
+    }
     if (bytes != null) {
-      final imageData = Uint8List.fromList(bytes);
-      final codec = await instantiateImageCodec(imageData);
+      final codec = await instantiateImageCodec(bytes);
       final frame = await codec.getNextFrame();
       return frame.image;
     }
@@ -24,8 +32,11 @@ class TileImageCache {
     if (bytes == null) {
       throw 'cannot store image';
     }
-    await _delegate.put(_toKey(tile, modifier),
-        bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
+    final key = _toKey(tile, modifier);
+    final cacheData =
+        bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes);
+    _memoryCache.putItem(key, cacheData);
+    await _delegate.put(key, cacheData);
   }
 
   String _toKey(TileIdentity id, String modifier) =>
