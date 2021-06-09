@@ -7,6 +7,7 @@ class StorageCache {
   final ByteStorage _storage;
   final Duration _ttl;
   final int _maxSizeInBytes;
+  int _putCount = 0;
 
   StorageCache(this._storage, this._ttl, this._maxSizeInBytes);
 
@@ -14,8 +15,11 @@ class StorageCache {
     return _storage.read(key);
   }
 
-  Future<void> put(String key, List<int> data) {
-    return _storage.write(key, data);
+  Future<void> put(String key, List<int> data) async {
+    if (++_putCount % 20 == 0) {
+      await _applyMaxSize(await _storage.storageDirectory());
+    }
+    await _storage.write(key, data);
   }
 
   Future<bool> exists(String key) async {
@@ -26,19 +30,27 @@ class StorageCache {
   Future<void> applyConstraints() async {
     final directory = await _storage.storageDirectory();
     if (await directory.exists()) {
-      await directory.list().asyncMap((f) => _expireIfExceedsTtl(f)).toList();
-      final entries = await directory
-          .list()
-          .asyncMap((f) => _toEntry(f))
-          .where((e) => e.value.type == FileSystemEntityType.file)
-          .toList();
-      int size = entries.map((e) => e.value.size).reduce((a, b) => a + b);
-      final random = Random();
-      while (size > _maxSizeInBytes && entries.isNotEmpty) {
-        final toRemove = entries.removeAt(random.nextInt(entries.length));
-        size -= toRemove.value.size;
-        await toRemove.key.delete();
-      }
+      await _applyMaxAge(directory);
+      await _applyMaxSize(directory);
+    }
+  }
+
+  Future<void> _applyMaxAge(Directory directory) async {
+    await directory.list().asyncMap((f) => _expireIfExceedsTtl(f)).toList();
+  }
+
+  Future<void> _applyMaxSize(Directory directory) async {
+    final entries = await directory
+        .list()
+        .asyncMap((f) => _toEntry(f))
+        .where((e) => e.value.type == FileSystemEntityType.file)
+        .toList();
+    int size = entries.map((e) => e.value.size).reduce((a, b) => a + b);
+    final random = Random();
+    while (size > _maxSizeInBytes && entries.isNotEmpty) {
+      final toRemove = entries.removeAt(random.nextInt(entries.length));
+      size -= toRemove.value.size;
+      await toRemove.key.delete();
     }
   }
 

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:collection';
-import 'dart:math';
 import 'dart:ui';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
