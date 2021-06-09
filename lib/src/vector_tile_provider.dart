@@ -40,7 +40,7 @@ class NetworkVectorTileProvider extends VectorTileProvider {
       return response.bodyBytes;
     }
     throw Exception(
-        'Cannot retrieve tile: HTTP ${response.statusCode}: ${response.body}');
+        'Cannot retrieve tile: HTTP ${response.statusCode}: $uri ${response.body}');
   }
 }
 

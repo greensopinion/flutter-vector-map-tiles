@@ -6,15 +6,14 @@ import 'dart:ui' as ui;
 
 import 'disposable_state.dart';
 import 'slippy_map_translator.dart';
-import 'tile_pair_cache.dart';
-import 'tile_cache_key.dart';
+import 'cache/caches.dart';
 
 typedef ZoomScaleFunction = double Function();
 typedef ZoomFunction = double Function();
 
 class GridVectorTile extends StatefulWidget {
   final TileIdentity tileIdentity;
-  final TilePairCache cache;
+  final Caches caches;
   final Theme theme;
   final ZoomScaleFunction zoomScaleFunction;
   final ZoomFunction zoomFunction;
@@ -22,7 +21,7 @@ class GridVectorTile extends StatefulWidget {
   const GridVectorTile(
       {required Key key,
       required this.tileIdentity,
-      required this.cache,
+      required this.caches,
       required this.zoomScaleFunction,
       required this.zoomFunction,
       required this.theme})
@@ -37,34 +36,76 @@ class GridVectorTile extends StatefulWidget {
 class VectorTileModel extends ChangeNotifier {
   bool _disposed = false;
   bool get disposed => _disposed;
-  late final VectorTile vector;
-  late final ui.Image? image;
-  final TileTranslation translation;
+
+  final TileIdentity tile;
+  final Theme theme;
+  final Caches caches;
   final ZoomScaleFunction zoomScaleFunction;
   final ZoomFunction zoomFunction;
-  final Theme theme;
   double lastRenderedZoom = double.negativeInfinity;
   double lastRenderedZoomScale = double.negativeInfinity;
+  late final TileTranslation translation;
+  VectorTile? vector;
+  ui.Image? image;
 
-  VectorTileModel(TilePair tile, this.translation, this.zoomScaleFunction,
-      this.zoomFunction, this.theme) {
-    vector = tile.vector;
-    image = tile.image?.clone();
+  VectorTileModel(this.caches, this.theme, this.tile, this.zoomScaleFunction,
+      this.zoomFunction) {
+    final slippyMap = SlippyMapTranslator(caches.vectorTileCache.maximumZoom);
+    translation = slippyMap.translate(tile);
+  }
+
+  void startLoading() async {
+    vector = await caches.vectorTileCache.retrieve(translation.translated);
+    if (!_disposed) {
+      var image = await caches.imageTileCache.getIfPresent(
+          translation.translated, vector!,
+          zoom: tile.z.toDouble());
+      if (_disposed) {
+        image?.dispose();
+        return;
+      } else {
+        this.image = image;
+      }
+      notifyListeners();
+      if (this.image == null) {
+        var image = await caches.imageTileCache
+            .retrieve(translation.translated, vector!, zoom: tile.z.toDouble());
+        if (_disposed) {
+          image.dispose();
+          return;
+        } else {
+          this.image?.dispose();
+          this.image = image;
+        }
+        notifyListeners();
+      }
+    }
   }
 
   bool updateRendering() {
-    final lastRenderedZoom = zoomFunction();
-    final lastRenderedZoomScale = zoomScaleFunction();
-    final changed = lastRenderedZoomScale != this.lastRenderedZoomScale ||
-        lastRenderedZoom != this.lastRenderedZoom;
-    this.lastRenderedZoom = lastRenderedZoom;
-    this.lastRenderedZoomScale = lastRenderedZoomScale;
+    final changed = hasChanged();
+    if (changed) {
+      lastRenderedZoom = zoomFunction();
+      lastRenderedZoomScale = zoomScaleFunction();
+    }
     return changed;
   }
 
+  bool hasChanged() {
+    final lastRenderedZoom = zoomFunction();
+    final lastRenderedZoomScale = zoomScaleFunction();
+    return lastRenderedZoomScale != this.lastRenderedZoomScale ||
+        lastRenderedZoom != this.lastRenderedZoom;
+  }
+
   void requestRepaint() {
+    notifyListeners();
+  }
+
+  @override
+  void notifyListeners() {
     if (!_disposed) {
-      notifyListeners();
+      super.notifyListeners();
     }
   }
 
@@ -72,6 +113,7 @@ class VectorTileModel extends ChangeNotifier {
   void dispose() {
     super.dispose();
     image?.dispose();
+    image = null;
     _disposed = true;
   }
 
@@ -84,90 +126,42 @@ class VectorTileModel extends ChangeNotifier {
 }
 
 class _GridVectorTile extends DisposableState<GridVectorTile> {
-  VectorTileModel? _model;
+  late final VectorTileModel _model;
+  late final _VectorTilePainter _painter;
 
   @override
   void initState() {
     super.initState();
-    final slippyMap = SlippyMapTranslator(widget.cache.provider.maximumZoom);
-    var originalTranslation = slippyMap.translate(widget.tileIdentity);
-    TilePair? tile = widget.cache.getValue(
-        originalTranslation.toCacheKey(widget.tileIdentity.z.toInt()));
-    bool loadTile = tile == null;
-    if (tile == null) {
-      final alternative = _findAlternative(slippyMap, originalTranslation);
-      if (alternative != null) {
-        _updateTileState(alternative.tile, alternative.translation);
-      }
-    } else {
-      _updateTileState(tile, originalTranslation);
-    }
-    if (loadTile) {
-      widget.cache
-          .retrieveTile(
-              originalTranslation.toCacheKey(widget.tileIdentity.z.toInt()))
-          .then((tile) {
-        _updateTileState(tile, originalTranslation);
-      }).onError((error, stackTrace) {
-        print(error);
-        print(stackTrace);
-      });
-    }
-  }
-
-  void _updateTileState(TilePair tile, TileTranslation translation) async {
-    if (!disposed) {
-      VectorTileModel model = VectorTileModel(tile, translation,
-          widget.zoomScaleFunction, widget.zoomFunction, widget.theme);
-      setState(() {
-        _model?.dispose();
-        _model = model;
-      });
-    }
+    _model = VectorTileModel(widget.caches, widget.theme, widget.tileIdentity,
+        widget.zoomScaleFunction, widget.zoomFunction);
+    _model.startLoading();
+    _painter = _VectorTilePainter(_model);
+    _model.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_model == null) {
+    if (_model.image == null && _model.vector == null) {
       return Container();
     }
-    return RepaintBoundary(
-        child: CustomPaint(painter: _VectorTilePainter(_model!)));
+    return RepaintBoundary(child: CustomPaint(painter: _painter));
   }
 
   @override
   void dispose() {
     super.dispose();
-    _model?.dispose();
-    _model = null;
-  }
-
-  _AlternativeTile? _findAlternative(
-      SlippyMapTranslator slippyMap, TileTranslation originalTranslation) {
-    int difference = widget.tileIdentity.z.toInt() -
-        originalTranslation.translated.z.toInt() +
-        1;
-    final translation =
-        slippyMap.lowerZoomAlternative(widget.tileIdentity, difference);
-    final alternativeKey = TilePairCacheKey(translation.translated.toCacheKey(),
-        translation.translated.z.toInt(), 1.0);
-    final vectorTile = widget.cache.getValue(alternativeKey);
-    if (vectorTile != null) {
-      return _AlternativeTile(translation, vectorTile);
-    }
+    _model.dispose();
   }
 }
 
-class _AlternativeTile {
-  final TileTranslation translation;
-  final TilePair tile;
-
-  _AlternativeTile(this.translation, this.tile);
-}
+enum _PaintMode { vector, raster, none }
 
 class _VectorTilePainter extends CustomPainter {
   final VectorTileModel model;
   late final ScheduledDebounce debounce;
+  var _lastPainted = _PaintMode.none;
 
   _VectorTilePainter(VectorTileModel model)
       : this.model = model,
@@ -191,19 +185,21 @@ class _VectorTilePainter extends CustomPainter {
     }
     bool changed = model.updateRendering();
     bool renderVector = true;
-    if (changed) {
+    if (changed || model.vector == null) {
       final image = model.image;
       if (image != null) {
         renderVector = false;
         canvas.scale(_tileSize / image.height.toDouble());
         canvas.drawImage(image, Offset.zero, Paint());
+        _lastPainted = _PaintMode.raster;
         debounce.update();
       }
     }
     if (renderVector) {
-      Renderer(theme: model.theme).render(canvas, model.vector,
+      Renderer(theme: model.theme).render(canvas, model.vector!,
           zoomScaleFactor: model.translation.fraction.toDouble() * scale,
           zoom: model.lastRenderedZoom);
+      _lastPainted = _PaintMode.vector;
     }
     canvas.restore();
   }
@@ -215,13 +211,8 @@ class _VectorTilePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-}
-
-extension _TileTranslationExtension on TileTranslation {
-  TilePairCacheKey toCacheKey(int zoom, {int? specifiedFraction}) =>
-      TilePairCacheKey(translated.toCacheKey(), zoom,
-          (specifiedFraction ?? fraction).toDouble());
+  bool shouldRepaint(covariant CustomPainter oldDelegate) =>
+      model.hasChanged() || _lastPainted != _PaintMode.vector;
 }
 
 final _tileSize = 256.0;

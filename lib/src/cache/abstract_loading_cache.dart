@@ -30,7 +30,7 @@ class AbstractLoadingCache<K, T> {
     return null;
   }
 
-  Future<T> retrieveTile(K key) async {
+  Future<T> retrieve(K key) async {
     _checkDisposed();
     _CacheBucket<T>? bucket = _map[key];
     if (bucket == null) {

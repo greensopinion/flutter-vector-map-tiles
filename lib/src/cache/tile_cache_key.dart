@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'tile_identity.dart';
+import '../tile_identity.dart';
 
 class TileCacheKey {
   final int z;

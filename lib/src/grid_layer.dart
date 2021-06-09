@@ -4,8 +4,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map/plugin_api.dart';
-import 'package:vector_map_tiles/src/tile_pair_cache.dart';
+import 'package:vector_map_tiles/src/renderer_pipeline.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
+import 'cache/caches.dart';
 import 'disposable_state.dart';
 import 'tile_identity.dart';
 import 'vector_tile_provider.dart';
@@ -47,12 +48,23 @@ class VectorTileLayerOptions extends LayerOptions {
   /// memory. Set to 1.0 to have lowest memory usage.
   final double rasterImageScale;
 
+  /// the time to live of items in the file cache
+  /// consider the terms of your tile provider service
+  /// and the desired freshness of map data when setting this value
+  final Duration fileCacheTtl;
+  static const DEFAULT_CACHE_TTL = Duration(days: 30);
+
+  final fileCacheMaximumSizeInBytes;
+  static const DEFAULT_CACHE_MAX_SIZE = 50 * 1024 * 1024;
+
   VectorTileLayerOptions(
       {required this.tileProvider,
       required this.theme,
       this.maxCachedTiles = 20,
-      this.rasterImageScale = 1.0,
-      this.renderMode = RenderMode.vector}) {
+      this.rasterImageScale = 3.0,
+      this.renderMode = RenderMode.vector,
+      this.fileCacheTtl = DEFAULT_CACHE_TTL,
+      this.fileCacheMaximumSizeInBytes = DEFAULT_CACHE_MAX_SIZE}) {
     assert(rasterImageScale >= 1.0 && rasterImageScale <= 5.0);
     assert(maxCachedTiles >= 1 && maxCachedTiles <= 60);
   }
@@ -71,11 +83,10 @@ class VectorTileLayer extends StatefulWidget {
   }
 }
 
-class _VectorTileLayerState extends DisposableState<VectorTileLayer>
-    with WidgetsBindingObserver {
+class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
   StreamSubscription<Null>? _subscription;
   late final TileWidgets _tileWidgets;
-  TilePairCache? _cache;
+  late final Caches _caches;
 
   MapState get _mapState => widget.mapState;
   double get _clampedZoom => _mapState.zoom.roundToDouble();
@@ -84,15 +95,21 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance?.addObserver(this);
-    final cache = TilePairCache(widget.options);
-    _cache = cache;
+    _caches = Caches(
+        provider: widget.options.tileProvider,
+        pipeline: RendererPipeline(widget.options.theme,
+            scale: widget.options.rasterImageScale),
+        ttl: widget.options.fileCacheTtl,
+        maxSizeInBytes: widget.options.fileCacheMaximumSizeInBytes);
+    Future.delayed(Duration(seconds: 3), () {
+      _caches.applyConstraints();
+    });
     _tileWidgets = TileWidgets(
         widget.options.tileProvider,
         () => _paintZoomScale,
         () => _mapState.zoom,
         widget.options.theme,
-        cache);
+        _caches);
     _subscription = widget.stream.listen((event) {
       _update();
     });
@@ -102,15 +119,7 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer>
   @override
   void dispose() {
     super.dispose();
-    WidgetsBinding.instance?.removeObserver(this);
-    _cache?.dispose();
-    _cache = null;
     _subscription?.cancel();
-  }
-
-  @override
-  void didHaveMemoryPressure() {
-    _cache?.releaseMemory();
   }
 
   @override
