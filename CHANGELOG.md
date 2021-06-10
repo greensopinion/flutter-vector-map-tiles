@@ -1,3 +1,7 @@
+## 0.1.1
+
+* reduce memory usage
+* add storage-based cache
 ## 0.1.0
 
 * add mixed mode rendering
