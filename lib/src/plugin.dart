@@ -2,7 +2,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map/plugin_api.dart';
 
-import 'grid_layer.dart';
+import 'grid/grid_layer.dart';
+import 'options.dart';
 
 class VectorMapTilesPlugin extends MapPlugin {
   @override
