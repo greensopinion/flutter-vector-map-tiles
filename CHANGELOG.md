@@ -1,3 +1,6 @@
+## 0.1.2
+
+* image memory cache is conigurable
 ## 0.1.1
 
 * reduce memory usage
