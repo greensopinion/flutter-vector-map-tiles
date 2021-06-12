@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'package:vector_map_tiles/src/slippy_map_translator.dart';
+import 'package:vector_map_tiles/src/grid/slippy_map_translator.dart';
 import 'package:vector_map_tiles/src/tile_identity.dart';
 
 void main() {

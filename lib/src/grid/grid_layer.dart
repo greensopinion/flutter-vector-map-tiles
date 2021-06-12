@@ -4,12 +4,12 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map/plugin_api.dart';
-import 'package:vector_map_tiles/src/renderer_pipeline.dart';
+import 'package:vector_map_tiles/src/grid/renderer_pipeline.dart';
 import '../cache/caches.dart';
-import '../disposable_state.dart';
+import 'disposable_state.dart';
 import '../options.dart';
 import '../tile_identity.dart';
-import '../tile_widgets.dart';
+import 'tile_widgets.dart';
 
 class VectorTileLayer extends StatefulWidget {
   final VectorTileLayerOptions options;
@@ -42,6 +42,7 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer>
         pipeline: RendererPipeline(widget.options.theme,
             scale: widget.options.rasterImageScale),
         ttl: widget.options.fileCacheTtl,
+        maxImagesInMemory: widget.options.maxImagesInMemory,
         maxSizeInBytes: widget.options.fileCacheMaximumSizeInBytes);
     Future.delayed(Duration(seconds: 3), () {
       _caches.applyConstraints();

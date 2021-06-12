@@ -4,7 +4,7 @@ import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../tile_identity.dart';
 import 'tile_image_cache.dart';
-import '../renderer_pipeline.dart';
+import '../grid/renderer_pipeline.dart';
 
 class ImageTileLoadingCache {
   final TileImageCache _delegate;

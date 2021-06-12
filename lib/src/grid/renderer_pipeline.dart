@@ -3,7 +3,7 @@ import 'dart:collection';
 import 'dart:ui';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
-import './tile_identity.dart';
+import '../tile_identity.dart';
 
 class RendererPipeline {
   late final ImageRenderer _renderer;

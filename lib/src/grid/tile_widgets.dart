@@ -31,15 +31,12 @@ class TileWidgets {
   Map<TileIdentity, Widget> get all => _idToWidget;
 
   Widget _createWidget(TileIdentity tile) {
-    return AnimatedOpacity(
-        opacity: 1.0,
-        duration: Duration(seconds: 2),
-        child: GridVectorTile(
-            key: Key('GridTile_${tile.z}_${tile.x}_${tile.y}'),
-            tileIdentity: tile,
-            caches: _caches,
-            zoomScaleFunction: _zoomScaleFunction,
-            zoomFunction: _zoomFunction,
-            theme: _theme));
+    return GridVectorTile(
+        key: Key('GridTile_${tile.z}_${tile.x}_${tile.y}'),
+        tileIdentity: tile,
+        caches: _caches,
+        zoomScaleFunction: _zoomScaleFunction,
+        zoomFunction: _zoomFunction,
+        theme: _theme);
   }
 }

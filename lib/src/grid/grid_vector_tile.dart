@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart' as material;
 import 'package:flutter/widgets.dart';
 import 'package:vector_map_tiles/src/grid/debounce.dart';
 import 'package:vector_map_tiles/src/tile_identity.dart';
@@ -29,9 +30,9 @@ class GridVectorTile extends StatefulWidget {
   }
 }
 
-class _GridVectorTile extends DisposableState<GridVectorTile> {
+class _GridVectorTile extends DisposableState<GridVectorTile>
+    with material.SingleTickerProviderStateMixin {
   late final VectorTileModel _model;
-  late final _VectorTilePainter _painter;
 
   @override
   void initState() {
@@ -39,6 +40,43 @@ class _GridVectorTile extends DisposableState<GridVectorTile> {
     _model = VectorTileModel(widget.caches, widget.theme, widget.tileIdentity,
         widget.zoomScaleFunction, widget.zoomFunction);
     _model.startLoading();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GridVectorTileBody(
+        key: Key(
+            'tileBody${widget.tileIdentity.z}_${widget.tileIdentity.x}_${widget.tileIdentity.y}'),
+        model: _model);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _model.dispose();
+  }
+}
+
+class GridVectorTileBody extends StatefulWidget {
+  final VectorTileModel model;
+
+  const GridVectorTileBody({required Key key, required this.model})
+      : super(key: key);
+  @override
+  material.State<material.StatefulWidget> createState() {
+    return _GridVectorTileBodyState(model);
+  }
+}
+
+class _GridVectorTileBodyState extends DisposableState<GridVectorTileBody> {
+  final VectorTileModel _model;
+  late final _VectorTilePainter _painter;
+
+  _GridVectorTileBodyState(this._model);
+
+  @override
+  void initState() {
+    super.initState();
     _painter = _VectorTilePainter(_model);
     _model.addListener(() {
       setState(() {});
@@ -47,16 +85,7 @@ class _GridVectorTile extends DisposableState<GridVectorTile> {
 
   @override
   Widget build(BuildContext context) {
-    if (_model.image == null && _model.vector == null) {
-      return Container();
-    }
     return RepaintBoundary(child: CustomPaint(painter: _painter));
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _model.dispose();
   }
 }
 
@@ -76,6 +105,9 @@ class _VectorTilePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    if (model.image == null && model.vector == null) {
+      return;
+    }
     bool changed = model.updateRendering();
     final image = model.image;
     final renderImage = (changed || model.vector == null) && image != null;

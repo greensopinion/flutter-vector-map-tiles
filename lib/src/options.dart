@@ -45,8 +45,22 @@ class VectorTileLayerOptions extends LayerOptions {
   final Duration fileCacheTtl;
   static const DEFAULT_CACHE_TTL = Duration(days: 30);
 
+  /// the maximum size of the file-based cache in bytes.
+  /// the cache does a good-enough effort to keep the cache size
+  /// within the specified limit, however the size can exceed the
+  /// specified limit from time to time.
   final fileCacheMaximumSizeInBytes;
   static const DEFAULT_CACHE_MAX_SIZE = 50 * 1024 * 1024;
+
+  /// the maximum number of images retained in the memory
+  /// cache. The higher the number of images retained in memory,
+  /// the less the user is exposed to delays in loading tiles
+  /// and therefore the less flicker on the map. Images
+  /// take anywhere from 2-3MB each, so setting this value too
+  /// high can result in exceeding maximum allowable process memory
+  /// size, resulting in the OS terminating the app (i.e. crashes).
+  final maxImagesInMemory;
+  static const DEFAULT_CACHE_MAX_IMAGES_IN_MEMORY = 20;
 
   VectorTileLayerOptions(
       {required this.tileProvider,
@@ -55,6 +69,7 @@ class VectorTileLayerOptions extends LayerOptions {
       this.rasterImageScale = 3.0,
       this.renderMode = RenderMode.vector,
       this.fileCacheTtl = DEFAULT_CACHE_TTL,
+      this.maxImagesInMemory = DEFAULT_CACHE_MAX_IMAGES_IN_MEMORY,
       this.fileCacheMaximumSizeInBytes = DEFAULT_CACHE_MAX_SIZE}) {
     assert(rasterImageScale >= 1.0 && rasterImageScale <= 5.0);
     assert(maxCachedTiles >= 1 && maxCachedTiles <= 60);
