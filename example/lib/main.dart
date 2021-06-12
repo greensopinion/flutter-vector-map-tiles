@@ -14,9 +14,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Vector Tiles Demo',
+      title: 'vector_map_tiles Example',
       theme: ThemeData.light(),
-      home: MyHomePage(title: 'Vector Tiles Demo'),
+      home: MyHomePage(title: 'vector_map_tiles Example'),
     );
   }
 }
