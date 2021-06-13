@@ -1,3 +1,7 @@
+## 0.1.3
+
+* add option for raster-only images
+* add debug tile option
 ## 0.1.2
 
 * image memory cache is conigurable

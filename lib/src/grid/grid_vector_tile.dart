@@ -148,8 +148,11 @@ class _VectorTilePainter extends CustomPainter {
       _lastPainted = _PaintMode.raster;
       debounce.update();
     } else {
+      final tileClip = _tileClip(size, effectiveScale, translationDelta);
       Renderer(theme: model.theme).render(canvas, model.vector!,
-          zoomScaleFactor: effectiveScale, zoom: model.lastRenderedZoom);
+          clip: tileClip,
+          zoomScaleFactor: effectiveScale,
+          zoom: model.lastRenderedZoom);
       _lastPainted = _PaintMode.vector;
     }
     canvas.restore();
@@ -172,17 +175,28 @@ class _VectorTilePainter extends CustomPainter {
           foreground: Paint()..color = Color.fromARGB(0xff, 0, 0, 0),
           fontSize: 15);
       final roundedScale = (scale * 1000).roundToDouble() / 1000;
+      final renderedOffset =
+          Offset(-translationDelta.width, -translationDelta.height);
+      final renderedBox = renderedOffset & size;
+      final tileBox = _tileClip(size, scale, translationDelta);
       final text = TextPainter(
           text: TextSpan(
               style: textStyle,
               text:
-                  '${model.tile}\nscale=$roundedScale\nsize=$size\ntranslation=$translationDelta'),
+                  '${model.tile}\nscale=$roundedScale\nsize=$size\ntranslation=$translationDelta\nbox=${renderedBox.debugString()}\ntileBox=${tileBox.debugString()}'),
           textAlign: TextAlign.start,
           textDirection: TextDirection.ltr)
         ..layout();
       text.paint(canvas, material.Offset(10, 10));
     }
   }
+
+  Rect _tileClip(Size size, double scale, Size translationDelta) =>
+      Rect.fromLTWH(
+          -translationDelta.width / scale,
+          -translationDelta.height / scale,
+          size.width / scale,
+          size.height / scale);
 
   void _notify() {
     Future.microtask(() {
@@ -196,3 +210,7 @@ class _VectorTilePainter extends CustomPainter {
 }
 
 final _tileSize = 256.0;
+
+extension RectDebugExtension on Rect {
+  String debugString() => '[$left,$top,$width,$height]';
+}
