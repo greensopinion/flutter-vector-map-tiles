@@ -6,10 +6,12 @@ import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import 'disposable_state.dart';
 import '../cache/caches.dart';
+import '../options.dart';
 import 'tile_model.dart';
 
 class GridVectorTile extends StatefulWidget {
   final TileIdentity tileIdentity;
+  final RenderMode renderMode;
   final Caches caches;
   final Theme theme;
   final ZoomScaleFunction zoomScaleFunction;
@@ -18,6 +20,7 @@ class GridVectorTile extends StatefulWidget {
   const GridVectorTile(
       {required Key key,
       required this.tileIdentity,
+      required this.renderMode,
       required this.caches,
       required this.zoomScaleFunction,
       required this.zoomFunction,
@@ -37,8 +40,8 @@ class _GridVectorTile extends DisposableState<GridVectorTile>
   @override
   void initState() {
     super.initState();
-    _model = VectorTileModel(widget.caches, widget.theme, widget.tileIdentity,
-        widget.zoomScaleFunction, widget.zoomFunction);
+    _model = VectorTileModel(widget.renderMode, widget.caches, widget.theme,
+        widget.tileIdentity, widget.zoomScaleFunction, widget.zoomFunction);
     _model.startLoading();
   }
 

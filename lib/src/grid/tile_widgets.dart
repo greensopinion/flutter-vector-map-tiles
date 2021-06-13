@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:vector_map_tiles/vector_map_tiles.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../tile_identity.dart';
@@ -13,9 +14,10 @@ class TileWidgets {
   final ZoomFunction _zoomFunction;
   final Theme _theme;
   final Caches _caches;
+  final RenderMode _renderMode;
 
   TileWidgets(VectorTileProvider tileProvider, this._zoomScaleFunction,
-      this._zoomFunction, this._theme, this._caches);
+      this._zoomFunction, this._theme, this._caches, this._renderMode);
 
   void update(List<TileIdentity> tiles) {
     if (tiles.isEmpty) {
@@ -34,6 +36,7 @@ class TileWidgets {
     return GridVectorTile(
         key: Key('GridTile_${tile.z}_${tile.x}_${tile.y}'),
         tileIdentity: tile,
+        renderMode: _renderMode,
         caches: _caches,
         zoomScaleFunction: _zoomScaleFunction,
         zoomFunction: _zoomFunction,

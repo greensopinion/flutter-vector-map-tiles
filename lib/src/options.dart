@@ -27,13 +27,6 @@ class VectorTileLayerOptions extends LayerOptions {
   /// and reduces CPU overhead.
   final RenderMode renderMode;
 
-  /// the maximum number of rendered tiles to cache. Increasing this number improves
-  /// the transition between tiles when zooming and panning at the expense of memory.
-  /// If memory pressure is experienced, this the provided number is reduced automatically
-  /// however setting this value too high can cause performance problems due to memory
-  /// pressure.
-  final int maxCachedTiles;
-
   /// the scale of raster images when using `mixed` [renderMode].
   /// best quality corresponds to the device pixel ratio, at the expense of
   /// memory. Set to 1.0 to have lowest memory usage.
@@ -52,8 +45,9 @@ class VectorTileLayerOptions extends LayerOptions {
   final fileCacheMaximumSizeInBytes;
   static const DEFAULT_CACHE_MAX_SIZE = 50 * 1024 * 1024;
 
-  /// the maximum number of images retained in the memory
-  /// cache. The higher the number of images retained in memory,
+  /// The maximum number of images retained in the memory
+  /// cache. Only applicable for [renderMode] of `vector`.
+  /// The higher the number of images retained in memory,
   /// the less the user is exposed to delays in loading tiles
   /// and therefore the less flicker on the map. Images
   /// take anywhere from 2-3MB each, so setting this value too
@@ -65,13 +59,12 @@ class VectorTileLayerOptions extends LayerOptions {
   VectorTileLayerOptions(
       {required this.tileProvider,
       required this.theme,
-      this.maxCachedTiles = 20,
       this.rasterImageScale = 3.0,
       this.renderMode = RenderMode.vector,
       this.fileCacheTtl = DEFAULT_CACHE_TTL,
       this.maxImagesInMemory = DEFAULT_CACHE_MAX_IMAGES_IN_MEMORY,
       this.fileCacheMaximumSizeInBytes = DEFAULT_CACHE_MAX_SIZE}) {
     assert(rasterImageScale >= 1.0 && rasterImageScale <= 5.0);
-    assert(maxCachedTiles >= 1 && maxCachedTiles <= 60);
+    assert(maxImagesInMemory >= 1 && maxImagesInMemory <= 60);
   }
 }

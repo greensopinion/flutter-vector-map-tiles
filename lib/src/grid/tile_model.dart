@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:vector_map_tiles/src/options.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 import 'dart:ui' as ui;
 
@@ -13,6 +14,7 @@ class VectorTileModel extends ChangeNotifier {
   bool _disposed = false;
   bool get disposed => _disposed;
 
+  final RenderMode renderMode;
   final TileIdentity tile;
   final Theme theme;
   final Caches caches;
@@ -25,8 +27,8 @@ class VectorTileModel extends ChangeNotifier {
   VectorTile? vector;
   ui.Image? image;
 
-  VectorTileModel(this.caches, this.theme, this.tile, this.zoomScaleFunction,
-      this.zoomFunction) {
+  VectorTileModel(this.renderMode, this.caches, this.theme, this.tile,
+      this.zoomScaleFunction, this.zoomFunction) {
     final slippyMap = SlippyMapTranslator(caches.vectorTileCache.maximumZoom);
     translation = slippyMap.translate(tile);
     imageTranslation = translation;
@@ -36,20 +38,25 @@ class VectorTileModel extends ChangeNotifier {
     final vectorFuture =
         caches.vectorTileCache.retrieve(translation.translated);
     bool loadImage = false;
-    await _updateImageIfPresent(translation, zoom: tile.z.toDouble());
-    if (!_disposed && this.image == null) {
-      final slippyMap = SlippyMapTranslator(caches.vectorTileCache.maximumZoom);
-      final alternativeTranslation = slippyMap.lowerZoomAlternative(tile, 1);
-      if (alternativeTranslation.translated != translation.translated) {
-        loadImage = await _updateImageIfPresent(alternativeTranslation,
-            zoom: tile.z.toDouble());
+    if (renderMode == RenderMode.mixed) {
+      await _updateImageIfPresent(translation, zoom: tile.z.toDouble());
+      if (!_disposed && this.image == null) {
+        final slippyMap =
+            SlippyMapTranslator(caches.vectorTileCache.maximumZoom);
+        final alternativeTranslation = slippyMap.lowerZoomAlternative(tile, 1);
+        if (alternativeTranslation.translated != translation.translated) {
+          loadImage = await _updateImageIfPresent(alternativeTranslation,
+              zoom: tile.z.toDouble());
+        }
+      }
+      if (this.image != null) {
+        notifyListeners();
       }
     }
-    if (this.image != null) {
-      notifyListeners();
-    }
     vector = await vectorFuture;
-    if (!_disposed && (this.image == null || loadImage)) {
+    if (renderMode == RenderMode.mixed &&
+        !_disposed &&
+        (this.image == null || loadImage)) {
       await _updateImage(translation, vector!, zoom: tile.z.toDouble());
     }
     notifyListeners();
