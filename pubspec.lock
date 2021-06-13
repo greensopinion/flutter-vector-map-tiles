@@ -504,9 +504,9 @@ packages:
   vector_tile_renderer:
     dependency: "direct main"
     description:
-      name: vector_tile_renderer
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "../dart-vector-tile-renderer"
+      relative: true
+    source: path
     version: "0.1.13"
   vm_service:
     dependency: transitive

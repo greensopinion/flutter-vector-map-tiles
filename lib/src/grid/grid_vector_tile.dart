@@ -16,6 +16,7 @@ class GridVectorTile extends StatefulWidget {
   final Theme theme;
   final ZoomScaleFunction zoomScaleFunction;
   final ZoomFunction zoomFunction;
+  final bool showTileDebugInfo;
 
   const GridVectorTile(
       {required Key key,
@@ -24,7 +25,8 @@ class GridVectorTile extends StatefulWidget {
       required this.caches,
       required this.zoomScaleFunction,
       required this.zoomFunction,
-      required this.theme})
+      required this.theme,
+      required this.showTileDebugInfo})
       : super(key: key);
 
   @override
@@ -40,8 +42,14 @@ class _GridVectorTile extends DisposableState<GridVectorTile>
   @override
   void initState() {
     super.initState();
-    _model = VectorTileModel(widget.renderMode, widget.caches, widget.theme,
-        widget.tileIdentity, widget.zoomScaleFunction, widget.zoomFunction);
+    _model = VectorTileModel(
+        widget.renderMode,
+        widget.caches,
+        widget.theme,
+        widget.tileIdentity,
+        widget.zoomScaleFunction,
+        widget.zoomFunction,
+        widget.showTileDebugInfo);
     _model.startLoading();
   }
 
@@ -119,6 +127,7 @@ class _VectorTilePainter extends CustomPainter {
 
     final scale = model.zoomScaleFunction();
     canvas.save();
+    canvas.clipRect(Offset.zero & size);
     if (translation.isTranslated) {
       final dx = -(translation.xOffset * size.width);
       final dy = -(translation.yOffset * size.height);
@@ -140,6 +149,32 @@ class _VectorTilePainter extends CustomPainter {
       _lastPainted = _PaintMode.vector;
     }
     canvas.restore();
+    _paintTileDebugInfo(canvas, size, renderImage, scale);
+  }
+
+  void _paintTileDebugInfo(
+      Canvas canvas, Size size, bool renderedImage, double scale) {
+    if (model.showTileDebugInfo) {
+      final paint = Paint()
+        ..strokeWidth = 2.0
+        ..style = material.PaintingStyle.stroke
+        ..color = renderedImage
+            ? Color.fromARGB(0xff, 0xff, 0, 0)
+            : Color.fromARGB(0xff, 0, 0xff, 0);
+      canvas.drawLine(Offset.zero, material.Offset(0, size.height), paint);
+      canvas.drawLine(Offset.zero, material.Offset(size.width, 0), paint);
+      final textStyle = TextStyle(
+          foreground: Paint()..color = Color.fromARGB(0xff, 0, 0, 0),
+          fontSize: 15);
+      final roundedScale = (scale * 1000).roundToDouble() / 1000;
+      final text = TextPainter(
+          text: TextSpan(
+              style: textStyle, text: '${model.tile}\nscale=$roundedScale'),
+          textAlign: TextAlign.start,
+          textDirection: TextDirection.ltr)
+        ..layout();
+      text.paint(canvas, material.Offset(10, 10));
+    }
   }
 
   void _notify() {

@@ -9,7 +9,11 @@ enum RenderMode {
 
   /// tiles are rendered using vectors when idle, and raster images when
   /// zooming. Can improve the frame rate and reduce jank.
-  mixed
+  mixed,
+
+  /// tiles are rendered using raster images only
+  /// raster images are created by rendering the vector tile to an image
+  raster
 }
 
 class VectorTileLayerOptions extends LayerOptions {
@@ -56,6 +60,9 @@ class VectorTileLayerOptions extends LayerOptions {
   final maxImagesInMemory;
   static const DEFAULT_CACHE_MAX_IMAGES_IN_MEMORY = 20;
 
+  /// Indicates whether debug information should be shown for tiles
+  final bool showTileDebugInfo;
+
   VectorTileLayerOptions(
       {required this.tileProvider,
       required this.theme,
@@ -63,7 +70,8 @@ class VectorTileLayerOptions extends LayerOptions {
       this.renderMode = RenderMode.vector,
       this.fileCacheTtl = DEFAULT_CACHE_TTL,
       this.maxImagesInMemory = DEFAULT_CACHE_MAX_IMAGES_IN_MEMORY,
-      this.fileCacheMaximumSizeInBytes = DEFAULT_CACHE_MAX_SIZE}) {
+      this.fileCacheMaximumSizeInBytes = DEFAULT_CACHE_MAX_SIZE,
+      this.showTileDebugInfo = false}) {
     assert(rasterImageScale >= 1.0 && rasterImageScale <= 5.0);
     assert(maxImagesInMemory >= 1 && maxImagesInMemory <= 60);
   }

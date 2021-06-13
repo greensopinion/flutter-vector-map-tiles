@@ -18,6 +18,7 @@ class VectorTileModel extends ChangeNotifier {
   final TileIdentity tile;
   final Theme theme;
   final Caches caches;
+  final bool showTileDebugInfo;
   final ZoomScaleFunction zoomScaleFunction;
   final ZoomFunction zoomFunction;
   double lastRenderedZoom = double.negativeInfinity;
@@ -28,7 +29,7 @@ class VectorTileModel extends ChangeNotifier {
   ui.Image? image;
 
   VectorTileModel(this.renderMode, this.caches, this.theme, this.tile,
-      this.zoomScaleFunction, this.zoomFunction) {
+      this.zoomScaleFunction, this.zoomFunction, this.showTileDebugInfo) {
     final slippyMap = SlippyMapTranslator(caches.vectorTileCache.maximumZoom);
     translation = slippyMap.translate(tile);
     imageTranslation = translation;
@@ -37,8 +38,8 @@ class VectorTileModel extends ChangeNotifier {
   void startLoading() async {
     final vectorFuture =
         caches.vectorTileCache.retrieve(translation.translated);
-    bool loadImage = false;
-    if (renderMode == RenderMode.mixed) {
+    bool loadImage = renderMode == RenderMode.raster;
+    if (renderMode != RenderMode.vector) {
       await _updateImageIfPresent(translation, zoom: tile.z.toDouble());
       if (!_disposed && this.image == null) {
         final slippyMap =
@@ -53,11 +54,14 @@ class VectorTileModel extends ChangeNotifier {
         notifyListeners();
       }
     }
-    vector = await vectorFuture;
-    if (renderMode == RenderMode.mixed &&
+    VectorTile vectorTile = await vectorFuture;
+    if (renderMode != RenderMode.raster) {
+      vector = vectorTile;
+    }
+    if (renderMode != RenderMode.vector &&
         !_disposed &&
         (this.image == null || loadImage)) {
-      await _updateImage(translation, vector!, zoom: tile.z.toDouble());
+      await _updateImage(translation, vectorTile, zoom: tile.z.toDouble());
     }
     notifyListeners();
   }

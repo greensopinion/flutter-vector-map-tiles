@@ -53,7 +53,8 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer>
         () => _mapState.zoom,
         widget.options.theme,
         _caches,
-        widget.options.renderMode);
+        widget.options.renderMode,
+        widget.options.showTileDebugInfo);
     _subscription = widget.stream.listen((event) {
       _update();
     });

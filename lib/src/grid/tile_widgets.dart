@@ -15,9 +15,16 @@ class TileWidgets {
   final Theme _theme;
   final Caches _caches;
   final RenderMode _renderMode;
+  final bool showTileDebugInfo;
 
-  TileWidgets(VectorTileProvider tileProvider, this._zoomScaleFunction,
-      this._zoomFunction, this._theme, this._caches, this._renderMode);
+  TileWidgets(
+      VectorTileProvider tileProvider,
+      this._zoomScaleFunction,
+      this._zoomFunction,
+      this._theme,
+      this._caches,
+      this._renderMode,
+      this.showTileDebugInfo);
 
   void update(List<TileIdentity> tiles) {
     if (tiles.isEmpty) {
@@ -40,6 +47,7 @@ class TileWidgets {
         caches: _caches,
         zoomScaleFunction: _zoomScaleFunction,
         zoomFunction: _zoomFunction,
-        theme: _theme);
+        theme: _theme,
+        showTileDebugInfo: showTileDebugInfo);
   }
 }
