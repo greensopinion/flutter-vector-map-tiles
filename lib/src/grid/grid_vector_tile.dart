@@ -128,32 +128,37 @@ class _VectorTilePainter extends CustomPainter {
     final scale = model.zoomScaleFunction();
     canvas.save();
     canvas.clipRect(Offset.zero & size);
+    var translationDelta = Size.zero;
+    var effectiveScale = scale;
     if (translation.isTranslated) {
       final dx = -(translation.xOffset * size.width);
       final dy = -(translation.yOffset * size.height);
+      translationDelta = Size(dx, dy);
       canvas.translate(dx, dy);
-      canvas.scale(translation.fraction.toDouble());
-    }
-    if (scale != 1.0) {
-      canvas.scale(scale);
+      effectiveScale = effectiveScale * translation.fraction.toDouble();
     }
     if (renderImage) {
-      canvas.scale(_tileSize / image!.height.toDouble());
-      canvas.drawImage(image, Offset.zero, Paint());
+      effectiveScale = effectiveScale * (_tileSize / image!.height.toDouble());
+    }
+    if (effectiveScale != 1.0) {
+      canvas.scale(effectiveScale);
+    }
+    if (renderImage) {
+      canvas.drawImage(image!, Offset.zero, Paint());
       _lastPainted = _PaintMode.raster;
       debounce.update();
     } else {
       Renderer(theme: model.theme).render(canvas, model.vector!,
-          zoomScaleFactor: translation.fraction.toDouble() * scale,
-          zoom: model.lastRenderedZoom);
+          zoomScaleFactor: effectiveScale, zoom: model.lastRenderedZoom);
       _lastPainted = _PaintMode.vector;
     }
     canvas.restore();
-    _paintTileDebugInfo(canvas, size, renderImage, scale);
+    _paintTileDebugInfo(
+        canvas, size, renderImage, effectiveScale, translationDelta);
   }
 
-  void _paintTileDebugInfo(
-      Canvas canvas, Size size, bool renderedImage, double scale) {
+  void _paintTileDebugInfo(Canvas canvas, Size size, bool renderedImage,
+      double scale, Size translationDelta) {
     if (model.showTileDebugInfo) {
       final paint = Paint()
         ..strokeWidth = 2.0
@@ -169,7 +174,9 @@ class _VectorTilePainter extends CustomPainter {
       final roundedScale = (scale * 1000).roundToDouble() / 1000;
       final text = TextPainter(
           text: TextSpan(
-              style: textStyle, text: '${model.tile}\nscale=$roundedScale'),
+              style: textStyle,
+              text:
+                  '${model.tile}\nscale=$roundedScale\nsize=$size\ntranslation=$translationDelta'),
           textAlign: TextAlign.start,
           textDirection: TextDirection.ltr)
         ..layout();
