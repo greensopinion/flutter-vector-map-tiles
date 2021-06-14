@@ -1,8 +1,10 @@
 import 'dart:collection';
 import 'dart:typed_data';
 
-class MemoryCache {
-  final int maxSizeBytes;
+import 'cache_stats.dart';
+
+class MemoryCache with CacheStats {
+  int maxSizeBytes;
   int _currentSizeBytes = 0;
   final LinkedHashMap<String, Uint8List> _cache = LinkedHashMap();
 
@@ -12,6 +14,9 @@ class MemoryCache {
     var value = _cache.remove(key);
     if (value != null) {
       _cache[key] = value;
+      cacheHit();
+    } else {
+      cacheMiss();
     }
     return value;
   }
@@ -31,5 +36,11 @@ class MemoryCache {
       final removed = _cache.remove(_cache.keys.first);
       _currentSizeBytes -= removed!.lengthInBytes;
     }
+  }
+
+  void didHaveMemoryPressure() {
+    maxSizeBytes = maxSizeBytes ~/ 2;
+    _cache.clear();
+    _currentSizeBytes = 0;
   }
 }

@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:vector_map_tiles/src/cache/cache_stats.dart';
+
 import 'byte_storage.dart';
 
-class StorageCache {
+class StorageCache with CacheStats {
   final ByteStorage _storage;
   final Duration _ttl;
   final int _maxSizeInBytes;
@@ -11,8 +13,14 @@ class StorageCache {
 
   StorageCache(this._storage, this._ttl, this._maxSizeInBytes);
 
-  Future<List<int>?> retrieve(String key) {
-    return _storage.read(key);
+  Future<List<int>?> retrieve(String key) async {
+    final bytes = await _storage.read(key);
+    if (bytes == null) {
+      cacheMiss();
+    } else {
+      cacheHit();
+    }
+    return bytes;
   }
 
   Future<void> put(String key, List<int> data) async {

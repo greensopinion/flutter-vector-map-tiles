@@ -63,6 +63,9 @@ class VectorTileLayerOptions extends LayerOptions {
   /// Indicates whether debug information should be shown for tiles
   final bool showTileDebugInfo;
 
+  /// Indicates whether to log cache stats
+  final bool logCacheStats;
+
   VectorTileLayerOptions(
       {required this.tileProvider,
       required this.theme,
@@ -71,7 +74,8 @@ class VectorTileLayerOptions extends LayerOptions {
       this.fileCacheTtl = DEFAULT_CACHE_TTL,
       this.maxImagesInMemory = DEFAULT_CACHE_MAX_IMAGES_IN_MEMORY,
       this.fileCacheMaximumSizeInBytes = DEFAULT_CACHE_MAX_SIZE,
-      this.showTileDebugInfo = false}) {
+      this.showTileDebugInfo = false,
+      this.logCacheStats = false}) {
     assert(rasterImageScale >= 1.0 && rasterImageScale <= 5.0);
     assert(maxImagesInMemory >= 1 && maxImagesInMemory <= 60);
   }

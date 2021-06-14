@@ -7,13 +7,13 @@ import '../tile_identity.dart';
 
 class TileImageCache {
   final StorageCache _delegate;
-  final MemoryCache _memoryCache = MemoryCache(maxSizeBytes: 10 * 1024 * 1024);
+  final MemoryCache memoryCache = MemoryCache(maxSizeBytes: 10 * 1024 * 1024);
 
   TileImageCache(this._delegate);
 
   Future<Image?> retrieve(TileIdentity tile, String modifier) async {
     final key = _toKey(tile, modifier);
-    var bytes = _memoryCache.getItem(key);
+    var bytes = memoryCache.getItem(key);
     if (bytes == null) {
       final cached = await _delegate.retrieve(key);
       if (cached != null) {
@@ -35,7 +35,7 @@ class TileImageCache {
     final key = _toKey(tile, modifier);
     final cacheData =
         bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes);
-    _memoryCache.putItem(key, cacheData);
+    memoryCache.putItem(key, cacheData);
     await _delegate.put(key, cacheData);
   }
 

@@ -1,16 +1,17 @@
 import 'dart:ui';
 
+import 'package:vector_map_tiles/src/cache/cache_stats.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../tile_identity.dart';
 import 'tile_image_cache.dart';
 import '../grid/renderer_pipeline.dart';
 
-class ImageTileLoadingCache {
-  final TileImageCache _delegate;
+class ImageTileLoadingCache with CacheStats {
+  final TileImageCache delegate;
   final RendererPipeline _pipeline;
 
-  ImageTileLoadingCache(this._delegate, this._pipeline);
+  ImageTileLoadingCache(this.delegate, this._pipeline);
 
   double get scale => _pipeline.scale;
 
@@ -18,17 +19,27 @@ class ImageTileLoadingCache {
       {required double zoom}) async {
     final modifier = _toModifier(zoom);
 
-    final image = await _delegate.retrieve(identity, modifier);
+    final image = await delegate.retrieve(identity, modifier);
     if (image == null) {
+      cacheMiss();
       final rendered = await _pipeline.renderImage(identity, tile, zoom);
-      await _delegate.put(identity, rendered, modifier);
+      await delegate.put(identity, rendered, modifier);
       return rendered;
+    } else {
+      cacheHit();
     }
     return image;
   }
 
-  Future<Image?> getIfPresent(TileIdentity identity, {required double zoom}) {
-    return _delegate.retrieve(identity, _toModifier(zoom));
+  Future<Image?> getIfPresent(TileIdentity identity,
+      {required double zoom}) async {
+    final image = await delegate.retrieve(identity, _toModifier(zoom));
+    if (image == null) {
+      cacheMiss();
+    } else {
+      cacheHit();
+    }
+    return image;
   }
 
   String _toModifier(double zoom) {

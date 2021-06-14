@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map/plugin_api.dart';
+import 'package:vector_map_tiles/src/grid/debounce.dart';
 import 'package:vector_map_tiles/src/grid/renderer_pipeline.dart';
 import '../cache/caches.dart';
 import 'disposable_state.dart';
@@ -33,6 +34,8 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer>
   MapState get _mapState => widget.mapState;
   double get _clampedZoom => _mapState.zoom.roundToDouble();
   double _paintZoomScale = 1.0;
+  late final _cacheStats = ScheduledDebounce(
+      _printCacheStats, Duration(seconds: 1), Duration(seconds: 3));
 
   @override
   void initState() {
@@ -94,6 +97,9 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer>
     final tileRange = _pixelBoundsToTileRange(pixelBounds);
     final tiles = _expand(tileRange);
     _tileWidgets.update(tiles);
+    if (widget.options.logCacheStats) {
+      _cacheStats.update();
+    }
     setState(() {});
   }
 
@@ -149,6 +155,10 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer>
   void _updatePaintZoomScale() {
     final tileZoom = _tileWidgets.all.keys.first.z;
     _paintZoomScale = _zoomScale(_mapState.zoom, tileZoom.toDouble());
+  }
+
+  void _printCacheStats() {
+    print('Cache stats:\n${_caches.stats()}');
   }
 }
 

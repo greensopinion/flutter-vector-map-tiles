@@ -3,8 +3,9 @@ import 'dart:collection';
 import 'dart:ui';
 
 import '../tile_identity.dart';
+import 'cache_stats.dart';
 
-class MemoryImageCache {
+class MemoryImageCache with CacheStats {
   int _maxSize;
   final _cache = LinkedHashMap<String, Image>();
 
@@ -21,8 +22,11 @@ class MemoryImageCache {
     final key = _toKey(id, zoom);
     final image = _cache.remove(key);
     if (image != null) {
+      cacheHit();
       _cache[key] = image;
       return image.clone();
+    } else {
+      cacheMiss();
     }
   }
 

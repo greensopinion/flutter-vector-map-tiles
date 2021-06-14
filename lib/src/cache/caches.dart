@@ -40,5 +40,23 @@ class Caches {
 
   void didHaveMemoryPressure() {
     memoryImageCache.didHaveMemoryPressure();
+    imageTileCache.delegate.memoryCache.didHaveMemoryPressure();
   }
+
+  String stats() {
+    final cacheStats = <String>[];
+    cacheStats
+        .add('Storage cache hit ratio:           ${_cache.hitRatio.asPct()}%');
+    cacheStats.add(
+        'Image tile cache hit ratio:        ${imageTileCache.hitRatio.asPct()}%');
+    cacheStats.add(
+        'Image byte memory cache hit ratio: ${imageTileCache.delegate.memoryCache.hitRatio.asPct()}%');
+    cacheStats.add(
+        'Image cache hit ratio:             ${memoryImageCache.hitRatio.asPct()}%');
+    return cacheStats.join('\n');
+  }
+}
+
+extension _PctExtension on double {
+  double asPct() => (this * 1000).roundToDouble() / 10;
 }
