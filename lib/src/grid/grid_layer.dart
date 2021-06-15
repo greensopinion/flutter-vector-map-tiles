@@ -82,8 +82,9 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer>
       return Container();
     }
     _updatePaintZoomScale();
+    final state = _TilePositioningState(_paintZoomScale, _mapState);
     final tileWidgets = _tileWidgets.all.entries
-        .map((entry) => _positionTile(entry.key, entry.value))
+        .map((entry) => _positionTile(state, entry.key, entry.value))
         .toList();
     return Stack(children: tileWidgets);
   }
@@ -129,21 +130,17 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer>
     return tiles;
   }
 
-  Widget _positionTile(TileIdentity tile, Widget tileWidget) {
-    final zoomScale = _paintZoomScale;
-    final pixelOrigin =
-        _mapState.getNewPixelOrigin(_mapState.center, _mapState.zoom).round();
-    final origin =
-        _mapState.project(_mapState.unproject(pixelOrigin), _mapState.zoom);
-    final translate = origin.multiplyBy(zoomScale) - pixelOrigin;
+  Widget _positionTile(
+      _TilePositioningState state, TileIdentity tile, Widget tileWidget) {
     final tilePosition =
-        (tile.scaleBy(_tileSize) - origin).multiplyBy(zoomScale) + translate;
+        (tile.scaleBy(_tileSize) - state.origin).multiplyBy(state.zoomScale) +
+            state.translate;
     return Positioned(
         key: Key('PositionedGridTile_${tile.z}_${tile.x}_${tile.y}'),
         top: tilePosition.y.toDouble(),
         left: tilePosition.x.toDouble(),
-        width: (_tileSize.x * zoomScale),
-        height: (_tileSize.y * zoomScale),
+        width: (_tileSize.x * state.zoomScale),
+        height: (_tileSize.y * state.zoomScale),
         child: tileWidget);
   }
 
@@ -163,3 +160,16 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer>
 }
 
 final _tileSize = CustomPoint(256, 256);
+
+class _TilePositioningState {
+  final double zoomScale;
+  late final CustomPoint<num> origin;
+  late final CustomPoint<num> translate;
+
+  _TilePositioningState(this.zoomScale, MapState mapState) {
+    final pixelOrigin =
+        mapState.getNewPixelOrigin(mapState.center, mapState.zoom).round();
+    origin = mapState.project(mapState.unproject(pixelOrigin), mapState.zoom);
+    translate = origin.multiplyBy(zoomScale) - pixelOrigin;
+  }
+}

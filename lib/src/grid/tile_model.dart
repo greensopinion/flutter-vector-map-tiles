@@ -40,16 +40,7 @@ class VectorTileModel extends ChangeNotifier {
         caches.vectorTileCache.retrieve(translation.translated);
     bool loadImage = renderMode == RenderMode.raster;
     if (renderMode != RenderMode.vector) {
-      await _updateImageIfPresent(translation, zoom: tile.z.toDouble());
-      if (!_disposed && this.image == null) {
-        final slippyMap =
-            SlippyMapTranslator(caches.vectorTileCache.maximumZoom);
-        final alternativeTranslation = slippyMap.lowerZoomAlternative(tile, 1);
-        if (alternativeTranslation.translated != translation.translated) {
-          loadImage = await _updateImageIfPresent(alternativeTranslation,
-              zoom: tile.z.toDouble());
-        }
-      }
+      loadImage = _presentImageTilePreviewIfPresent();
       if (this.image != null) {
         notifyListeners();
       }
@@ -74,16 +65,10 @@ class VectorTileModel extends ChangeNotifier {
     return _applyImage(translation, image);
   }
 
-  Future<bool> _updateImageIfPresent(TileTranslation translation,
-      {required double zoom}) async {
+  bool _updateImageIfPresent(TileTranslation translation,
+      {required double zoom}) {
     final id = translation.translated;
     var image = caches.memoryImageCache.getImage(id, zoom: zoom);
-    if (image == null) {
-      image = await caches.imageTileCache.getIfPresent(id, zoom: zoom);
-      if (image != null) {
-        caches.memoryImageCache.putImage(id, zoom: zoom, image: image);
-      }
-    }
     return _applyImage(translation, image);
   }
 
@@ -137,5 +122,27 @@ class VectorTileModel extends ChangeNotifier {
     if (!_disposed) {
       super.removeListener(listener);
     }
+  }
+
+  // returns true if alternative was presented
+  bool _presentImageTilePreviewIfPresent() {
+    _updateImageIfPresent(translation,
+        zoom: translation.translated.z.toDouble());
+    if (!_disposed && this.image == null) {
+      var alternativeLoaded = false;
+      final slippyMap = SlippyMapTranslator(caches.vectorTileCache.maximumZoom);
+      for (var altLevel = 1;
+          altLevel < tile.z && altLevel < 3 && !_disposed && !alternativeLoaded;
+          ++altLevel) {
+        final alternativeTranslation =
+            slippyMap.lowerZoomAlternative(tile, altLevel);
+        if (alternativeTranslation.translated != translation.translated) {
+          alternativeLoaded = _updateImageIfPresent(alternativeTranslation,
+              zoom: alternativeTranslation.translated.z.toDouble());
+        }
+      }
+      return alternativeLoaded;
+    }
+    return false;
   }
 }

@@ -32,7 +32,8 @@ class MemoryImageCache with CacheStats {
 
   void _applyMaxSize() {
     while (_cache.length > _maxSize) {
-      final removed = _cache.remove(_cache.keys.first)!;
+      final oldest = _cache.keys.first;
+      final removed = _cache.remove(oldest)!;
       removed.dispose();
     }
   }
