@@ -1,3 +1,6 @@
+## 1.0.0
+
+* release
 ## 0.1.3
 
 * add option for raster-only images

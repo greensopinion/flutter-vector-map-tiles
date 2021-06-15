@@ -24,7 +24,7 @@ class _MyHomePageState extends State<MyHomePage> {
             options: MapOptions(
                 center: LatLng(49.246292, -123.116226),
                 zoom: 10,
-                maxZoom: 18,
+                maxZoom: 15,
                 interactiveFlags: InteractiveFlag.doubleTapZoom |
                     InteractiveFlag.drag |
                     InteractiveFlag.pinchZoom |
@@ -55,14 +55,8 @@ See the [example](example) for details.
 
 ## Status
 
-This plugin is in its very early stages, and is not ready for production use.
-
-Outstanding issues:
-
-* performance
-* smooth scrolling/zooming
-* transition between zoom levels when tiles are not cached
-* the unknown unknowns
+This plugin is fairly new and has not yet been broadly used. It's feature complete enough to be a v1, but does
+have performance issues on larger screens such as on a tablet or very old devices.
 
 ## License
 

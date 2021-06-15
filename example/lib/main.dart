@@ -53,14 +53,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     InteractiveFlag.pinchMove,
                 plugins: [VectorMapTilesPlugin()]),
             layers: <LayerOptions>[
-              // TileLayerOptions(
-              //     urlTemplate:
-              //         'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-              //     subdomains: ['a', 'b', 'c'],
-              //     // For example purposes. It is recommended to use
-              //     // TileProvider with a caching and retry strategy, like
-              //     // NetworkTileProvider or CachedNetworkTileProvider
-              //     tileProvider: NonCachingNetworkTileProvider()),
+              // normally you would see TileLayerOptions which provides raster tiles
+              // instead this vector tile layer replaces the standard tile layer
               VectorTileLayerOptions(
                   theme: theme,
                   tileProvider: MemoryCacheVectorTileProvider(
@@ -68,7 +62,8 @@ class _MyHomePageState extends State<MyHomePage> {
                           urlTemplate:
                               'https://tiles.stadiamaps.com/data/openmaptiles/{z}/{x}/{y}.pbf?api_key=$apiKey',
                           // this is the maximum zoom of the provider, not the
-                          // maximum of the map
+                          // maximum of the map. vector tiles are rendered
+                          // to larger sizes to support higher zoom levels
                           maximumZoom: 14),
                       maxSizeBytes: 1024 * 1024 * 2)),
             ],
