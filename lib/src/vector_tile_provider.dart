@@ -5,6 +5,8 @@ import 'package:vector_map_tiles/src/tile_identity.dart';
 import 'package:http/http.dart';
 import 'package:http/retry.dart';
 
+import 'cache/memory_cache.dart';
+
 abstract class VectorTileProvider {
   /// provides a tile as a `pbf` or `mvt` format
   Future<Uint8List> provide(TileIdentity tile);
@@ -53,26 +55,22 @@ class NetworkVectorTileProvider extends VectorTileProvider {
 
 class MemoryCacheVectorTileProvider extends VectorTileProvider {
   final VectorTileProvider delegate;
-  final int maxSizeBytes;
-  int _currentSizeBytes = 0;
-  final LinkedHashMap<TileIdentity, Uint8List> _cache = LinkedHashMap();
+  late final MemoryCache _cache;
 
   int get maximumZoom => delegate.maximumZoom;
 
   MemoryCacheVectorTileProvider(
-      {required this.delegate, required this.maxSizeBytes});
+      {required this.delegate, required int maxSizeBytes}) {
+    _cache = MemoryCache(maxSizeBytes: maxSizeBytes);
+  }
 
   @override
   Future<Uint8List> provide(TileIdentity tile) async {
-    var value = _cache[tile];
+    final key = tile.toCacheKey();
+    var value = _cache.getItem(key);
     if (value == null) {
       value = await delegate.provide(tile);
-      _cache[tile] = value;
-      _currentSizeBytes += value.lengthInBytes;
-      while (_currentSizeBytes > maxSizeBytes && _cache.isNotEmpty) {
-        final removed = _cache.remove(_cache.keys.first);
-        _currentSizeBytes -= removed!.lengthInBytes;
-      }
+      _cache.putItem(key, value);
     }
     return value;
   }
@@ -98,4 +96,8 @@ class _UrlProvider {
       }
     });
   }
+}
+
+extension _TileCacheKey on TileIdentity {
+  String toCacheKey() => '$z.$x.$y';
 }
