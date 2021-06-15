@@ -63,7 +63,6 @@ class _MyHomePageState extends State<MyHomePage> {
               //     tileProvider: NonCachingNetworkTileProvider()),
               VectorTileLayerOptions(
                   theme: theme,
-                  renderMode: RenderMode.mixed,
                   tileProvider: MemoryCacheVectorTileProvider(
                       delegate: NetworkVectorTileProvider(
                           urlTemplate:

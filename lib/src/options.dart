@@ -58,7 +58,7 @@ class VectorTileLayerOptions extends LayerOptions {
   /// high can result in exceeding maximum allowable process memory
   /// size, resulting in the OS terminating the app (i.e. crashes).
   final maxImagesInMemory;
-  static const DEFAULT_CACHE_MAX_IMAGES_IN_MEMORY = 20;
+  static const DEFAULT_CACHE_MAX_IMAGES_IN_MEMORY = 80;
 
   /// Indicates whether debug information should be shown for tiles
   final bool showTileDebugInfo;
@@ -70,13 +70,13 @@ class VectorTileLayerOptions extends LayerOptions {
       {required this.tileProvider,
       required this.theme,
       this.rasterImageScale = 3.0,
-      this.renderMode = RenderMode.vector,
+      this.renderMode = RenderMode.mixed,
       this.fileCacheTtl = DEFAULT_CACHE_TTL,
       this.maxImagesInMemory = DEFAULT_CACHE_MAX_IMAGES_IN_MEMORY,
       this.fileCacheMaximumSizeInBytes = DEFAULT_CACHE_MAX_SIZE,
       this.showTileDebugInfo = false,
       this.logCacheStats = false}) {
     assert(rasterImageScale >= 1.0 && rasterImageScale <= 5.0);
-    assert(maxImagesInMemory >= 1 && maxImagesInMemory <= 60);
+    assert(maxImagesInMemory >= 1 && maxImagesInMemory <= 200);
   }
 }
