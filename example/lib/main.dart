@@ -31,8 +31,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final theme = ProvidedThemes.lightTheme();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,11 +54,10 @@ class _MyHomePageState extends State<MyHomePage> {
               // normally you would see TileLayerOptions which provides raster tiles
               // instead this vector tile layer replaces the standard tile layer
               VectorTileLayerOptions(
-                  theme: theme,
+                  theme: _mapTheme(context),
                   tileProvider: MemoryCacheVectorTileProvider(
                       delegate: NetworkVectorTileProvider(
-                          urlTemplate:
-                              'https://tiles.stadiamaps.com/data/openmaptiles/{z}/{x}/{y}.pbf?api_key=$apiKey',
+                          urlTemplate: _urlTemplate(),
                           // this is the maximum zoom of the provider, not the
                           // maximum of the map. vector tiles are rendered
                           // to larger sizes to support higher zoom levels
@@ -69,5 +66,20 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           ))
         ])));
+  }
+
+  _mapTheme(BuildContext context) {
+    // maps are rendered using themes
+    // to provide a dark theme do something like this:
+    // if (MediaQuery.of(context).platformBrightness == Brightness.dark) return myDarkTheme();
+    return ProvidedThemes.lightTheme();
+  }
+
+  String _urlTemplate() {
+    // Stadia Maps source https://docs.stadiamaps.com/vector/
+    return 'https://tiles.stadiamaps.com/data/openmaptiles/{z}/{x}/{y}.pbf?api_key=$apiKey';
+
+    // Mapbox source https://docs.mapbox.com/api/maps/vector-tiles/#example-request-retrieve-vector-tiles
+    // return 'https://api.mapbox.com/v4/mapbox.mapbox-streets-v8/{z}/{x}/{y}.mvt?access_token=$apiKey',
   }
 }

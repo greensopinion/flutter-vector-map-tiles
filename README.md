@@ -1,6 +1,10 @@
 # vector_map_tiles
 
-A plugin for [`flutter_map`](https://pub.dev/packages/flutter_map) that enables the use of vector tiles.
+A plugin for [`flutter_map`](https://pub.dev/packages/flutter_map) that enables the use of vector tiles with slippy maps and Flutter.
+
+Loads vector tiles from a source such as Mapbox or Stadia Maps, and renders them as a layer on a `flutter_map`.
+
+Tile rendering can be vector, mixed, or raster. Mixed mode is default, since that provides an optimal trade-off between sharp visuals when idle, and smooth animation when zooming with a pinch gesture.
 
 <img src="https://raw.githubusercontent.com/greensopinion/flutter-vector-map-tiles/main/vector_map_tiles-example.png" alt="example screenshot" width="292"/>
 
@@ -8,9 +12,6 @@ A plugin for [`flutter_map`](https://pub.dev/packages/flutter_map) that enables 
 
 ```dart
 class _MyHomePageState extends State<MyHomePage> {
-  // provide a map theme
-  final theme = ProvidedThemes.lightTheme();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,24 +30,38 @@ class _MyHomePageState extends State<MyHomePage> {
                     InteractiveFlag.drag |
                     InteractiveFlag.pinchZoom |
                     InteractiveFlag.pinchMove,
-                plugins: [VectorMapTilesPlugin()]), // be sure to register the plugin
+                plugins: [VectorMapTilesPlugin()]),
             layers: <LayerOptions>[
               // normally you would see TileLayerOptions which provides raster tiles
               // instead this vector tile layer replaces the standard tile layer
               VectorTileLayerOptions(
-                  theme: theme,
+                  theme: _mapTheme(context),
                   tileProvider: MemoryCacheVectorTileProvider(
                       delegate: NetworkVectorTileProvider(
-                          urlTemplate:
-                              'https://tiles.stadiamaps.com/data/openmaptiles/{z}/{x}/{y}.pbf?api_key=$apiKey',
-                        // this is the maximum zoom of the provider, not the
-                        // maximum of the map. vector tiles are rendered
-                        // to larger sizes to support higher zoom levels
+                          urlTemplate: _urlTemplate(),
+                          // this is the maximum zoom of the provider, not the
+                          // maximum of the map. vector tiles are rendered
+                          // to larger sizes to support higher zoom levels
                           maximumZoom: 14),
                       maxSizeBytes: 1024 * 1024 * 2)),
             ],
           ))
         ])));
+  }
+
+  _mapTheme(BuildContext context) {
+    // maps are rendered using themes
+    // to provide a dark theme do something like this:
+    // if (MediaQuery.of(context).platformBrightness == Brightness.dark) return myDarkTheme();
+    return ProvidedThemes.lightTheme();
+  }
+
+  String _urlTemplate() {
+    // Stadia Maps source https://docs.stadiamaps.com/vector/
+    return 'https://tiles.stadiamaps.com/data/openmaptiles/{z}/{x}/{y}.pbf?api_key=$apiKey';
+
+    // Mapbox source https://docs.mapbox.com/api/maps/vector-tiles/#example-request-retrieve-vector-tiles
+    // return 'https://api.mapbox.com/v4/mapbox.mapbox-streets-v8/{z}/{x}/{y}.mvt?access_token=$apiKey',
   }
 }
 ```
