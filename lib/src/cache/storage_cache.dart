@@ -1,8 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 
-import 'package:vector_map_tiles/src/cache/cache_stats.dart';
-
+import 'cache_stats.dart';
 import 'byte_storage.dart';
 
 class StorageCache with CacheStats {

@@ -1,11 +1,10 @@
-import 'dart:collection';
 import 'dart:typed_data';
 
-import 'package:vector_map_tiles/src/tile_identity.dart';
 import 'package:http/http.dart';
 import 'package:http/retry.dart';
 
 import 'cache/memory_cache.dart';
+import 'tile_identity.dart';
 
 abstract class VectorTileProvider {
   /// provides a tile as a `pbf` or `mvt` format

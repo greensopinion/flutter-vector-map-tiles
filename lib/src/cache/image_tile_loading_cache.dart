@@ -1,11 +1,11 @@
 import 'dart:ui';
 
-import 'package:vector_map_tiles/src/cache/cache_stats.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../tile_identity.dart';
 import 'tile_image_cache.dart';
 import '../grid/renderer_pipeline.dart';
+import 'cache_stats.dart';
 
 class ImageTileLoadingCache with CacheStats {
   final TileImageCache delegate;

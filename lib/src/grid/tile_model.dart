@@ -1,8 +1,8 @@
 import 'package:flutter/widgets.dart';
-import 'package:vector_map_tiles/src/options.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 import 'dart:ui' as ui;
 
+import '../options.dart';
 import '../cache/caches.dart';
 import '../tile_identity.dart';
 import 'slippy_map_translator.dart';

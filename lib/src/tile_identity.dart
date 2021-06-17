@@ -2,8 +2,8 @@ import 'dart:ui';
 
 import 'package:flutter_map/plugin_api.dart';
 
-class TileIdentity extends CustomPoint<num> {
-  final num z;
+class TileIdentity extends CustomPoint<int> {
+  final int z;
 
   TileIdentity(int z, int x, int y)
       : this.z = z.toInt(),

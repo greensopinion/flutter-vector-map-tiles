@@ -4,12 +4,13 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map/plugin_api.dart';
-import 'package:vector_map_tiles/src/grid/debounce.dart';
-import 'package:vector_map_tiles/src/grid/renderer_pipeline.dart';
+import 'debounce.dart';
+import 'renderer_pipeline.dart';
 import '../cache/caches.dart';
 import 'disposable_state.dart';
 import '../options.dart';
 import '../tile_identity.dart';
+import 'grid_tile_positioner.dart';
 import 'tile_widgets.dart';
 
 class VectorTileLayer extends StatefulWidget {
@@ -103,9 +104,10 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer>
       return Container();
     }
     _updatePaintZoomScale();
-    final state = _TilePositioningState(_paintZoomScale, _mapState);
+    final positioner =
+        GridTilePositioner(TilePositioningState(_paintZoomScale, _mapState));
     final tileWidgets = _tileWidgets.all.entries
-        .map((entry) => _positionTile(state, entry.key, entry.value))
+        .map((entry) => positioner.positionTile(entry.key, entry.value))
         .toList();
     return Stack(children: tileWidgets);
   }
@@ -139,8 +141,8 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer>
   }
 
   Bounds _pixelBoundsToTileRange(Bounds bounds) => Bounds(
-        bounds.min.unscaleBy(_tileSize).floor(),
-        bounds.max.unscaleBy(_tileSize).ceil() - const CustomPoint(1, 1),
+        bounds.min.unscaleBy(tileSize).floor(),
+        bounds.max.unscaleBy(tileSize).ceil() - const CustomPoint(1, 1),
       );
 
   List<TileIdentity> _expand(Bounds range) {
@@ -156,20 +158,6 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer>
     return tiles;
   }
 
-  Widget _positionTile(
-      _TilePositioningState state, TileIdentity tile, Widget tileWidget) {
-    final tilePosition =
-        (tile.scaleBy(_tileSize) - state.origin).multiplyBy(state.zoomScale) +
-            state.translate;
-    return Positioned(
-        key: Key('PositionedGridTile_${tile.z}_${tile.x}_${tile.y}'),
-        top: tilePosition.y.toDouble(),
-        left: tilePosition.x.toDouble(),
-        width: (_tileSize.x * state.zoomScale),
-        height: (_tileSize.y * state.zoomScale),
-        child: tileWidget);
-  }
-
   double _zoomScale(double mapZoom, double tileZoom) {
     final crs = _mapState.options.crs;
     return crs.scale(mapZoom) / crs.scale(tileZoom);
@@ -182,20 +170,5 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer>
 
   void _printCacheStats() {
     print('Cache stats:\n${_caches.stats()}');
-  }
-}
-
-final _tileSize = CustomPoint(256, 256);
-
-class _TilePositioningState {
-  final double zoomScale;
-  late final CustomPoint<num> origin;
-  late final CustomPoint<num> translate;
-
-  _TilePositioningState(this.zoomScale, MapState mapState) {
-    final pixelOrigin =
-        mapState.getNewPixelOrigin(mapState.center, mapState.zoom).round();
-    origin = mapState.project(mapState.unproject(pixelOrigin), mapState.zoom);
-    translate = origin.multiplyBy(zoomScale) - pixelOrigin;
   }
 }

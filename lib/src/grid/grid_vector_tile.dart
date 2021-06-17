@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart' as material;
 import 'package:flutter/widgets.dart';
-import 'package:vector_map_tiles/src/grid/debounce.dart';
-import 'package:vector_map_tiles/src/tile_identity.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
+import 'debounce.dart';
+import '../tile_identity.dart';
 import 'disposable_state.dart';
 import '../cache/caches.dart';
 import '../options.dart';
+import 'grid_tile_positioner.dart';
 import 'tile_model.dart';
 
 class GridVectorTile extends StatefulWidget {
@@ -124,44 +125,30 @@ class _VectorTilePainter extends CustomPainter {
     final renderImage = (changed || model.vector == null) && image != null;
     final translation =
         renderImage ? model.imageTranslation : model.translation;
-
-    final scale = model.zoomScaleFunction();
+    final tileSizer = GridTileSizer(
+        translation, model.zoomScaleFunction(), size, renderImage, image);
     canvas.save();
     canvas.clipRect(Offset.zero & size);
-    var translationDelta = Size.zero;
-    var effectiveScale = scale;
-    if (translation.isTranslated) {
-      final dx = -(translation.xOffset * size.width);
-      final dy = -(translation.yOffset * size.height);
-      translationDelta = Size(dx, dy);
-      canvas.translate(dx, dy);
-      effectiveScale = effectiveScale * translation.fraction.toDouble();
-    }
-    if (renderImage) {
-      effectiveScale = effectiveScale * (_tileSize / image!.height.toDouble());
-    }
-    if (effectiveScale != 1.0) {
-      canvas.scale(effectiveScale);
-    }
+    tileSizer.apply(canvas);
     if (renderImage) {
       canvas.drawImage(image!, Offset.zero, Paint());
       _lastPainted = _PaintMode.raster;
       debounce.update();
     } else {
-      final tileClip = _tileClip(size, effectiveScale, translationDelta);
+      final tileClip = tileSizer.tileClip(size, tileSizer.effectiveScale);
       Renderer(theme: model.theme).render(canvas, model.vector!,
           clip: tileClip,
-          zoomScaleFactor: effectiveScale,
+          zoomScaleFactor: tileSizer.effectiveScale,
           zoom: model.lastRenderedZoom);
       _lastPainted = _PaintMode.vector;
     }
     canvas.restore();
     _paintTileDebugInfo(
-        canvas, size, renderImage, effectiveScale, translationDelta);
+        canvas, size, renderImage, tileSizer.effectiveScale, tileSizer);
   }
 
   void _paintTileDebugInfo(Canvas canvas, Size size, bool renderedImage,
-      double scale, Size translationDelta) {
+      double scale, GridTileSizer tileSizer) {
     if (model.showTileDebugInfo) {
       final paint = Paint()
         ..strokeWidth = 2.0
@@ -175,28 +162,21 @@ class _VectorTilePainter extends CustomPainter {
           foreground: Paint()..color = Color.fromARGB(0xff, 0, 0, 0),
           fontSize: 15);
       final roundedScale = (scale * 1000).roundToDouble() / 1000;
-      final renderedOffset =
-          Offset(-translationDelta.width, -translationDelta.height);
+      final renderedOffset = Offset(
+          -tileSizer.translationDelta.dx, -tileSizer.translationDelta.dy);
       final renderedBox = renderedOffset & size;
-      final tileBox = _tileClip(size, scale, translationDelta);
+      final tileBox = tileSizer.tileClip(size, scale);
       final text = TextPainter(
           text: TextSpan(
               style: textStyle,
               text:
-                  '${model.tile}\nscale=$roundedScale\nsize=$size\ntranslation=$translationDelta\nbox=${renderedBox.debugString()}\ntileBox=${tileBox.debugString()}'),
+                  '${model.tile}\nscale=$roundedScale\nsize=$size\ntranslation=${tileSizer.translationDelta}\nbox=${renderedBox.debugString()}\ntileBox=${tileBox.debugString()}'),
           textAlign: TextAlign.start,
           textDirection: TextDirection.ltr)
         ..layout();
       text.paint(canvas, material.Offset(10, 10));
     }
   }
-
-  Rect _tileClip(Size size, double scale, Size translationDelta) =>
-      Rect.fromLTWH(
-          -translationDelta.width / scale,
-          -translationDelta.height / scale,
-          size.width / scale,
-          size.height / scale);
 
   void _notify() {
     Future.microtask(() {
@@ -208,8 +188,6 @@ class _VectorTilePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) =>
       model.hasChanged() || _lastPainted != _PaintMode.vector;
 }
-
-final _tileSize = 256.0;
 
 extension RectDebugExtension on Rect {
   String debugString() => '[$left,$top,$width,$height]';

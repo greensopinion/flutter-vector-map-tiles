@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:vector_map_tiles/src/tile_identity.dart';
+import '../tile_identity.dart';
 
 class TileTranslation {
   /// the original tile
