@@ -1,6 +1,7 @@
-## 1.0.2
+## 1.0.3
 
 * eliminate occasional hairline gap between tiles
+* improve tile appearance when zooming to zoom levels higher than the tile size
 
 ## 1.0.1
 
