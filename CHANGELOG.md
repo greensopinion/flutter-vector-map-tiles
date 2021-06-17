@@ -1,3 +1,7 @@
+## 1.0.2
+
+* eliminate occasional hairline gap between tiles
+
 ## 1.0.1
 
 * use theme ID to segregate cached tiles by theme
