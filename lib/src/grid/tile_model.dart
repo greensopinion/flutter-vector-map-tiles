@@ -52,23 +52,29 @@ class VectorTileModel extends ChangeNotifier {
     if (renderMode != RenderMode.vector &&
         !_disposed &&
         (this.image == null || loadImage)) {
-      await _updateImage(translation, vectorTile, zoom: tile.z.toDouble());
+      await _updateImage(translation, vectorTile);
     }
     notifyListeners();
   }
 
-  Future<bool> _updateImage(TileTranslation translation, VectorTile tile,
-      {required double zoom}) async {
+  Future<bool> _updateImage(
+      TileTranslation translation, VectorTile tile) async {
     final id = translation.translated;
+    final zoom = translation.original.z.toDouble();
     final image = await caches.imageTileCache.retrieve(id, tile, zoom: zoom);
     caches.memoryImageCache.putImage(id, zoom: zoom, image: image);
     return _applyImage(translation, image);
   }
 
-  bool _updateImageIfPresent(TileTranslation translation,
-      {required double zoom}) {
+  bool _updateImageIfPresent(TileTranslation translation, {int? minZoom}) {
     final id = translation.translated;
-    var image = caches.memoryImageCache.getImage(id, zoom: zoom);
+    ui.Image? image;
+    if (minZoom == null) {
+      minZoom = translation.translated.z;
+    }
+    for (int z = translation.original.z; z >= minZoom && image == null; --z) {
+      image = caches.memoryImageCache.getImage(id, zoom: z.toDouble());
+    }
     return _applyImage(translation, image);
   }
 
@@ -126,8 +132,7 @@ class VectorTileModel extends ChangeNotifier {
 
   // returns true if alternative was presented
   bool _presentImageTilePreviewIfPresent() {
-    _updateImageIfPresent(translation,
-        zoom: translation.translated.z.toDouble());
+    _updateImageIfPresent(translation, minZoom: translation.original.z);
     if (!_disposed && this.image == null) {
       var alternativeLoaded = false;
       final slippyMap = SlippyMapTranslator(caches.vectorTileCache.maximumZoom);
@@ -137,9 +142,11 @@ class VectorTileModel extends ChangeNotifier {
         final alternativeTranslation =
             slippyMap.lowerZoomAlternative(tile, altLevel);
         if (alternativeTranslation.translated != translation.translated) {
-          alternativeLoaded = _updateImageIfPresent(alternativeTranslation,
-              zoom: alternativeTranslation.translated.z.toDouble());
+          alternativeLoaded = _updateImageIfPresent(alternativeTranslation);
         }
+      }
+      if (!alternativeLoaded) {
+        alternativeLoaded = _updateImageIfPresent(translation);
       }
       return alternativeLoaded;
     }
