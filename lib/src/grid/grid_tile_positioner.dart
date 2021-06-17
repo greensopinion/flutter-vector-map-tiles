@@ -17,8 +17,9 @@ class GridTilePositioner {
         _tileOffset(TileIdentity(tile.z, tile.x + 1, tile.y));
     final toBottomPosition =
         _tileOffset(TileIdentity(tile.z, tile.x, tile.y + 1));
-    final position = Rect.fromLTRB(
-        offset.dx, offset.dy, toRightPosition.dx, toBottomPosition.dy);
+    final tileOverlap = 0.5;
+    final position = Rect.fromLTRB(offset.dx, offset.dy,
+        toRightPosition.dx + tileOverlap, toBottomPosition.dy + tileOverlap);
     return Positioned(
         key: Key('PositionedGridTile_${tile.z}_${tile.x}_${tile.y}'),
         top: position.top,
@@ -32,8 +33,7 @@ class GridTilePositioner {
     final tilePosition =
         (tile.scaleBy(tileSize) - state.origin).multiplyBy(state.zoomScale) +
             state.translate;
-    return Offset(tilePosition.x.toDouble().toPosition(),
-        tilePosition.y.toDouble().toPosition());
+    return Offset(tilePosition.x.toDouble(), tilePosition.y.toDouble());
   }
 }
 
@@ -82,10 +82,6 @@ class GridTileSizer {
       -translationDelta.dy / scale,
       size.width / scale,
       size.height / scale);
-}
-
-extension _PositioningExtension on double {
-  double toPosition() => this.roundToDouble();
 }
 
 class TilePositioningState {
