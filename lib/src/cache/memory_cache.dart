@@ -40,6 +40,10 @@ class MemoryCache with CacheStats {
 
   void didHaveMemoryPressure() {
     maxSizeBytes = maxSizeBytes ~/ 2;
+    clear();
+  }
+
+  void clear() {
     _cache.clear();
     _currentSizeBytes = 0;
   }

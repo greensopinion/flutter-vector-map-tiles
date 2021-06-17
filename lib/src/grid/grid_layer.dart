@@ -28,8 +28,8 @@ class VectorTileLayer extends StatefulWidget {
 class _VectorTileLayerState extends DisposableState<VectorTileLayer>
     with WidgetsBindingObserver {
   StreamSubscription<Null>? _subscription;
-  late final TileWidgets _tileWidgets;
-  late final Caches _caches;
+  late TileWidgets _tileWidgets;
+  late Caches _caches;
 
   MapState get _mapState => widget.mapState;
   double get _clampedZoom => _mapState.zoom.roundToDouble();
@@ -40,24 +40,11 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer>
   @override
   void initState() {
     super.initState();
-    _caches = Caches(
-        provider: widget.options.tileProvider,
-        pipeline: RendererPipeline(widget.options.theme,
-            scale: widget.options.rasterImageScale),
-        ttl: widget.options.fileCacheTtl,
-        maxImagesInMemory: widget.options.maxImagesInMemory,
-        maxSizeInBytes: widget.options.fileCacheMaximumSizeInBytes);
+    _createCaches();
     Future.delayed(Duration(seconds: 3), () {
       _caches.applyConstraints();
     });
-    _tileWidgets = TileWidgets(
-        widget.options.tileProvider,
-        () => _paintZoomScale,
-        () => _mapState.zoom,
-        widget.options.theme,
-        _caches,
-        widget.options.renderMode,
-        widget.options.showTileDebugInfo);
+    _createTileWidgets();
     _subscription = widget.stream.listen((event) {
       _update();
     });
@@ -77,6 +64,40 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer>
   }
 
   @override
+  void didUpdateWidget(covariant VectorTileLayer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.options.theme.id != widget.options.theme.id) {
+      setState(() {
+        _caches.dispose();
+        _createCaches();
+        _createTileWidgets();
+        _updateTiles();
+      });
+    }
+  }
+
+  void _createTileWidgets() {
+    _tileWidgets = TileWidgets(
+        widget.options.tileProvider,
+        () => _paintZoomScale,
+        () => _mapState.zoom,
+        widget.options.theme,
+        _caches,
+        widget.options.renderMode,
+        widget.options.showTileDebugInfo);
+  }
+
+  void _createCaches() {
+    _caches = Caches(
+        provider: widget.options.tileProvider,
+        pipeline: RendererPipeline(widget.options.theme,
+            scale: widget.options.rasterImageScale),
+        ttl: widget.options.fileCacheTtl,
+        maxImagesInMemory: widget.options.maxImagesInMemory,
+        maxSizeInBytes: widget.options.fileCacheMaximumSizeInBytes);
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (_tileWidgets.all.isEmpty) {
       return Container();
@@ -93,6 +114,12 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer>
     if (disposed) {
       return;
     }
+    setState(() {
+      _updateTiles();
+    });
+  }
+
+  void _updateTiles() {
     final center = _mapState.center;
     final pixelBounds = _tiledPixelBounds(center);
     final tileRange = _pixelBoundsToTileRange(pixelBounds);
@@ -101,7 +128,6 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer>
     if (widget.options.logCacheStats) {
       _cacheStats.update();
     }
-    setState(() {});
   }
 
   Bounds _tiledPixelBounds(LatLng center) {

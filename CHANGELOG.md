@@ -1,3 +1,6 @@
+## 1.0.1
+
+* use theme ID to segregate cached tiles by theme
 ## 1.0.0
 
 * release

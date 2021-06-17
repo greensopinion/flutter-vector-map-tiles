@@ -41,7 +41,7 @@ class TileWidgets {
 
   Widget _createWidget(TileIdentity tile) {
     return GridVectorTile(
-        key: Key('GridTile_${tile.z}_${tile.x}_${tile.y}'),
+        key: Key('GridTile_${tile.z}_${tile.x}_${tile.y}_${_theme.id}'),
         tileIdentity: tile,
         renderMode: _renderMode,
         caches: _caches,

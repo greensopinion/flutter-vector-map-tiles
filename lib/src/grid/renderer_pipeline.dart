@@ -6,10 +6,11 @@ import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 import '../tile_identity.dart';
 
 class RendererPipeline {
+  final Theme theme;
   late final ImageRenderer _renderer;
   final queue = ListQueue<_RenderingJob>();
   final double scale;
-  RendererPipeline(Theme theme, {required this.scale}) {
+  RendererPipeline(this.theme, {required this.scale}) {
     _renderer = ImageRenderer(theme: theme, scale: scale);
   }
 
