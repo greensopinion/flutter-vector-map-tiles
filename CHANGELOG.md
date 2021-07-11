@@ -1,3 +1,6 @@
+## 1.0.4
+
+* improve support for text
 ## 1.0.3
 
 * eliminate occasional hairline gap between tiles
