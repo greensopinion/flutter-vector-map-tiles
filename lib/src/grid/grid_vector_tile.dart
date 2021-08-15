@@ -115,8 +115,10 @@ class _VectorTilePainter extends CustomPainter {
   _VectorTilePainter(VectorTileModel model)
       : this.model = model,
         super(repaint: model) {
-    debounce = ScheduledDebounce(
-        _notify, Duration(milliseconds: 200), Duration(seconds: 10));
+    debounce = ScheduledDebounce(_notifyIfNeeded,
+        delay: Duration(milliseconds: 200),
+        jitter: Duration(milliseconds: 100),
+        maxAge: Duration(seconds: 10));
   }
 
   @override
@@ -185,9 +187,11 @@ class _VectorTilePainter extends CustomPainter {
     }
   }
 
-  void _notify() {
+  void _notifyIfNeeded() {
     Future.microtask(() {
-      model.requestRepaint();
+      if (_lastPainted != _PaintMode.vector) {
+        model.requestRepaint();
+      }
     });
   }
 

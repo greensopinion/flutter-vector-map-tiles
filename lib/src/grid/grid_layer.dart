@@ -35,8 +35,10 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer>
   MapState get _mapState => widget.mapState;
   double get _clampedZoom => _mapState.zoom.roundToDouble();
   double _paintZoomScale = 1.0;
-  late final _cacheStats = ScheduledDebounce(
-      _printCacheStats, Duration(seconds: 1), Duration(seconds: 3));
+  late final _cacheStats = ScheduledDebounce(_printCacheStats,
+      delay: Duration(seconds: 1),
+      jitter: Duration(milliseconds: 0),
+      maxAge: Duration(seconds: 3));
 
   @override
   void initState() {

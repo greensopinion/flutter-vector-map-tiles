@@ -1,18 +1,27 @@
+import 'dart:math';
+
 class ScheduledDebounce {
   final Function() block;
   final Duration delay;
+  final Duration jitter;
   final Duration maxAge;
+  final Random random = Random();
   DateTime? last;
   DateTime? start;
 
-  ScheduledDebounce(this.block, this.delay, this.maxAge);
+  ScheduledDebounce(this.block,
+      {required this.delay, required this.jitter, required this.maxAge});
+
+  Duration get nextDelay => Duration(
+      milliseconds:
+          delay.inMilliseconds + random.nextInt(jitter.inMilliseconds));
 
   void update() {
     final first = last == null;
     last = DateTime.now();
     if (first) {
       start = DateTime.now();
-      Future.delayed(delay, _check);
+      Future.delayed(nextDelay, _check);
     } else {
       _checkMaxAge();
     }
