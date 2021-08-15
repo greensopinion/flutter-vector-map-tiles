@@ -1,6 +1,7 @@
-## 1.0.5
+## 1.0.6
 
 * reduce unnecessary tile repaints
+* add jitter to mixed mode tile repaints
 ## 1.0.4
 
 * improve support for text
