@@ -97,7 +97,10 @@ class _GridVectorTileBodyState extends DisposableState<GridVectorTileBody> {
 
   @override
   Widget build(BuildContext context) {
-    return RepaintBoundary(child: CustomPaint(painter: _painter));
+    return RepaintBoundary(
+        key: Key(
+            'tileBodyBoundary${widget.model.tile.z}_${widget.model.tile.x}_${widget.model.tile.y}'),
+        child: CustomPaint(painter: _painter));
   }
 }
 
@@ -107,6 +110,7 @@ class _VectorTilePainter extends CustomPainter {
   final VectorTileModel model;
   late final ScheduledDebounce debounce;
   var _lastPainted = _PaintMode.none;
+  var _paintCount = 0;
 
   _VectorTilePainter(VectorTileModel model)
       : this.model = model,
@@ -133,7 +137,9 @@ class _VectorTilePainter extends CustomPainter {
     if (renderImage) {
       canvas.drawImage(image!, Offset.zero, Paint());
       _lastPainted = _PaintMode.raster;
-      debounce.update();
+      if (model.renderMode == RenderMode.mixed) {
+        debounce.update();
+      }
     } else {
       final tileClip = tileSizer.tileClip(size, tileSizer.effectiveScale);
       Renderer(theme: model.theme).render(canvas, model.vector!,
@@ -150,6 +156,7 @@ class _VectorTilePainter extends CustomPainter {
   void _paintTileDebugInfo(Canvas canvas, Size size, bool renderedImage,
       double scale, GridTileSizer tileSizer) {
     if (model.showTileDebugInfo) {
+      ++_paintCount;
       final paint = Paint()
         ..strokeWidth = 2.0
         ..style = material.PaintingStyle.stroke
@@ -170,7 +177,7 @@ class _VectorTilePainter extends CustomPainter {
           text: TextSpan(
               style: textStyle,
               text:
-                  '${model.tile}\nscale=$roundedScale\nsize=$size\ntranslation=${tileSizer.translationDelta}\nbox=${renderedBox.debugString()}\ntileBox=${tileBox.debugString()}'),
+                  '${model.tile}\nscale=$roundedScale\nsize=$size\ntranslation=${tileSizer.translationDelta}\nbox=${renderedBox.debugString()}\ntileBox=${tileBox.debugString()}\npaintCount=$_paintCount'),
           textAlign: TextAlign.start,
           textDirection: TextDirection.ltr)
         ..layout();
@@ -186,7 +193,10 @@ class _VectorTilePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) =>
-      model.hasChanged() || _lastPainted != _PaintMode.vector;
+      model.hasChanged() ||
+      (_lastPainted == _PaintMode.none) ||
+      (_lastPainted != _PaintMode.vector &&
+          model.renderMode != RenderMode.raster);
 }
 
 extension RectDebugExtension on Rect {

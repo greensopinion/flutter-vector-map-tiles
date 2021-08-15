@@ -1,3 +1,6 @@
+## 1.0.5
+
+* reduce unnecessary tile repaints
 ## 1.0.4
 
 * improve support for text

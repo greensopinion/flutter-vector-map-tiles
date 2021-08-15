@@ -18,8 +18,10 @@ class GridTilePositioner {
     final toBottomPosition =
         _tileOffset(TileIdentity(tile.z, tile.x, tile.y + 1));
     final tileOverlap = 0.5;
-    final position = Rect.fromLTRB(offset.dx, offset.dy,
+    final p = Rect.fromLTRB(offset.dx, offset.dy,
         toRightPosition.dx + tileOverlap, toBottomPosition.dy + tileOverlap);
+    final position = Rect.fromLTWH(_roundSize(offset.dx), _roundSize(offset.dy),
+        _roundSize(p.width), _roundSize(p.height));
     return Positioned(
         key: Key('PositionedGridTile_${tile.z}_${tile.x}_${tile.y}'),
         top: position.top,
@@ -99,3 +101,8 @@ class TilePositioningState {
 
 final _tileSize = 256.0;
 final tileSize = CustomPoint(_tileSize, _tileSize);
+
+double _roundSize(double dimension) {
+  double factor = 1000;
+  return (dimension * factor).roundToDouble() / factor;
+}
