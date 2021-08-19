@@ -1,3 +1,6 @@
+## 1.0.7
+
+* improve stability
 ## 1.0.6
 
 * reduce unnecessary tile repaints

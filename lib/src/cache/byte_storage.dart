@@ -39,6 +39,9 @@ class ByteStorage {
 
   Future<void> write(String path, List<int> bytes) async {
     final file = await fileOf(path);
+    if (!await file.parent.exists()) {
+      await file.parent.create(recursive: true);
+    }
     await file.writeAsBytes(bytes);
   }
 

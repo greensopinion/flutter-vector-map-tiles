@@ -37,8 +37,12 @@ class StorageCache with CacheStats {
   Future<void> applyConstraints() async {
     final directory = await _storage.storageDirectory();
     if (await directory.exists()) {
-      await _applyMaxAge(directory);
-      await _applyMaxSize(directory);
+      try {
+        await _applyMaxAge(directory);
+        await _applyMaxSize(directory);
+      } catch (e) {
+        // ignore, race condition directory may have been deleted
+      }
     }
   }
 
