@@ -1,3 +1,6 @@
+## 1.0.8
+
+* improve label layout
 ## 1.0.7
 
 * improve stability
