@@ -1,6 +1,7 @@
-## 1.0.8
+## 1.0.9
 
 * improve label layout
+* add place name abbreviations
 ## 1.0.7
 
 * improve stability
