@@ -1,4 +1,4 @@
-## 1.0.10
+## 1.0.11
 
 * add theme version to cache key to enable theme providers to invalidate the cache
 ## 1.0.9
