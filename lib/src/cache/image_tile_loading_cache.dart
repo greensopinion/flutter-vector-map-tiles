@@ -43,6 +43,6 @@ class ImageTileLoadingCache with CacheStats {
   }
 
   String _toModifier(double zoom) {
-    return '${scale}_${zoom}_${_pipeline.theme.id}';
+    return '${scale}_${zoom}_${_pipeline.theme.id}_${_pipeline.theme.version}';
   }
 }
