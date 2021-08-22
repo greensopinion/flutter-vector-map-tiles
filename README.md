@@ -1,4 +1,4 @@
-# vector_map_tiles
+# [vector_map_tiles](https://pub.dev/packages/vector_map_tiles)
 
 A plugin for [`flutter_map`](https://pub.dev/packages/flutter_map) that enables the use of vector tiles with slippy maps and Flutter.
 
@@ -7,6 +7,13 @@ Loads vector tiles from a source such as Mapbox or Stadia Maps, and renders them
 Tile rendering can be vector, mixed, or raster. Mixed mode is default, since that provides an optimal trade-off between sharp visuals when idle, and smooth animation when zooming with a pinch gesture.
 
 <img src="https://raw.githubusercontent.com/greensopinion/flutter-vector-map-tiles/main/vector_map_tiles-example.png" alt="example screenshot" width="292"/>
+
+
+## Installing
+
+Details on https://pub.dev/packages/vector_map_tiles
+
+See [vector_map_tiles/install](https://pub.dev/packages/vector_map_tiles/install) for instructions on installing.
 
 ## Usage
 
