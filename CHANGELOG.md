@@ -1,3 +1,7 @@
+## 1.0.12
+
+* improve place name abbreviations
+
 ## 1.0.11
 
 * add theme version to cache key to enable theme providers to invalidate the cache
