@@ -1,3 +1,6 @@
+## 1.0.13
+
+* expand compatibility to include latest `flutter_map` release 0.14.0
 ## 1.0.12
 
 * improve place name abbreviations
