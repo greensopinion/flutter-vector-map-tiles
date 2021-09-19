@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:http/http.dart';
@@ -16,7 +17,8 @@ abstract class VectorTileProvider {
 class NetworkVectorTileProvider extends VectorTileProvider {
   final _UrlProvider _urlProvider;
   final Map<String, String>? httpHeaders;
-  final RetryClient _retryClient = RetryClient(Client());
+  final RetryClient _retryClient = RetryClient(Client(),
+      when: _retryCondition, whenError: _retryErrorCondition);
   final int _maximumZoom;
 
   int get maximumZoom => _maximumZoom;
@@ -50,6 +52,12 @@ class NetworkVectorTileProvider extends VectorTileProvider {
       throw Exception('out of range');
     }
   }
+
+  static bool _retryCondition(BaseResponse response) =>
+      response.statusCode == 503 || response.statusCode == 408;
+
+  static bool _retryErrorCondition(Object error, StackTrace stack) =>
+      error is SocketException;
 }
 
 class MemoryCacheVectorTileProvider extends VectorTileProvider {
