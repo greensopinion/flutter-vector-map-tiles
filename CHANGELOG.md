@@ -1,3 +1,8 @@
+
+## 1.0.14
+
+* eliminate resource leak by closing http client when idle
+* retry loading tiles on retryable errors, reduce exception noise
 ## 1.0.13
 
 * expand compatibility to include latest `flutter_map` release 0.14.0
