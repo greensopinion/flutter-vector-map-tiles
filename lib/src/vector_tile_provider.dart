@@ -1,9 +1,10 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:http/retry.dart';
-import 'package:vector_map_tiles/src/provider_exception.dart';
+import 'provider_exception.dart';
 
 import 'cache/memory_cache.dart';
 import 'tile_identity.dart';
@@ -15,11 +16,13 @@ abstract class VectorTileProvider {
   int get maximumZoom;
 }
 
+Duration _clientIdleTime = Duration(seconds: 10);
+
 class NetworkVectorTileProvider extends VectorTileProvider {
   final _UrlProvider _urlProvider;
   final Map<String, String>? httpHeaders;
-  final RetryClient _retryClient = RetryClient(Client(),
-      when: _retryCondition, whenError: _retryErrorCondition);
+  RetryClient? _retryClient;
+  DateTime _clientUsed = DateTime.now();
   final int _maximumZoom;
 
   int get maximumZoom => _maximumZoom;
@@ -41,7 +44,7 @@ class NetworkVectorTileProvider extends VectorTileProvider {
     _checkTile(tile);
     final uri = Uri.parse(_urlProvider.url(tile));
     try {
-      final response = await _retryClient.get(uri, headers: httpHeaders);
+      final response = await _client().get(uri, headers: httpHeaders);
       if (response.statusCode == 200) {
         return response.bodyBytes;
       }
@@ -66,6 +69,30 @@ class NetworkVectorTileProvider extends VectorTileProvider {
 
   static bool _retryErrorCondition(Object error, StackTrace stack) =>
       error is SocketException;
+
+  RetryClient _client() {
+    RetryClient? client = _retryClient;
+    if (client == null) {
+      client = RetryClient(Client(),
+          when: _retryCondition, whenError: _retryErrorCondition);
+      _retryClient = client;
+      Future.delayed(_clientIdleTime, _expireClient);
+    }
+    _clientUsed = DateTime.now();
+    return client;
+  }
+
+  void _expireClient() {
+    Duration elapsed = DateTime.now().difference(_clientUsed);
+    if (elapsed > _clientIdleTime) {
+      // there could be outstanding requests but that should be ok since
+      // the idle time is long enough
+      _retryClient?.close();
+      _retryClient = null;
+    } else {
+      Future.delayed(_clientIdleTime, _expireClient);
+    }
+  }
 }
 
 class MemoryCacheVectorTileProvider extends VectorTileProvider {

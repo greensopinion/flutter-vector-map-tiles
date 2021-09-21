@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:vector_map_tiles/src/provider_exception.dart';
+import '../provider_exception.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 import 'dart:ui' as ui;
 

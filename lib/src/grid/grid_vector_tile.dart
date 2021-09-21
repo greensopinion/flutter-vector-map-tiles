@@ -2,11 +2,11 @@ import 'package:flutter/material.dart' as material;
 import 'package:flutter/widgets.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
-import 'debounce.dart';
-import '../tile_identity.dart';
-import 'disposable_state.dart';
 import '../cache/caches.dart';
 import '../options.dart';
+import '../tile_identity.dart';
+import 'debounce.dart';
+import 'disposable_state.dart';
 import 'grid_tile_positioner.dart';
 import 'tile_model.dart';
 
