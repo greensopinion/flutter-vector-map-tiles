@@ -1,5 +1,7 @@
+## 1.0.16
 
-## 1.0.14
+* simplify socket management
+## 1.0.15
 
 * eliminate resource leak by closing http client when idle
 * retry loading tiles on retryable errors, reduce exception noise

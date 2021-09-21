@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:http/retry.dart';
 import 'provider_exception.dart';
@@ -15,11 +14,6 @@ abstract class VectorTileProvider {
 
   int get maximumZoom;
 }
-
-Duration _clientIdleTime = Duration(seconds: 10);
-RetryClient? _retryClient;
-DateTime _clientUsed = DateTime.now();
-int _clientUsage = 0;
 
 class NetworkVectorTileProvider extends VectorTileProvider {
   final _UrlProvider _urlProvider;
@@ -44,24 +38,22 @@ class NetworkVectorTileProvider extends VectorTileProvider {
   Future<Uint8List> provide(TileIdentity tile) async {
     _checkTile(tile);
     final uri = Uri.parse(_urlProvider.url(tile));
+    final client = RetryClient(Client());
     try {
-      ++_clientUsage;
-      final client = _client();
       final response = await client.get(uri, headers: httpHeaders);
-      _updateClientUsed();
       if (response.statusCode == 200) {
         return response.bodyBytes;
       }
       throw ProviderException(
           message:
               'Cannot retrieve tile: HTTP ${response.statusCode}: $uri ${response.body}',
-          retryable:
-              response.statusCode == 503 ? Retryable.retry : Retryable.none);
+          retryable: _isRetryable(response.statusCode)
+              ? Retryable.retry
+              : Retryable.none);
     } on ClientException catch (e) {
-      _updateClientUsed();
       throw ProviderException(message: e.message, retryable: Retryable.retry);
     } finally {
-      --_clientUsage;
+      client.close();
     }
   }
 
@@ -70,41 +62,9 @@ class NetworkVectorTileProvider extends VectorTileProvider {
       throw Exception('out of range');
     }
   }
+
+  _isRetryable(int statusCode) => statusCode == 503 || statusCode == 408;
 }
-
-void _updateClientUsed() {
-  _clientUsed = DateTime.now();
-}
-
-RetryClient _client() {
-  RetryClient? client = _retryClient;
-  if (client == null) {
-    client = RetryClient(Client(),
-        when: _retryCondition, whenError: _retryErrorCondition);
-    _retryClient = client;
-    Future.delayed(_clientIdleTime, _expireClient);
-  }
-  _updateClientUsed();
-  return client;
-}
-
-void _expireClient() {
-  Duration elapsed = DateTime.now().difference(_clientUsed);
-  if (elapsed > _clientIdleTime && _clientUsage == 0) {
-    _retryClient?.close();
-    _retryClient = null;
-  } else {
-    Future.delayed(
-        Duration(milliseconds: (_clientIdleTime.inMilliseconds / 2).floor()),
-        _expireClient);
-  }
-}
-
-bool _retryCondition(BaseResponse response) =>
-    response.statusCode == 503 || response.statusCode == 408;
-
-bool _retryErrorCondition(Object error, StackTrace stack) =>
-    error is SocketException;
 
 class MemoryCacheVectorTileProvider extends VectorTileProvider {
   final VectorTileProvider delegate;
