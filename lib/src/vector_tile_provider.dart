@@ -17,12 +17,13 @@ abstract class VectorTileProvider {
 }
 
 Duration _clientIdleTime = Duration(seconds: 10);
+RetryClient? _retryClient;
+DateTime _clientUsed = DateTime.now();
+int _clientUsage = 0;
 
 class NetworkVectorTileProvider extends VectorTileProvider {
   final _UrlProvider _urlProvider;
   final Map<String, String>? httpHeaders;
-  RetryClient? _retryClient;
-  DateTime _clientUsed = DateTime.now();
   final int _maximumZoom;
 
   int get maximumZoom => _maximumZoom;
@@ -44,7 +45,10 @@ class NetworkVectorTileProvider extends VectorTileProvider {
     _checkTile(tile);
     final uri = Uri.parse(_urlProvider.url(tile));
     try {
-      final response = await _client().get(uri, headers: httpHeaders);
+      ++_clientUsage;
+      final client = _client();
+      final response = await client.get(uri, headers: httpHeaders);
+      _updateClientUsed();
       if (response.statusCode == 200) {
         return response.bodyBytes;
       }
@@ -54,7 +58,10 @@ class NetworkVectorTileProvider extends VectorTileProvider {
           retryable:
               response.statusCode == 503 ? Retryable.retry : Retryable.none);
     } on ClientException catch (e) {
+      _updateClientUsed();
       throw ProviderException(message: e.message, retryable: Retryable.retry);
+    } finally {
+      --_clientUsage;
     }
   }
 
@@ -63,37 +70,41 @@ class NetworkVectorTileProvider extends VectorTileProvider {
       throw Exception('out of range');
     }
   }
+}
 
-  static bool _retryCondition(BaseResponse response) =>
-      response.statusCode == 503 || response.statusCode == 408;
+void _updateClientUsed() {
+  _clientUsed = DateTime.now();
+}
 
-  static bool _retryErrorCondition(Object error, StackTrace stack) =>
-      error is SocketException;
-
-  RetryClient _client() {
-    RetryClient? client = _retryClient;
-    if (client == null) {
-      client = RetryClient(Client(),
-          when: _retryCondition, whenError: _retryErrorCondition);
-      _retryClient = client;
-      Future.delayed(_clientIdleTime, _expireClient);
-    }
-    _clientUsed = DateTime.now();
-    return client;
+RetryClient _client() {
+  RetryClient? client = _retryClient;
+  if (client == null) {
+    client = RetryClient(Client(),
+        when: _retryCondition, whenError: _retryErrorCondition);
+    _retryClient = client;
+    Future.delayed(_clientIdleTime, _expireClient);
   }
+  _updateClientUsed();
+  return client;
+}
 
-  void _expireClient() {
-    Duration elapsed = DateTime.now().difference(_clientUsed);
-    if (elapsed > _clientIdleTime) {
-      // there could be outstanding requests but that should be ok since
-      // the idle time is long enough
-      _retryClient?.close();
-      _retryClient = null;
-    } else {
-      Future.delayed(_clientIdleTime, _expireClient);
-    }
+void _expireClient() {
+  Duration elapsed = DateTime.now().difference(_clientUsed);
+  if (elapsed > _clientIdleTime && _clientUsage == 0) {
+    _retryClient?.close();
+    _retryClient = null;
+  } else {
+    Future.delayed(
+        Duration(milliseconds: (_clientIdleTime.inMilliseconds / 2).floor()),
+        _expireClient);
   }
 }
+
+bool _retryCondition(BaseResponse response) =>
+    response.statusCode == 503 || response.statusCode == 408;
+
+bool _retryErrorCondition(Object error, StackTrace stack) =>
+    error is SocketException;
 
 class MemoryCacheVectorTileProvider extends VectorTileProvider {
   final VectorTileProvider delegate;

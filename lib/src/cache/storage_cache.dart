@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'dart:math';
 
-import 'cache_stats.dart';
 import 'byte_storage.dart';
+import 'cache_stats.dart';
 
 class StorageCache with CacheStats {
   final ByteStorage _storage;
