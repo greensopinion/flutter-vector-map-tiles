@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:vector_map_tiles/src/provider_exception.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 import 'dart:ui' as ui;
 
@@ -35,11 +36,33 @@ class VectorTileModel extends ChangeNotifier {
     imageTranslation = translation;
   }
 
-  void startLoading() async {
+  void startLoading() {
+    _loadWithAttempts(3);
+  }
+
+  void _loadWithAttempts(int attempts) {
+    try {
+      _loadOnce();
+    } on ProviderException catch (e, stack) {
+      print(e);
+      print(stack);
+      if (e.retryable == Retryable.retry && attempts > 0) {
+        Future.delayed(Duration(seconds: 3), () {
+          if (!_disposed) {
+            _loadWithAttempts(attempts - 1);
+          }
+        });
+      } else {
+        rethrow;
+      }
+    }
+  }
+
+  void _loadOnce() async {
     final vectorFuture =
         caches.vectorTileCache.retrieve(translation.translated);
     bool loadImage = renderMode == RenderMode.raster;
-    if (renderMode != RenderMode.vector) {
+    if (renderMode != RenderMode.vector && this.image == null) {
       loadImage = _presentImageTilePreviewIfPresent();
       if (this.image != null) {
         notifyListeners();

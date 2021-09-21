@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart';
 import 'package:http/retry.dart';
+import 'package:vector_map_tiles/src/provider_exception.dart';
 
 import 'cache/memory_cache.dart';
 import 'tile_identity.dart';
@@ -39,12 +40,19 @@ class NetworkVectorTileProvider extends VectorTileProvider {
   Future<Uint8List> provide(TileIdentity tile) async {
     _checkTile(tile);
     final uri = Uri.parse(_urlProvider.url(tile));
-    final response = await _retryClient.get(uri, headers: httpHeaders);
-    if (response.statusCode == 200) {
-      return response.bodyBytes;
+    try {
+      final response = await _retryClient.get(uri, headers: httpHeaders);
+      if (response.statusCode == 200) {
+        return response.bodyBytes;
+      }
+      throw ProviderException(
+          message:
+              'Cannot retrieve tile: HTTP ${response.statusCode}: $uri ${response.body}',
+          retryable:
+              response.statusCode == 503 ? Retryable.retry : Retryable.none);
+    } on ClientException catch (e) {
+      throw ProviderException(message: e.message, retryable: Retryable.retry);
     }
-    throw Exception(
-        'Cannot retrieve tile: HTTP ${response.statusCode}: $uri ${response.body}');
   }
 
   void _checkTile(TileIdentity tile) {
