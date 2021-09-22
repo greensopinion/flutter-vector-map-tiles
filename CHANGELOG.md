@@ -1,3 +1,6 @@
+## 1.0.17
+
+* fail quietly on retryable network failures
 ## 1.0.16
 
 * simplify socket management

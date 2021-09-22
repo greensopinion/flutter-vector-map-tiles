@@ -46,12 +46,14 @@ class VectorTileModel extends ChangeNotifier {
     } on ProviderException catch (e, stack) {
       print(e);
       print(stack);
-      if (e.retryable == Retryable.retry && attempts > 0) {
-        Future.delayed(Duration(seconds: 3), () {
-          if (!_disposed) {
-            _loadWithAttempts(attempts - 1);
-          }
-        });
+      if (e.retryable == Retryable.retry) {
+        if (attempts > 0) {
+          Future.delayed(Duration(seconds: 3), () {
+            if (!_disposed) {
+              _loadWithAttempts(attempts - 1);
+            }
+          });
+        } // keep retryable failures quiet
       } else {
         rethrow;
       }
