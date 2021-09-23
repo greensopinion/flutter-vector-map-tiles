@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:http/http.dart';
@@ -37,6 +37,13 @@ class NetworkVectorTileProvider extends VectorTileProvider {
   @override
   Future<Uint8List> provide(TileIdentity tile) async {
     _checkTile(tile);
+    final max = pow(2, tile.z).toInt();
+    if (tile.x >= max || tile.y >= max || tile.x < 0 || tile.y < 0) {
+      throw ProviderException(
+          message: 'Invalid tile coordinates $tile',
+          retryable: Retryable.none,
+          statusCode: 400);
+    }
     final uri = Uri.parse(_urlProvider.url(tile));
     final client = RetryClient(Client());
     try {
@@ -44,9 +51,11 @@ class NetworkVectorTileProvider extends VectorTileProvider {
       if (response.statusCode == 200) {
         return response.bodyBytes;
       }
+      final logSafeUri = uri.toString().split(RegExp(r'\?')).first;
       throw ProviderException(
           message:
-              'Cannot retrieve tile: HTTP ${response.statusCode}: $uri ${response.body}',
+              'Cannot retrieve tile: HTTP ${response.statusCode}: $logSafeUri ${response.body}',
+          statusCode: response.statusCode,
           retryable: _isRetryable(response.statusCode)
               ? Retryable.retry
               : Retryable.none);

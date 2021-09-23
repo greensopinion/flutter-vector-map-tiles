@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter_map/plugin_api.dart';
@@ -17,4 +18,19 @@ class TileIdentity extends CustomPoint<int> {
 
   @override
   String toString() => 'TileIdentity(z=$z,x=$x,y=$y)';
+
+  TileIdentity normalize() {
+    final maxX = pow(2, z).toInt();
+    if (x >= 0 && x < maxX) {
+      return this;
+    }
+    var normalizedX = x;
+    while (normalizedX >= maxX) {
+      normalizedX -= maxX;
+    }
+    while (normalizedX < 0) {
+      normalizedX += maxX;
+    }
+    return TileIdentity(z, normalizedX, y);
+  }
 }

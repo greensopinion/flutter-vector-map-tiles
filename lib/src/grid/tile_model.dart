@@ -32,7 +32,7 @@ class VectorTileModel extends ChangeNotifier {
   VectorTileModel(this.renderMode, this.caches, this.theme, this.tile,
       this.zoomScaleFunction, this.zoomFunction, this.showTileDebugInfo) {
     final slippyMap = SlippyMapTranslator(caches.vectorTileCache.maximumZoom);
-    translation = slippyMap.translate(tile);
+    translation = slippyMap.translate(tile.normalize());
     imageTranslation = translation;
   }
 
@@ -40,12 +40,11 @@ class VectorTileModel extends ChangeNotifier {
     _loadWithAttempts(3);
   }
 
-  void _loadWithAttempts(int attempts) {
+  void _loadWithAttempts(int attempts) async {
     try {
-      _loadOnce();
+      await _loadOnce();
     } on ProviderException catch (e, stack) {
       print(e);
-      print(stack);
       if (e.retryable == Retryable.retry) {
         if (attempts > 0) {
           Future.delayed(Duration(seconds: 3), () {
@@ -54,13 +53,16 @@ class VectorTileModel extends ChangeNotifier {
             }
           });
         } // keep retryable failures quiet
+      } else if (e.statusCode != null && e.statusCode == 400) {
+        // bad request; unsupported
       } else {
+        print(stack);
         rethrow;
       }
     }
   }
 
-  void _loadOnce() async {
+  Future<void> _loadOnce() async {
     final vectorFuture =
         caches.vectorTileCache.retrieve(translation.translated);
     bool loadImage = renderMode == RenderMode.raster;
