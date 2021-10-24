@@ -10,6 +10,8 @@ class MemoryCache with CacheStats {
 
   MemoryCache({required this.maxSizeBytes});
 
+  int get sizeInBytes => _currentSizeBytes;
+
   void removeItem(String key) {
     _cache.remove(key);
   }
