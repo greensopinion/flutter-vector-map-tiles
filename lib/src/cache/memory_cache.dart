@@ -10,6 +10,10 @@ class MemoryCache with CacheStats {
 
   MemoryCache({required this.maxSizeBytes});
 
+  void removeItem(String key) {
+    _cache.remove(key);
+  }
+
   Uint8List? getItem(String key) {
     var value = _cache.remove(key);
     if (value != null) {

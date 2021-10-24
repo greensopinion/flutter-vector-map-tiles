@@ -18,13 +18,26 @@ class TileImageCache {
       final cached = await _delegate.retrieve(key);
       if (cached != null) {
         bytes = Uint8List.fromList(cached);
+        memoryCache.putItem(key, bytes);
       }
     }
     if (bytes != null) {
-      final codec = await instantiateImageCodec(bytes);
-      final frame = await codec.getNextFrame();
-      return frame.image;
+      try {
+        final codec = await instantiateImageCodec(bytes);
+        final frame = await codec.getNextFrame();
+        return frame.image;
+      } catch (error, stack) {
+        // in case the byte data is invalid, discard and remove the cached value
+        print(error);
+        print(stack);
+        _remove(key);
+      }
     }
+  }
+
+  Future<void> _remove(String key) async {
+    memoryCache.removeItem(key);
+    await _delegate.remove(key);
   }
 
   Future<void> put(TileIdentity tile, Image image, String modifier) async {

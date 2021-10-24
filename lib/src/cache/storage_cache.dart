@@ -12,6 +12,10 @@ class StorageCache with CacheStats {
 
   StorageCache(this._storage, this._ttl, this._maxSizeInBytes);
 
+  Future<List<int>?> remove(String key) async {
+    await _storage.delete(key);
+  }
+
   Future<List<int>?> retrieve(String key) async {
     final bytes = await _storage.read(key);
     if (bytes == null) {
