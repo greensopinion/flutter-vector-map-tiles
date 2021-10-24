@@ -1,3 +1,6 @@
+## 1.0.20
+
+* reduce memory overhead
 ## 1.0.19
 
 * eliminate exception in tile cache when image data is invalid
