@@ -13,8 +13,10 @@ class ScheduledDebounce {
       {required this.delay, required this.jitter, required this.maxAge});
 
   Duration get nextDelay => Duration(
-      milliseconds:
-          delay.inMilliseconds + random.nextInt(jitter.inMilliseconds));
+      milliseconds: delay.inMilliseconds +
+          (jitter.inMilliseconds == 0
+              ? 0
+              : random.nextInt(jitter.inMilliseconds)));
 
   void update() {
     final first = last == null;
