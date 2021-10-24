@@ -1,3 +1,6 @@
+## 1.0.19
+
+* eliminate exception in tile cache when image data is invalid
 ## 1.0.17
 
 * fail quietly on retryable network failures

@@ -220,7 +220,7 @@ packages:
       name: positioned_tap_detector_2
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.0"
+    version: "1.0.4"
   process:
     dependency: transitive
     description:
@@ -330,7 +330,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.0.18"
+    version: "1.0.19"
   vector_math:
     dependency: transitive
     description:
