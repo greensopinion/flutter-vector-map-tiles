@@ -23,8 +23,17 @@ class TileImageCache {
         // in case the byte data is invalid, discard and remove the cached value
         print(error);
         print(stack);
-        _remove(key);
+        await _removeQuietly(key);
       }
+    }
+  }
+
+  Future<void> _removeQuietly(String key) async {
+    try {
+      await _remove(key);
+    } catch (error, stack) {
+      print(error);
+      print(stack);
     }
   }
 
