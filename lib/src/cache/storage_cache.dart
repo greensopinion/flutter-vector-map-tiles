@@ -17,13 +17,18 @@ class StorageCache with CacheStats {
   }
 
   Future<List<int>?> retrieve(String key) async {
-    final bytes = await _storage.read(key);
-    if (bytes == null) {
-      cacheMiss();
-    } else {
-      cacheHit();
+    try {
+      final bytes = await _storage.read(key);
+      if (bytes == null) {
+        cacheMiss();
+      } else {
+        cacheHit();
+      }
+      return bytes;
+    } catch (e) {
+      // ignore, file was likely deleted
+      return null;
     }
-    return bytes;
   }
 
   Future<void> put(String key, List<int> data) async {
