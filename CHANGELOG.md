@@ -1,3 +1,6 @@
+## 1.0.21
+
+* reduce noise from file cache errors
 ## 1.0.20
 
 * reduce memory overhead
