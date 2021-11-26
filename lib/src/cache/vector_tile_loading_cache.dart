@@ -9,8 +9,9 @@ import 'storage_cache.dart';
 class VectorTileLoadingCache {
   final StorageCache _delegate;
   final VectorTileProvider _provider;
+  final String _cacheId;
 
-  VectorTileLoadingCache(this._delegate, this._provider);
+  VectorTileLoadingCache(this._delegate, this._provider, this._cacheId);
 
   int get maximumZoom => _provider.maximumZoom;
 
@@ -31,5 +32,5 @@ class VectorTileLoadingCache {
     }
   }
 
-  String _toKey(TileIdentity id) => '${id.z}_${id.x}_${id.y}.pbf';
+  String _toKey(TileIdentity id) => '${_cacheId}_${id.z}_${id.x}_${id.y}.pbf';
 }

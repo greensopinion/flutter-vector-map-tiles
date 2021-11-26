@@ -8,8 +8,9 @@ import 'cache_stats.dart';
 class MemoryImageCache with CacheStats {
   int _maxSize;
   final _cache = LinkedHashMap<String, Image>();
+  final _cacheId;
 
-  MemoryImageCache(this._maxSize);
+  MemoryImageCache(this._maxSize, this._cacheId);
 
   void putImage(TileIdentity id, {required double zoom, required Image image}) {
     final key = _toKey(id, zoom);
@@ -55,5 +56,5 @@ class MemoryImageCache with CacheStats {
   }
 
   String _toKey(TileIdentity id, double zoom) =>
-      '${id.z}.${id.x}.${id.y}.$zoom';
+      '${_cacheId}_${id.z}.${id.x}.${id.y}.$zoom';
 }

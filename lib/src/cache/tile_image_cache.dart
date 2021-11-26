@@ -6,8 +6,9 @@ import '../tile_identity.dart';
 
 class TileImageCache {
   final StorageCache _delegate;
+  final String _cacheId;
 
-  TileImageCache(this._delegate);
+  TileImageCache(this._delegate, this._cacheId);
 
   Future<Image?> retrieve(TileIdentity tile, String modifier) async {
     final key = _toKey(tile, modifier);
@@ -53,5 +54,5 @@ class TileImageCache {
   }
 
   String _toKey(TileIdentity id, String modifier) =>
-      '${id.z}_${id.x}_${id.y}_$modifier.png';
+      '${_cacheId}_${id.z}_${id.x}_${id.y}_$modifier.png';
 }

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
+import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 import '../grid/renderer_pipeline.dart';
 import 'memory_image_cache.dart';
 import 'storage_cache.dart';
@@ -27,9 +28,10 @@ class Caches {
       required int maxImagesInMemory,
       required int maxSizeInBytes}) {
     _cache = StorageCache(_storage, ttl, maxSizeInBytes);
-    vectorTileCache = VectorTileLoadingCache(_cache, provider);
-    imageTileCache = ImageTileLoadingCache(TileImageCache(_cache), pipeline);
-    memoryImageCache = MemoryImageCache(maxImagesInMemory);
+    var _cacheId = "${pipeline.theme.id}_${pipeline.theme.version}";
+    vectorTileCache = VectorTileLoadingCache(_cache, provider, _cacheId);
+    imageTileCache = ImageTileLoadingCache(TileImageCache(_cache, _cacheId), pipeline);
+    memoryImageCache = MemoryImageCache(maxImagesInMemory, _cacheId);
   }
 
   Future<void> applyConstraints() => _cache.applyConstraints();
