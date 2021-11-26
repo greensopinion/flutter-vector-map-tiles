@@ -51,6 +51,20 @@ class _MyHomePageState extends State<MyHomePage> {
                     InteractiveFlag.pinchMove |
                     InteractiveFlag.flingAnimation,
                 plugins: [VectorMapTilesPlugin()]),
+            // Can also be used as a native widget
+            // children: [
+            //   VectorTileLayerWidget(options: VectorTileLayerOptions(
+            //       theme: _mapTheme(context),
+            //       tileProvider: MemoryCacheVectorTileProvider(
+            //           delegate: NetworkVectorTileProvider(
+            //               urlTemplate: _urlTemplate(),
+            //               // this is the maximum zoom of the provider, not the
+            //               // maximum of the map. vector tiles are rendered
+            //               // to larger sizes to support higher zoom levels
+            //               maximumZoom: 14),
+            //           maxSizeBytes: 1024 * 1024 * 2)),
+            //   )
+            // ],
             layers: <LayerOptions>[
               // normally you would see TileLayerOptions which provides raster tiles
               // instead this vector tile layer replaces the standard tile layer
