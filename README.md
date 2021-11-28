@@ -33,10 +33,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 center: LatLng(49.246292, -123.116226),
                 zoom: 10,
                 maxZoom: 15,
-                interactiveFlags: InteractiveFlag.doubleTapZoom |
-                    InteractiveFlag.drag |
-                    InteractiveFlag.pinchZoom |
-                    InteractiveFlag.pinchMove,
                 plugins: [VectorMapTilesPlugin()]),
             layers: <LayerOptions>[
               // normally you would see TileLayerOptions which provides raster tiles
@@ -74,6 +70,32 @@ class _MyHomePageState extends State<MyHomePage> {
 ```
 
 See the [example](example) for details.
+
+### Widget-based Layer
+
+As an alternative to using `FlutterMap` `layers`, the vector layer can be used as a child widget:
+
+```dart
+FlutterMap(
+  options: MapOptions(
+      center: LatLng(49.246292, -123.116226),
+      zoom: 10,
+      maxZoom: 18),
+  children: [
+    VectorTileLayerWidget(
+      options: VectorTileLayerOptions(
+          theme: _mapTheme(context),
+          tileProvider: MemoryCacheVectorTileProvider(
+              delegate: NetworkVectorTileProvider(
+                  urlTemplate: _urlTemplate(),
+                  // this is the maximum zoom of the provider, not the
+                  // maximum of the map. vector tiles are rendered
+                  // to larger sizes to support higher zoom levels
+                  maximumZoom: 14),
+              maxSizeBytes: 1024 * 1024 * 2)),
+    )
+  ]);
+```
 
 ## Status
 

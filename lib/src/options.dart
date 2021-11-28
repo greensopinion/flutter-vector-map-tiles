@@ -1,4 +1,5 @@
 import 'package:flutter_map/plugin_api.dart';
+import 'package:vector_map_tiles/vector_map_tiles.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import 'vector_tile_provider.dart';
@@ -16,6 +17,9 @@ enum RenderMode {
   raster
 }
 
+/// a [FlutterMap] layer options, to be used with [VectorMapTilesPlugin].
+/// See the readme for details.
+/// See [VectorTileLayerWidget] for an alternative.
 class VectorTileLayerOptions extends LayerOptions {
   /// provides vector tiles
   final VectorTileProvider tileProvider;

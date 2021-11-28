@@ -1,3 +1,6 @@
+## 1.0.22
+
+* provide a `VectorTileLayerWidget` as an alternative to `VectorTileLayerOptions`
 ## 1.0.21
 
 * reduce noise from file cache errors

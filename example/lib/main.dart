@@ -45,11 +45,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 center: LatLng(49.246292, -123.116226),
                 zoom: 10,
                 maxZoom: 18,
-                interactiveFlags: InteractiveFlag.doubleTapZoom |
-                    InteractiveFlag.drag |
-                    InteractiveFlag.pinchZoom |
-                    InteractiveFlag.pinchMove |
-                    InteractiveFlag.flingAnimation,
                 plugins: [VectorMapTilesPlugin()]),
             layers: <LayerOptions>[
               // normally you would see TileLayerOptions which provides raster tiles

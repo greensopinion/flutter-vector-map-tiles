@@ -330,7 +330,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.0.21"
+    version: "1.0.22"
   vector_math:
     dependency: transitive
     description:
