@@ -1,3 +1,6 @@
+## 1.1.26
+
+* update example
 ## 1.1.25
 
 * support multiple tile sources so that data such as hillshade can be rendered on a map
