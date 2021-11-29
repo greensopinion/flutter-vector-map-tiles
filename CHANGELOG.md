@@ -1,3 +1,7 @@
+## 1.1.25
+
+* support multiple tile sources so that data such as hillshade can be rendered on a map
+
 ## 1.0.22
 
 * provide a `VectorTileLayerWidget` as an alternative to `VectorTileLayerOptions`
