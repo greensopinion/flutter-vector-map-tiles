@@ -39,17 +39,22 @@ class _MyHomePageState extends State<MyHomePage> {
               // instead this vector tile layer replaces the standard tile layer
               VectorTileLayerOptions(
                   theme: _mapTheme(context),
-                  tileProvider: MemoryCacheVectorTileProvider(
-                      delegate: NetworkVectorTileProvider(
-                          urlTemplate: _urlTemplate(),
-                          // this is the maximum zoom of the provider, not the
-                          // maximum of the map. vector tiles are rendered
-                          // to larger sizes to support higher zoom levels
-                          maximumZoom: 14),
-                      maxSizeBytes: 1024 * 1024 * 2)),
+                  tileProviders: TileProviders(
+                      {'openmaptiles': _cachingTileProvider(_urlTemplate())})),
             ],
           ))
         ])));
+  }
+
+  VectorTileProvider _cachingTileProvider(String urlTemplate) {
+    return MemoryCacheVectorTileProvider(
+        delegate: NetworkVectorTileProvider(
+            urlTemplate: urlTemplate,
+            // this is the maximum zoom of the provider, not the
+            // maximum of the map. vector tiles are rendered
+            // to larger sizes to support higher zoom levels
+            maximumZoom: 14),
+        maxSizeBytes: 1024 * 1024 * 2);
   }
 
   _mapTheme(BuildContext context) {
@@ -80,19 +85,13 @@ FlutterMap(
   options: MapOptions(
       center: LatLng(49.246292, -123.116226),
       zoom: 10,
-      maxZoom: 18),
+      maxZoom: 15),
   children: [
     VectorTileLayerWidget(
       options: VectorTileLayerOptions(
-          theme: _mapTheme(context),
-          tileProvider: MemoryCacheVectorTileProvider(
-              delegate: NetworkVectorTileProvider(
-                  urlTemplate: _urlTemplate(),
-                  // this is the maximum zoom of the provider, not the
-                  // maximum of the map. vector tiles are rendered
-                  // to larger sizes to support higher zoom levels
-                  maximumZoom: 14),
-              maxSizeBytes: 1024 * 1024 * 2)),
+                  theme: _mapTheme(context),
+                  tileProviders: TileProviders(
+                      {'openmaptiles': _cachingTileProvider(_urlTemplate())}))
     )
   ]);
 ```

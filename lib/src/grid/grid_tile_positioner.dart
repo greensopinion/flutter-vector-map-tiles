@@ -1,10 +1,11 @@
 import 'dart:math';
+import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_map/plugin_api.dart';
-import 'slippy_map_translator.dart';
+
 import '../tile_identity.dart';
-import 'dart:ui' as ui;
+import 'slippy_map_translator.dart';
 
 class GridTilePositioner {
   final TilePositioningState state;

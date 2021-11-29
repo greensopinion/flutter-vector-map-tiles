@@ -15,27 +15,18 @@ class ImageTileLoadingCache with CacheStats {
 
   double get scale => _pipeline.scale;
 
-  Future<Image> retrieve(TileIdentity identity, VectorTile tile,
+  Future<Image> retrieve(
+      TileIdentity identity, Map<String, VectorTile> tileBySource,
       {required double zoom}) async {
     final modifier = _toModifier(zoom);
 
     final image = await delegate.retrieve(identity, modifier);
     if (image == null) {
       cacheMiss();
-      final rendered = await _pipeline.renderImage(identity, tile, zoom);
+      final rendered =
+          await _pipeline.renderImage(identity, tileBySource, zoom);
       await delegate.put(identity, rendered, modifier);
       return rendered;
-    } else {
-      cacheHit();
-    }
-    return image;
-  }
-
-  Future<Image?> getIfPresent(TileIdentity identity,
-      {required double zoom}) async {
-    final image = await delegate.retrieve(identity, _toModifier(zoom));
-    if (image == null) {
-      cacheMiss();
     } else {
       cacheHit();
     }

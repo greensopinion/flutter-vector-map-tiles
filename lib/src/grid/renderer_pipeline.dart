@@ -14,9 +14,9 @@ class RendererPipeline {
     _renderer = ImageRenderer(theme: theme, scale: scale);
   }
 
-  Future<Image> renderImage(
-      TileIdentity id, VectorTile tile, double zoom) async {
-    final job = _RenderingJob(id, tile, zoom);
+  Future<Image> renderImage(TileIdentity id,
+      Map<String, VectorTile> tileBySource, double zoom) async {
+    final job = _RenderingJob(id, tileBySource, zoom);
     queue.add(job);
     if (queue.length == 1) {
       _scheduleOne();
@@ -28,7 +28,7 @@ class RendererPipeline {
     final job = queue.removeLast();
     try {
       int zoomDifference = job.zoom.toInt() - job.id.z.toInt();
-      final image = await _renderer.render(job.tile,
+      final image = await _renderer.render(job.tileBySource,
           zoomScaleFactor: scale * zoomDifference, zoom: job.zoom);
       job.completer.complete(image);
     } catch (error, stack) {
@@ -51,8 +51,8 @@ class RendererPipeline {
 class _RenderingJob {
   final completer = Completer<Image>();
   final TileIdentity id;
-  final VectorTile tile;
+  final Map<String, VectorTile> tileBySource;
   final double zoom;
 
-  _RenderingJob(this.id, this.tile, this.zoom);
+  _RenderingJob(this.id, this.tileBySource, this.zoom);
 }

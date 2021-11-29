@@ -81,7 +81,6 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer>
 
   void _createTileWidgets() {
     _tileWidgets = TileWidgets(
-        widget.options.tileProvider,
         () => _paintZoomScale,
         () => _mapState.zoom,
         widget.options.theme,
@@ -92,7 +91,7 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer>
 
   void _createCaches() {
     _caches = Caches(
-        provider: widget.options.tileProvider,
+        providers: widget.options.tileProviders,
         pipeline: RendererPipeline(widget.options.theme,
             scale: widget.options.rasterImageScale),
         ttl: widget.options.fileCacheTtl,

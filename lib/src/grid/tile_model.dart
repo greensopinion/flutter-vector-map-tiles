@@ -26,7 +26,7 @@ class VectorTileModel extends ChangeNotifier {
   double lastRenderedZoomScale = double.negativeInfinity;
   late final TileTranslation translation;
   late TileTranslation imageTranslation;
-  VectorTile? vector;
+  Map<String, VectorTile>? vector;
   ui.Image? image;
 
   VectorTileModel(this.renderMode, this.caches, this.theme, this.tile,
@@ -63,8 +63,7 @@ class VectorTileModel extends ChangeNotifier {
   }
 
   Future<void> _loadOnce() async {
-    final vectorFuture =
-        caches.vectorTileCache.retrieve(translation.translated);
+    final vectorFuture = _retrieve(translation.translated);
     bool loadImage = renderMode == RenderMode.raster;
     if (renderMode != RenderMode.vector && this.image == null) {
       loadImage = _presentImageTilePreviewIfPresent();
@@ -72,23 +71,33 @@ class VectorTileModel extends ChangeNotifier {
         notifyListeners();
       }
     }
-    VectorTile vectorTile = await vectorFuture;
+    Map<String, VectorTile> tileBySource = await vectorFuture;
     if (renderMode != RenderMode.raster) {
-      vector = vectorTile;
+      vector = tileBySource;
     }
     if (renderMode != RenderMode.vector &&
         !_disposed &&
         (this.image == null || loadImage)) {
-      await _updateImage(translation, vectorTile);
+      await _updateImage(translation, tileBySource);
     }
     notifyListeners();
   }
 
+  Future<Map<String, VectorTile>> _retrieve(TileIdentity tile) async {
+    Map<String, VectorTile> tileBySource = {};
+    for (final source in caches.providerSources) {
+      tileBySource[source] =
+          await caches.vectorTileCache.retrieve(source, tile);
+    }
+    return tileBySource;
+  }
+
   Future<bool> _updateImage(
-      TileTranslation translation, VectorTile tile) async {
+      TileTranslation translation, Map<String, VectorTile> tileBySource) async {
     final id = translation.translated;
     final zoom = translation.original.z.toDouble();
-    final image = await caches.imageTileCache.retrieve(id, tile, zoom: zoom);
+    final image =
+        await caches.imageTileCache.retrieve(id, tileBySource, zoom: zoom);
     caches.memoryImageCache.putImage(id, zoom: zoom, image: image);
     return _applyImage(translation, image);
   }

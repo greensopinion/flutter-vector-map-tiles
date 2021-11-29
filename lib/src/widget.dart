@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/plugin_api.dart';
-import 'package:vector_map_tiles/src/grid/grid_layer.dart';
+import 'grid/grid_layer.dart';
 
 import '../vector_map_tiles.dart';
 

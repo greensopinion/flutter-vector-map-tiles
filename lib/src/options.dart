@@ -1,8 +1,8 @@
 import 'package:flutter_map/plugin_api.dart';
-import 'package:vector_map_tiles/vector_map_tiles.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
-import 'vector_tile_provider.dart';
+import '../vector_map_tiles.dart';
+import 'tile_providers.dart';
 
 enum RenderMode {
   /// tiles are rendered using vectors only
@@ -21,8 +21,9 @@ enum RenderMode {
 /// See the readme for details.
 /// See [VectorTileLayerWidget] for an alternative.
 class VectorTileLayerOptions extends LayerOptions {
-  /// provides vector tiles
-  final VectorTileProvider tileProvider;
+  /// provides vector tiles, by source ID where the source ID corresponds to
+  /// a source in the theme
+  final TileProviders tileProviders;
 
   /// the theme used to render tiles
   final Theme theme;
@@ -71,7 +72,7 @@ class VectorTileLayerOptions extends LayerOptions {
   final bool logCacheStats;
 
   VectorTileLayerOptions(
-      {required this.tileProvider,
+      {required this.tileProviders,
       required this.theme,
       this.rasterImageScale = 3.0,
       this.renderMode = RenderMode.mixed,
