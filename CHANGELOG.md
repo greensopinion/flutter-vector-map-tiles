@@ -1,3 +1,6 @@
+## 1.1.27
+
+* eliminate unnecessary re-rendering of tiles when panning
 ## 1.1.26
 
 * update example

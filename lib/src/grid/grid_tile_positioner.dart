@@ -21,14 +21,12 @@ class GridTilePositioner {
     final tileOverlap = 0.5;
     final p = Rect.fromLTRB(offset.dx, offset.dy,
         toRightPosition.dx + tileOverlap, toBottomPosition.dy + tileOverlap);
-    final position = Rect.fromLTWH(_roundSize(offset.dx), _roundSize(offset.dy),
-        _roundSize(p.width), _roundSize(p.height));
     return Positioned(
         key: Key('PositionedGridTile_${tile.z}_${tile.x}_${tile.y}'),
-        top: position.top,
-        left: position.left,
-        width: position.width,
-        height: position.height,
+        top: _roundSize(offset.dy),
+        left: _roundSize(offset.dx),
+        width: _roundSize(p.width),
+        height: _roundSize(p.height),
         child: tileWidget);
   }
 
