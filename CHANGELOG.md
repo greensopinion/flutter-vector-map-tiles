@@ -1,6 +1,7 @@
-## 1.1.28
+## 1.1.30
 
 * provide an option to render a background at a lower zoom level when tile data is loading
+* fix defect in cache concurrency
 ## 1.1.27
 
 * eliminate unnecessary re-rendering of tiles when panning
