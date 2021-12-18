@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart' as material;
+import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
+import 'package:vector_map_tiles/src/grid/slippy_map_translator.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../cache/caches.dart';
@@ -15,6 +17,8 @@ class GridVectorTile extends StatefulWidget {
   final RenderMode renderMode;
   final Caches caches;
   final Theme theme;
+  final Theme? backgroundTheme;
+  final int backgroundZoom;
   final ZoomScaleFunction zoomScaleFunction;
   final ZoomFunction zoomFunction;
   final bool showTileDebugInfo;
@@ -27,6 +31,8 @@ class GridVectorTile extends StatefulWidget {
       required this.zoomScaleFunction,
       required this.zoomFunction,
       required this.theme,
+      required this.backgroundTheme,
+      required this.backgroundZoom,
       required this.showTileDebugInfo})
       : super(key: key);
 
@@ -47,6 +53,8 @@ class _GridVectorTile extends DisposableState<GridVectorTile>
         widget.renderMode,
         widget.caches,
         widget.theme,
+        widget.backgroundTheme,
+        widget.backgroundZoom,
         widget.tileIdentity,
         widget.zoomScaleFunction,
         widget.zoomFunction,
@@ -104,7 +112,7 @@ class _GridVectorTileBodyState extends DisposableState<GridVectorTileBody> {
   }
 }
 
-enum _PaintMode { vector, raster, none }
+enum _PaintMode { vector, raster, background, none }
 
 class _VectorTilePainter extends CustomPainter {
   final VectorTileModel model;
@@ -123,10 +131,18 @@ class _VectorTilePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (model.image == null && model.vector == null) {
+    if (model.image == null &&
+        model.vector == null &&
+        model.backgroundVector == null) {
       return;
     }
     bool changed = model.updateRendering();
+    if (model.backgroundVector != null &&
+        model.vector == null &&
+        model.image == null) {
+      _paintBackground(canvas, size);
+      return;
+    }
     final image = model.image;
     final renderImage = (changed || model.vector == null) && image != null;
     final translation =
@@ -153,6 +169,25 @@ class _VectorTilePainter extends CustomPainter {
     canvas.restore();
     _paintTileDebugInfo(
         canvas, size, renderImage, tileSizer.effectiveScale, tileSizer);
+  }
+
+  void _paintBackground(Canvas canvas, Size size) {
+    final tileSizer = GridTileSizer(model.backgroundTranslation!,
+        model.zoomScaleFunction(), size, false, null);
+    canvas.save();
+    canvas.clipRect(Offset.zero & size);
+    tileSizer.apply(canvas);
+    final tileClip = tileSizer.tileClip(size, tileSizer.effectiveScale);
+    Renderer(theme: model.backgroundTheme!).render(
+        canvas, model.backgroundVector!,
+        clip: tileClip,
+        zoomScaleFactor: tileSizer.effectiveScale,
+        zoom: model.lastRenderedZoom);
+    _lastPainted = _PaintMode.background;
+    canvas.restore();
+    _paintTileDebugInfo(
+        canvas, size, false, tileSizer.effectiveScale, tileSizer);
+    debounce.update();
   }
 
   void _paintTileDebugInfo(Canvas canvas, Size size, bool renderedImage,
@@ -199,6 +234,7 @@ class _VectorTilePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) =>
       model.hasChanged() ||
       (_lastPainted == _PaintMode.none) ||
+      (_lastPainted == _PaintMode.background) ||
       (_lastPainted != _PaintMode.vector &&
           model.renderMode != RenderMode.raster);
 }

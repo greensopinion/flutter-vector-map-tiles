@@ -48,8 +48,14 @@ class SlippyMapTranslator {
     return _translate(tile, maxZoom);
   }
 
-  TileTranslation lowerZoomAlternative(TileIdentity tile, int levels) {
+  TileTranslation lowerZoomAlternative(TileIdentity tile,
+      {required int levels}) {
     return _translate(tile, tile.z.toInt() - levels);
+  }
+
+  TileTranslation specificZoomTranslation(TileIdentity tile,
+      {required int zoom}) {
+    return _translate(tile, zoom);
   }
 
   TileTranslation _translate(TileIdentity tile, int targetZoom) {

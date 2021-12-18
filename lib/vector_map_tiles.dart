@@ -6,3 +6,4 @@ export 'src/tile_identity.dart';
 export 'src/tile_providers.dart';
 export 'src/vector_tile_provider.dart';
 export 'src/widget.dart';
+export 'src/theme_extensions.dart';

@@ -18,6 +18,7 @@ class VectorTileModel extends ChangeNotifier {
   final RenderMode renderMode;
   final TileIdentity tile;
   final Theme theme;
+  final Theme? backgroundTheme;
   final Caches caches;
   final bool showTileDebugInfo;
   final ZoomScaleFunction zoomScaleFunction;
@@ -25,14 +26,33 @@ class VectorTileModel extends ChangeNotifier {
   double lastRenderedZoom = double.negativeInfinity;
   double lastRenderedZoomScale = double.negativeInfinity;
   late final TileTranslation translation;
+  late final TileTranslation? backgroundTranslation;
   late TileTranslation imageTranslation;
   Map<String, VectorTile>? vector;
+  Map<String, VectorTile>? backgroundVector;
   ui.Image? image;
 
-  VectorTileModel(this.renderMode, this.caches, this.theme, this.tile,
-      this.zoomScaleFunction, this.zoomFunction, this.showTileDebugInfo) {
+  VectorTileModel(
+      this.renderMode,
+      this.caches,
+      this.theme,
+      this.backgroundTheme,
+      int backgroundZoom,
+      this.tile,
+      this.zoomScaleFunction,
+      this.zoomFunction,
+      this.showTileDebugInfo) {
     final slippyMap = SlippyMapTranslator(caches.vectorTileCache.maximumZoom);
-    translation = slippyMap.translate(tile.normalize());
+    final normalizedTile = tile.normalize();
+    translation = slippyMap.translate(normalizedTile);
+    if (backgroundZoom >= normalizedTile.z) {
+      backgroundZoom = 2;
+    }
+    backgroundTranslation =
+        backgroundTheme != null && normalizedTile.z <= backgroundZoom
+            ? null
+            : slippyMap.specificZoomTranslation(normalizedTile,
+                zoom: backgroundZoom);
     imageTranslation = translation;
   }
 
@@ -64,6 +84,19 @@ class VectorTileModel extends ChangeNotifier {
 
   Future<void> _loadOnce() async {
     final vectorFuture = _retrieve(translation.translated);
+    final background = backgroundTranslation;
+    if (background != null) {
+      final backgroundFuture = _retrieve(background.translated);
+      backgroundFuture.then((value) {
+        if (this.image == null && this.vector == null) {
+          backgroundVector = value;
+          notifyListeners();
+        }
+      });
+    }
+    if (_disposed) {
+      return;
+    }
     bool loadImage = renderMode == RenderMode.raster;
     if (renderMode != RenderMode.vector && this.image == null) {
       loadImage = _presentImageTilePreviewIfPresent();
@@ -176,7 +209,7 @@ class VectorTileModel extends ChangeNotifier {
           altLevel < tile.z && altLevel < 3 && !_disposed && !alternativeLoaded;
           ++altLevel) {
         final alternativeTranslation =
-            slippyMap.lowerZoomAlternative(tile, altLevel);
+            slippyMap.lowerZoomAlternative(tile, levels: altLevel);
         if (alternativeTranslation.translated != translation.translated) {
           alternativeLoaded = _updateImageIfPresent(alternativeTranslation);
         }

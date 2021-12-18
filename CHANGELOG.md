@@ -1,3 +1,6 @@
+## 1.1.28
+
+* provide an option to render a background at a lower zoom level when tile data is loading
 ## 1.1.27
 
 * eliminate unnecessary re-rendering of tiles when panning

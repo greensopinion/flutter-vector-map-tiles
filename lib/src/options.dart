@@ -71,6 +71,12 @@ class VectorTileLayerOptions extends LayerOptions {
   /// Indicates whether to log cache stats
   final bool logCacheStats;
 
+  /// Draws background from a vector tile source when available
+  final Theme? backgroundTheme;
+
+  /// The zoom level of background tiles, if rendered with a [backgroundTheme]
+  final int backgroundZoom;
+
   VectorTileLayerOptions(
       {required this.tileProviders,
       required this.theme,
@@ -79,6 +85,8 @@ class VectorTileLayerOptions extends LayerOptions {
       this.fileCacheTtl = DEFAULT_CACHE_TTL,
       this.maxImagesInMemory = DEFAULT_CACHE_MAX_IMAGES_IN_MEMORY,
       this.fileCacheMaximumSizeInBytes = DEFAULT_CACHE_MAX_SIZE,
+      this.backgroundTheme,
+      this.backgroundZoom = 4,
       this.showTileDebugInfo = false,
       this.logCacheStats = false}) {
     assert(rasterImageScale >= 1.0 && rasterImageScale <= 5.0);

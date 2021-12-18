@@ -84,6 +84,8 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer>
         () => _paintZoomScale,
         () => _mapState.zoom,
         widget.options.theme,
+        widget.options.backgroundTheme,
+        widget.options.backgroundZoom,
         _caches,
         widget.options.renderMode,
         widget.options.showTileDebugInfo);
