@@ -2,7 +2,7 @@ import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 final defaultLayerPredicate = (Map<String, dynamic> layer) {
   final type = layer['type'];
-  if (type == 'backgournd') {
+  if (type == 'background') {
     return true;
   } else if (type == 'fill') {
     final sourceLayer = layer['source-layer'];
@@ -25,10 +25,7 @@ extension ThemeReaderExtension on ThemeReader {
     final newLayers = [];
     layers?.forEach((layer) {
       if (layer is Map<String, dynamic> && layerPredicate(layer)) {
-        final type = layer['type'] as String?;
-        if (type == 'background' || type == 'fill') {
-          newLayers.add(layer);
-        }
+        newLayers.add(layer);
       }
     });
     backgroundTheme['layers'] = newLayers;
