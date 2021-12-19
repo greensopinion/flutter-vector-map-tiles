@@ -51,7 +51,7 @@ class VectorTileModel extends ChangeNotifier {
       backgroundZoom = max(normalizedTile.z ~/ 2, 2);
     }
     backgroundTranslation =
-        backgroundTheme != null && normalizedTile.z <= backgroundZoom
+        backgroundTheme == null || normalizedTile.z <= backgroundZoom
             ? null
             : slippyMap.specificZoomTranslation(normalizedTile,
                 zoom: backgroundZoom);

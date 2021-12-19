@@ -1,9 +1,13 @@
+## 1.1.32
+
+* fix crash when background theme not specified
 ## 1.1.31
 
 * provide an option to render a background at a lower zoom level when tile data is loading
 * improve cache hit rate when concurrently accessed
 * improve background layer rendering
 * reduce memory usage
+
 ## 1.1.27
 
 * eliminate unnecessary re-rendering of tiles when panning
