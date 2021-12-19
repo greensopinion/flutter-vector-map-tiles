@@ -55,15 +55,16 @@ class VectorTileLayerOptions extends LayerOptions {
   static const DEFAULT_CACHE_MAX_SIZE = 50 * 1024 * 1024;
 
   /// The maximum number of images retained in the memory
-  /// cache. Only applicable for [renderMode] of `vector`.
+  /// cache.
   /// The higher the number of images retained in memory,
   /// the less the user is exposed to delays in loading tiles
   /// and therefore the less flicker on the map. Images
   /// take anywhere from 2-3MB each, so setting this value too
   /// high can result in exceeding maximum allowable process memory
   /// size, resulting in the OS terminating the app (i.e. crashes).
+  /// Only applicable for [renderMode] of `mixed` or `raster`.
   final maxImagesInMemory;
-  static const DEFAULT_CACHE_MAX_IMAGES_IN_MEMORY = 80;
+  static const DEFAULT_CACHE_MAX_IMAGES_IN_MEMORY = 40;
 
   /// Indicates whether debug information should be shown for tiles
   final bool showTileDebugInfo;
