@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/widgets.dart';
 import '../provider_exception.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
@@ -46,7 +48,7 @@ class VectorTileModel extends ChangeNotifier {
     final normalizedTile = tile.normalize();
     translation = slippyMap.translate(normalizedTile);
     if (backgroundZoom >= normalizedTile.z) {
-      backgroundZoom = 2;
+      backgroundZoom = max(normalizedTile.z ~/ 2, 2);
     }
     backgroundTranslation =
         backgroundTheme != null && normalizedTile.z <= backgroundZoom

@@ -87,7 +87,7 @@ class VectorTileLayerOptions extends LayerOptions {
       this.maxImagesInMemory = DEFAULT_CACHE_MAX_IMAGES_IN_MEMORY,
       this.fileCacheMaximumSizeInBytes = DEFAULT_CACHE_MAX_SIZE,
       this.backgroundTheme,
-      this.backgroundZoom = 4,
+      this.backgroundZoom = 7,
       this.showTileDebugInfo = false,
       this.logCacheStats = false}) {
     assert(rasterImageScale >= 1.0 && rasterImageScale <= 5.0);
