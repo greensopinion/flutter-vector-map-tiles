@@ -1,5 +1,6 @@
-## 1.1.32
+## 1.1.34
 
+* consume upstream performance improvements
 * fix crash when background theme not specified
 ## 1.1.31
 
