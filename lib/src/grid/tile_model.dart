@@ -1,12 +1,11 @@
-import 'dart:math';
-
-import 'package:flutter/widgets.dart';
-import '../provider_exception.dart';
-import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 import 'dart:ui' as ui;
 
-import '../options.dart';
+import 'package:flutter/widgets.dart';
+import 'package:vector_tile_renderer/vector_tile_renderer.dart';
+
 import '../cache/caches.dart';
+import '../options.dart';
+import '../provider_exception.dart';
 import '../tile_identity.dart';
 import 'slippy_map_translator.dart';
 
@@ -20,7 +19,7 @@ class VectorTileModel extends ChangeNotifier {
   final RenderMode renderMode;
   final TileIdentity tile;
   final Theme theme;
-  final Theme? backgroundTheme;
+  final bool paintBackground;
   final Caches caches;
   final bool showTileDebugInfo;
   final ZoomScaleFunction zoomScaleFunction;
@@ -28,33 +27,22 @@ class VectorTileModel extends ChangeNotifier {
   double lastRenderedZoom = double.negativeInfinity;
   double lastRenderedZoomScale = double.negativeInfinity;
   late final TileTranslation translation;
-  late final TileTranslation? backgroundTranslation;
   late TileTranslation imageTranslation;
   Map<String, VectorTile>? vector;
-  Map<String, VectorTile>? backgroundVector;
   ui.Image? image;
 
   VectorTileModel(
       this.renderMode,
       this.caches,
       this.theme,
-      this.backgroundTheme,
-      int backgroundZoom,
       this.tile,
       this.zoomScaleFunction,
       this.zoomFunction,
+      this.paintBackground,
       this.showTileDebugInfo) {
     final slippyMap = SlippyMapTranslator(caches.vectorTileCache.maximumZoom);
     final normalizedTile = tile.normalize();
     translation = slippyMap.translate(normalizedTile);
-    if (backgroundZoom >= normalizedTile.z) {
-      backgroundZoom = max(normalizedTile.z ~/ 2, 2);
-    }
-    backgroundTranslation =
-        backgroundTheme == null || normalizedTile.z <= backgroundZoom
-            ? null
-            : slippyMap.specificZoomTranslation(normalizedTile,
-                zoom: backgroundZoom);
     imageTranslation = translation;
   }
 
@@ -85,20 +73,10 @@ class VectorTileModel extends ChangeNotifier {
   }
 
   Future<void> _loadOnce() async {
-    final vectorFuture = _retrieve(translation.translated);
-    final background = backgroundTranslation;
-    if (background != null) {
-      final backgroundFuture = _retrieve(background.translated);
-      backgroundFuture.then((value) {
-        if (this.image == null && this.vector == null) {
-          backgroundVector = value;
-          notifyListeners();
-        }
-      });
-    }
     if (_disposed) {
       return;
     }
+    final vectorFuture = _retrieve(translation.translated);
     bool loadImage = renderMode == RenderMode.raster;
     if (renderMode != RenderMode.vector && this.image == null) {
       loadImage = _presentImageTilePreviewIfPresent();

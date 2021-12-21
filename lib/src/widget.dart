@@ -17,6 +17,6 @@ class VectorTileLayerWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mapState = MapState.maybeOf(context)!;
-    return VectorTileLayer(options, mapState, mapState.onMoved);
+    return VectorTileCompositeLayer(options, mapState, mapState.onMoved);
   }
 }

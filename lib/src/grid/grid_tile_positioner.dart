@@ -90,10 +90,10 @@ class TilePositioningState {
   late final CustomPoint<num> origin;
   late final CustomPoint<num> translate;
 
-  TilePositioningState(this.zoomScale, MapState mapState) {
+  TilePositioningState(this.zoomScale, MapState mapState, double zoom) {
     final pixelOrigin =
         mapState.getNewPixelOrigin(mapState.center, mapState.zoom).round();
-    origin = mapState.project(mapState.unproject(pixelOrigin), mapState.zoom);
+    origin = mapState.project(mapState.unproject(pixelOrigin, zoom), zoom);
     translate = origin.multiplyBy(zoomScale) - pixelOrigin;
   }
 }

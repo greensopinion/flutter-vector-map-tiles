@@ -2,43 +2,39 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:flutter_map/plugin_api.dart';
-import 'debounce.dart';
-import 'renderer_pipeline.dart';
+import 'package:vector_tile_renderer/vector_tile_renderer.dart';
+
 import '../cache/caches.dart';
-import 'disposable_state.dart';
 import '../options.dart';
 import '../tile_identity.dart';
+import 'debounce.dart';
+import 'disposable_state.dart';
 import 'grid_tile_positioner.dart';
+import 'renderer_pipeline.dart';
 import 'tile_widgets.dart';
 
-class VectorTileLayer extends StatefulWidget {
+class VectorTileCompositeLayer extends StatefulWidget {
   final VectorTileLayerOptions options;
   final MapState mapState;
   final Stream<Null> stream;
 
-  const VectorTileLayer(this.options, this.mapState, this.stream);
+  const VectorTileCompositeLayer(this.options, this.mapState, this.stream);
 
   @override
   State<StatefulWidget> createState() {
-    return _VectorTileLayerState();
+    return _VectorTileCompositeLayerState();
   }
 }
 
-class _VectorTileLayerState extends DisposableState<VectorTileLayer>
+class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
     with WidgetsBindingObserver {
-  StreamSubscription<Null>? _subscription;
-  late TileWidgets _tileWidgets;
   late Caches _caches;
-
-  MapState get _mapState => widget.mapState;
-  double get _clampedZoom => _mapState.zoom.roundToDouble();
-  double _paintZoomScale = 1.0;
   late final _cacheStats = ScheduledDebounce(_printCacheStats,
       delay: Duration(seconds: 1),
       jitter: Duration(milliseconds: 0),
       maxAge: Duration(seconds: 3));
+  StreamSubscription<Null>? _subscription;
 
   @override
   void initState() {
@@ -47,18 +43,18 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer>
     Future.delayed(Duration(seconds: 3), () {
       _caches.applyConstraints();
     });
-    _createTileWidgets();
-    _subscription = widget.stream.listen((event) {
-      _update();
-    });
-    _update();
+    if (widget.options.logCacheStats) {
+      _subscription = widget.stream.listen((event) {
+        _cacheStats.update();
+      });
+    }
   }
 
   @override
   void dispose() {
     super.dispose();
-    _caches.dispose();
     _subscription?.cancel();
+    _caches.dispose();
   }
 
   @override
@@ -67,28 +63,51 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer>
   }
 
   @override
-  void didUpdateWidget(covariant VectorTileLayer oldWidget) {
+  void didUpdateWidget(covariant VectorTileCompositeLayer oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.options.theme.id != widget.options.theme.id) {
       setState(() {
         _caches.dispose();
         _createCaches();
-        _createTileWidgets();
-        _updateTiles();
       });
     }
   }
 
-  void _createTileWidgets() {
-    _tileWidgets = TileWidgets(
-        () => _paintZoomScale,
-        () => _mapState.zoom,
-        widget.options.theme,
-        widget.options.backgroundTheme,
-        widget.options.backgroundZoom,
-        _caches,
-        widget.options.renderMode,
-        widget.options.showTileDebugInfo);
+  @override
+  Widget build(BuildContext context) {
+    final options = widget.options;
+    final backgroundTheme = options.backgroundTheme;
+    final layers = <Widget>[
+      VectorTileLayer(
+          Key("${options.theme.id}_VectorTileLayer"),
+          _LayerOptions(
+              options.theme,
+              options.renderMode,
+              options.showTileDebugInfo,
+              backgroundTheme == null,
+              () => widget.mapState.zoom),
+          widget.mapState,
+          widget.stream,
+          _caches)
+    ];
+    if (backgroundTheme != null) {
+      final background = VectorTileLayer(
+          Key("${backgroundTheme.id}_background_VectorTileLayer"),
+          _LayerOptions(
+              backgroundTheme,
+              RenderMode.vector,
+              options.showTileDebugInfo,
+              true,
+              () => options.backgroundZoom.toDouble()),
+          widget.mapState,
+          widget.stream,
+          _caches);
+      layers.insert(0, background);
+    }
+    // if (layers.length == 1) {
+    //   return layers.first;
+    // }
+    return Stack(children: layers);
   }
 
   void _createCaches() {
@@ -101,14 +120,94 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer>
         maxSizeInBytes: widget.options.fileCacheMaximumSizeInBytes);
   }
 
+  void _printCacheStats() {
+    print('Cache stats:\n${_caches.stats()}');
+  }
+}
+
+class _LayerOptions {
+  final Theme theme;
+  final RenderMode renderMode;
+  final bool showTileDebugInfo;
+  final bool paintBackground;
+  final double Function() mapZoom;
+
+  _LayerOptions(this.theme, this.renderMode, this.showTileDebugInfo,
+      this.paintBackground, this.mapZoom);
+}
+
+class VectorTileLayer extends StatefulWidget {
+  final _LayerOptions options;
+  final MapState mapState;
+  final Stream<Null> stream;
+  final Caches caches;
+
+  const VectorTileLayer(
+      Key key, this.options, this.mapState, this.stream, this.caches)
+      : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() {
+    return _VectorTileLayerState();
+  }
+}
+
+class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
+  StreamSubscription<Null>? _subscription;
+  late TileWidgets _tileWidgets;
+
+  MapState get _mapState => widget.mapState;
+  double get _zoom => widget.options.mapZoom();
+  double get _clampedZoom => _zoom.roundToDouble();
+  double _paintZoomScale = 1.0;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _createTileWidgets();
+    _subscription = widget.stream.listen((event) {
+      _update();
+    });
+    _update();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _subscription?.cancel();
+  }
+
+  @override
+  void didUpdateWidget(covariant VectorTileLayer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.options.theme.id != widget.options.theme.id) {
+      setState(() {
+        _createTileWidgets();
+        _updateTiles();
+      });
+    }
+  }
+
+  void _createTileWidgets() {
+    _tileWidgets = TileWidgets(
+        () => _paintZoomScale,
+        () => _zoom,
+        widget.options.theme,
+        widget.caches,
+        widget.options.renderMode,
+        widget.options.paintBackground,
+        widget.options.showTileDebugInfo);
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_tileWidgets.all.isEmpty) {
       return Container();
     }
     _updatePaintZoomScale();
-    final positioner =
-        GridTilePositioner(TilePositioningState(_paintZoomScale, _mapState));
+    final positioner = GridTilePositioner(
+        TilePositioningState(_paintZoomScale, _mapState, _zoom));
     final tileWidgets = _tileWidgets.all.entries
         .map((entry) => positioner.positionTile(entry.key, entry.value))
         .toList();
@@ -125,20 +224,18 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer>
   }
 
   void _updateTiles() {
-    final center = _mapState.center;
-    final pixelBounds = _tiledPixelBounds(center);
+    final pixelBounds = _tiledPixelBounds();
     final tileRange = _pixelBoundsToTileRange(pixelBounds);
     final tiles = _expand(tileRange);
     _tileWidgets.update(tiles);
-    if (widget.options.logCacheStats) {
-      _cacheStats.update();
-    }
   }
 
-  Bounds _tiledPixelBounds(LatLng center) {
-    var scale = _mapState.getZoomScale(_mapState.zoom, _clampedZoom);
-    var centerPoint = _mapState.project(center, _clampedZoom).floor();
-    var halfSize = _mapState.size / (scale * 2);
+  Bounds _tiledPixelBounds() {
+    final zoom = _mapState.zoom;
+    final scale = _mapState.getZoomScale(zoom, _clampedZoom);
+    final centerPoint =
+        _mapState.project(_mapState.center, _clampedZoom).floor();
+    final halfSize = _mapState.size / (scale * 2);
 
     return Bounds(centerPoint - halfSize, centerPoint + halfSize);
   }
@@ -168,10 +265,6 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer>
 
   void _updatePaintZoomScale() {
     final tileZoom = _tileWidgets.all.keys.first.z;
-    _paintZoomScale = _zoomScale(_mapState.zoom, tileZoom.toDouble());
-  }
-
-  void _printCacheStats() {
-    print('Cache stats:\n${_caches.stats()}');
+    _paintZoomScale = _zoomScale(widget.mapState.zoom, tileZoom.toDouble());
   }
 }

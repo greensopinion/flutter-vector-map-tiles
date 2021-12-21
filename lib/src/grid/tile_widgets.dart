@@ -13,20 +13,18 @@ class TileWidgets {
   final ZoomScaleFunction _zoomScaleFunction;
   final ZoomFunction _zoomFunction;
   final Theme _theme;
-  final Theme? _backgroundTheme;
-  final int _backgroundZoom;
   final Caches _caches;
   final RenderMode _renderMode;
+  final bool paintBackground;
   final bool showTileDebugInfo;
 
   TileWidgets(
       this._zoomScaleFunction,
       this._zoomFunction,
       this._theme,
-      this._backgroundTheme,
-      this._backgroundZoom,
       this._caches,
       this._renderMode,
+      this.paintBackground,
       this.showTileDebugInfo);
 
   void update(List<TileIdentity> tiles) {
@@ -51,8 +49,7 @@ class TileWidgets {
         zoomScaleFunction: _zoomScaleFunction,
         zoomFunction: _zoomFunction,
         theme: _theme,
-        backgroundTheme: _backgroundTheme,
-        backgroundZoom: _backgroundZoom,
+        paintBackground: paintBackground,
         showTileDebugInfo: showTileDebugInfo);
   }
 }

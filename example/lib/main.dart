@@ -85,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   _backgroundTheme() {
     return ThemeReader().readAsBackground(lightThemeData(),
-        layerPredicate: defaultLayerPredicate);
+        layerPredicate: defaultBackgroundLayerPredicate);
   }
 
   String _urlTemplate() {

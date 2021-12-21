@@ -1,15 +1,12 @@
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
-final defaultLayerPredicate = (Map<String, dynamic> layer) {
+final defaultBackgroundLayerPredicate = (Map<String, dynamic> layer) {
   final type = layer['type'];
   if (type == 'background') {
     return true;
   } else if (type == 'fill') {
     final sourceLayer = layer['source-layer'];
-    return (sourceLayer == 'landcover' ||
-        sourceLayer == 'park' ||
-        sourceLayer == 'water' ||
-        sourceLayer == 'hillshade');
+    return (sourceLayer == 'landcover' || sourceLayer == 'water');
   }
   return false;
 };
@@ -28,6 +25,7 @@ extension ThemeReaderExtension on ThemeReader {
         newLayers.add(layer);
       }
     });
+    backgroundTheme['id'] = (json['id'] ?? 'default') + '_bg';
     backgroundTheme['layers'] = newLayers;
     return read(backgroundTheme);
   }

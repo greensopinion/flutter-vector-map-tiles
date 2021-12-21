@@ -8,10 +8,14 @@ import 'cache_stats.dart';
 class MemoryImageCache with CacheStats {
   int _maxSize;
   final _cache = LinkedHashMap<String, Image>();
+  bool _disposed = false;
 
   MemoryImageCache(this._maxSize);
 
   void putImage(TileIdentity id, {required double zoom, required Image image}) {
+    if (_disposed) {
+      return;
+    }
     final key = _toKey(id, zoom);
     _cache.remove(key)?.dispose();
     _cache[key] = image.clone();
@@ -19,6 +23,9 @@ class MemoryImageCache with CacheStats {
   }
 
   Image? getImage(TileIdentity id, {required double zoom}) {
+    if (_disposed) {
+      return null;
+    }
     final key = _toKey(id, zoom);
     final image = _cache.remove(key);
     if (image != null) {

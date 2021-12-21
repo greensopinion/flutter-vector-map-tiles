@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart' as material;
-import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
-import 'package:vector_map_tiles/src/grid/slippy_map_translator.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../cache/caches.dart';
@@ -17,10 +15,9 @@ class GridVectorTile extends StatefulWidget {
   final RenderMode renderMode;
   final Caches caches;
   final Theme theme;
-  final Theme? backgroundTheme;
-  final int backgroundZoom;
   final ZoomScaleFunction zoomScaleFunction;
   final ZoomFunction zoomFunction;
+  final bool paintBackground;
   final bool showTileDebugInfo;
 
   const GridVectorTile(
@@ -31,8 +28,7 @@ class GridVectorTile extends StatefulWidget {
       required this.zoomScaleFunction,
       required this.zoomFunction,
       required this.theme,
-      required this.backgroundTheme,
-      required this.backgroundZoom,
+      required this.paintBackground,
       required this.showTileDebugInfo})
       : super(key: key);
 
@@ -53,11 +49,10 @@ class _GridVectorTile extends DisposableState<GridVectorTile>
         widget.renderMode,
         widget.caches,
         widget.theme,
-        widget.backgroundTheme,
-        widget.backgroundZoom,
         widget.tileIdentity,
         widget.zoomScaleFunction,
         widget.zoomFunction,
+        widget.paintBackground,
         widget.showTileDebugInfo);
     _model.startLoading();
   }
@@ -133,7 +128,9 @@ class _VectorTilePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     bool changed = model.updateRendering();
     if (model.vector == null && model.image == null) {
-      _paintBackground(canvas, size);
+      if (model.paintBackground) {
+        _paintBackground(canvas, size);
+      }
       return;
     }
     final image = model.image;
@@ -165,15 +162,13 @@ class _VectorTilePainter extends CustomPainter {
   }
 
   void _paintBackground(Canvas canvas, Size size) {
-    final translation = model.backgroundTranslation ?? model.translation;
-    final theme = model.backgroundTheme ?? model.theme;
     final tileSizer = GridTileSizer(
-        translation, model.zoomScaleFunction(), size, false, null);
+        model.translation, model.zoomScaleFunction(), size, false, null);
     canvas.save();
     canvas.clipRect(Offset.zero & size);
     tileSizer.apply(canvas);
     final tileClip = tileSizer.tileClip(size, tileSizer.effectiveScale);
-    Renderer(theme: theme).render(canvas, model.backgroundVector ?? {},
+    Renderer(theme: model.theme).render(canvas, {},
         clip: tileClip,
         zoomScaleFactor: tileSizer.effectiveScale,
         zoom: model.lastRenderedZoom);

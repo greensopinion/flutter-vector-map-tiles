@@ -10,7 +10,7 @@ class VectorMapTilesPlugin extends MapPlugin {
   Widget createLayer(
       LayerOptions options, MapState mapState, Stream<Null> stream) {
     if (options is VectorTileLayerOptions) {
-      return VectorTileLayer(options, mapState, stream);
+      return VectorTileCompositeLayer(options, mapState, stream);
     }
     throw Exception('not supported: $options');
   }
