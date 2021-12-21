@@ -1,3 +1,7 @@
+## 1.2.36
+
+* improve backgound layer rendering
+
 ## 1.1.35
 
 * consume upstream performance improvements
