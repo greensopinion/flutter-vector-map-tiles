@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -93,12 +94,8 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
     if (backgroundTheme != null) {
       final background = VectorTileLayer(
           Key("${backgroundTheme.id}_background_VectorTileLayer"),
-          _LayerOptions(
-              backgroundTheme,
-              RenderMode.vector,
-              options.showTileDebugInfo,
-              true,
-              () => options.backgroundZoom.toDouble()),
+          _LayerOptions(backgroundTheme, RenderMode.vector,
+              options.showTileDebugInfo, true, _backgroundZoom),
           widget.mapState,
           widget.stream,
           _caches);
@@ -122,6 +119,14 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
 
   void _printCacheStats() {
     print('Cache stats:\n${_caches.stats()}');
+  }
+
+  double _backgroundZoom() {
+    var zoom = widget.options.backgroundZoom.toDouble();
+    if (zoom >= widget.mapState.zoom) {
+      zoom = max(1, widget.mapState.zoom / 3).roundToDouble();
+    }
+    return zoom;
   }
 }
 
