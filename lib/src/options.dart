@@ -77,6 +77,7 @@ class VectorTileLayerOptions extends LayerOptions {
 
   /// The zoom level of background tiles, if rendered with a [backgroundTheme]
   final int backgroundZoom;
+  static const DEFAULT_BACKGROUND_ZOOM = 9;
 
   VectorTileLayerOptions(
       {required this.tileProviders,
@@ -87,7 +88,7 @@ class VectorTileLayerOptions extends LayerOptions {
       this.maxImagesInMemory = DEFAULT_CACHE_MAX_IMAGES_IN_MEMORY,
       this.fileCacheMaximumSizeInBytes = DEFAULT_CACHE_MAX_SIZE,
       this.backgroundTheme,
-      this.backgroundZoom = 7,
+      this.backgroundZoom = DEFAULT_BACKGROUND_ZOOM,
       this.showTileDebugInfo = false,
       this.logCacheStats = false}) {
     assert(rasterImageScale >= 1.0 && rasterImageScale <= 5.0);
