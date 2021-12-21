@@ -101,9 +101,6 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
           _caches);
       layers.insert(0, background);
     }
-    // if (layers.length == 1) {
-    //   return layers.first;
-    // }
     return Stack(children: layers);
   }
 
@@ -122,11 +119,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
   }
 
   double _backgroundZoom() {
-    var zoom = widget.options.backgroundZoom.toDouble();
-    if ((zoom + 1) >= widget.mapState.zoom) {
-      zoom = max(1, widget.mapState.zoom / 1.8).roundToDouble();
-    }
-    return zoom;
+    return max(1, min(14, widget.mapState.zoom - 2).roundToDouble());
   }
 }
 
