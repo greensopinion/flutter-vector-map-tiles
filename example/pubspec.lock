@@ -86,9 +86,9 @@ packages:
   flutter_map:
     dependency: transitive
     description:
-      name: flutter_map
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "../../flutter_map"
+      relative: true
+    source: path
     version: "0.14.0"
   flutter_test:
     dependency: "direct dev"
@@ -330,7 +330,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.2.36"
+    version: "1.2.37"
   vector_math:
     dependency: transitive
     description:
@@ -348,9 +348,9 @@ packages:
   vector_tile_renderer:
     dependency: transitive
     description:
-      name: vector_tile_renderer
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "../../dart-vector-tile-renderer"
+      relative: true
+    source: path
     version: "2.0.2"
   win32:
     dependency: transitive
