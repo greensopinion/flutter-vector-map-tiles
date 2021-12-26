@@ -97,19 +97,24 @@ class VectorTileModel extends ChangeNotifier {
   }
 
   Future<Map<String, VectorTile>> _retrieve(TileIdentity tile) async {
-    Map<String, VectorTile> tileBySource = {};
+    Map<String, Future<VectorTile>> futureBySource = {};
     for (final source in caches.providerSources) {
+      futureBySource[source] = caches.vectorTileCache.retrieve(source, tile);
+    }
+    Map<String, VectorTile> tileBySource = {};
+    for (final entry in futureBySource.entries) {
+      VectorTile tile;
       try {
-        tileBySource[source] =
-            await caches.vectorTileCache.retrieve(source, tile);
+        tile = await entry.value;
       } catch (error) {
         if (error is ProviderException && error.statusCode == 404) {
           print(error);
-          tileBySource[source] = VectorTile(layers: []);
+          tile = VectorTile(layers: []);
         } else {
           rethrow;
         }
       }
+      tileBySource[entry.key] = tile;
     }
     return tileBySource;
   }
