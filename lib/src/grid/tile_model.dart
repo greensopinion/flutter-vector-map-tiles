@@ -28,7 +28,7 @@ class VectorTileModel extends ChangeNotifier {
   double lastRenderedZoomScale = double.negativeInfinity;
   late final TileTranslation translation;
   late TileTranslation imageTranslation;
-  Map<String, VectorTile>? vector;
+  Tileset? tileset;
   ui.Image? image;
 
   VectorTileModel(
@@ -85,13 +85,15 @@ class VectorTileModel extends ChangeNotifier {
       }
     }
     Map<String, VectorTile> tileBySource = await vectorFuture;
+    final preprocessedTileset =
+        TilesetPreprocessor(theme).preprocess(Tileset(tileBySource));
     if (renderMode != RenderMode.raster) {
-      vector = tileBySource;
+      tileset = preprocessedTileset;
     }
     if (renderMode != RenderMode.vector &&
         !_disposed &&
         (this.image == null || loadImage)) {
-      await _updateImage(translation, tileBySource);
+      await _updateImage(translation, preprocessedTileset);
     }
     notifyListeners();
   }
@@ -120,11 +122,10 @@ class VectorTileModel extends ChangeNotifier {
   }
 
   Future<bool> _updateImage(
-      TileTranslation translation, Map<String, VectorTile> tileBySource) async {
+      TileTranslation translation, Tileset tileset) async {
     final id = translation.translated;
     final zoom = translation.original.z.toDouble();
-    final image =
-        await caches.imageTileCache.retrieve(id, tileBySource, zoom: zoom);
+    final image = await caches.imageTileCache.retrieve(id, tileset, zoom: zoom);
     caches.memoryImageCache.putImage(id, zoom: zoom, image: image);
     return _applyImage(translation, image);
   }

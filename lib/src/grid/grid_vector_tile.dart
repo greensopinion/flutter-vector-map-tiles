@@ -127,14 +127,14 @@ class _VectorTilePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     bool changed = model.updateRendering();
-    if (model.vector == null && model.image == null) {
+    if (model.tileset == null && model.image == null) {
       if (model.paintBackground) {
         _paintBackground(canvas, size);
       }
       return;
     }
     final image = model.image;
-    final renderImage = (changed || model.vector == null) && image != null;
+    final renderImage = (changed || model.tileset == null) && image != null;
     final translation =
         renderImage ? model.imageTranslation : model.translation;
     final tileSizer = GridTileSizer(
@@ -150,7 +150,7 @@ class _VectorTilePainter extends CustomPainter {
       }
     } else {
       final tileClip = tileSizer.tileClip(size, tileSizer.effectiveScale);
-      Renderer(theme: model.theme).render(canvas, model.vector!,
+      Renderer(theme: model.theme).render(canvas, model.tileset!,
           clip: tileClip,
           zoomScaleFactor: tileSizer.effectiveScale,
           zoom: model.lastRenderedZoom);
@@ -168,7 +168,7 @@ class _VectorTilePainter extends CustomPainter {
     canvas.clipRect(Offset.zero & size);
     tileSizer.apply(canvas);
     final tileClip = tileSizer.tileClip(size, tileSizer.effectiveScale);
-    Renderer(theme: model.theme).render(canvas, {},
+    Renderer(theme: model.theme).render(canvas, Tileset({}),
         clip: tileClip,
         zoomScaleFactor: tileSizer.effectiveScale,
         zoom: model.lastRenderedZoom);

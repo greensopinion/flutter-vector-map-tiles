@@ -2,7 +2,6 @@ import 'package:flutter_map/plugin_api.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../vector_map_tiles.dart';
-import 'tile_providers.dart';
 
 enum RenderMode {
   /// tiles are rendered using vectors only

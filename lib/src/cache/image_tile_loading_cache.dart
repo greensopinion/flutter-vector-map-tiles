@@ -16,14 +16,12 @@ class ImageTileLoadingCache with CacheStats {
 
   double get scale => _pipeline.scale;
 
-  Future<Image> retrieve(
-      TileIdentity identity, Map<String, VectorTile> tileBySource,
+  Future<Image> retrieve(TileIdentity identity, Tileset tileset,
       {required double zoom}) async {
     final key = _key(identity, zoom: zoom);
     var future = _futuresByKey[key];
     if (future == null) {
-      future =
-          _ReferenceCountedImage(_load(identity, tileBySource, zoom: zoom));
+      future = _ReferenceCountedImage(_load(identity, tileset, zoom: zoom));
       _futuresByKey[key] = future;
     } else {
       future.reference();
@@ -40,15 +38,13 @@ class ImageTileLoadingCache with CacheStats {
     }
   }
 
-  Future<Image> _load(
-      TileIdentity identity, Map<String, VectorTile> tileBySource,
+  Future<Image> _load(TileIdentity identity, Tileset tileset,
       {required double zoom}) async {
     final modifier = _toModifier(zoom);
     final image = await delegate.retrieve(identity, modifier);
     if (image == null) {
       cacheMiss();
-      final rendered =
-          await _pipeline.renderImage(identity, tileBySource, zoom);
+      final rendered = await _pipeline.renderImage(identity, tileset, zoom);
       await delegate.put(identity, rendered, modifier);
       return rendered;
     } else {

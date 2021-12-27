@@ -1,3 +1,7 @@
+## 1.2.38
+
+* reduce CPU overhead when rendering tiles
+
 ## 1.2.37
 
 * improve backgound layer rendering

@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import '../../vector_map_tiles.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
-import '../tile_identity.dart';
 import 'storage_cache.dart';
 
 class VectorTileLoadingCache {

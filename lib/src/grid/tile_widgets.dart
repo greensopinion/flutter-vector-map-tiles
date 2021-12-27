@@ -2,8 +2,6 @@ import 'package:flutter/widgets.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../vector_map_tiles.dart';
-import '../tile_identity.dart';
-import '../options.dart';
 import '../cache/caches.dart';
 import 'grid_vector_tile.dart';
 import 'tile_model.dart';
