@@ -500,14 +500,14 @@ packages:
       name: vector_tile
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.2"
+    version: "0.3.0"
   vector_tile_renderer:
     dependency: "direct main"
     description:
       name: vector_tile_renderer
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.4"
+    version: "2.1.5"
   vm_service:
     dependency: transitive
     description:

@@ -1,3 +1,10 @@
+## 1.2.39
+
+* consume latest `vector_tile_renderer` to:
+* improve rendering speed
+* improve label placement to have fewer unlabelled roads
+* improve support for theme expressions
+
 ## 1.2.38
 
 * reduce CPU overhead when rendering tiles

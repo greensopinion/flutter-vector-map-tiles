@@ -330,7 +330,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.2.38"
+    version: "1.2.39"
   vector_math:
     dependency: transitive
     description:
@@ -344,14 +344,14 @@ packages:
       name: vector_tile
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.2"
+    version: "0.3.0"
   vector_tile_renderer:
     dependency: transitive
     description:
       name: vector_tile_renderer
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.4"
+    version: "2.1.5"
   win32:
     dependency: transitive
     description:
