@@ -1,66 +1,31 @@
-import 'dart:collection';
-
 import 'dart:ui';
 
 import '../tile_identity.dart';
-import 'cache_stats.dart';
+import 'cache.dart';
 
-class MemoryImageCache with CacheStats {
-  int _maxSize;
-  final _cache = LinkedHashMap<String, Image>();
-  bool _disposed = false;
+class ImageKey {
+  final TileIdentity id;
+  final int zoom;
+  ImageKey(this.id, this.zoom);
 
-  MemoryImageCache(this._maxSize);
+  @override
+  operator ==(o) => o is ImageKey && o.id == id && o.zoom == zoom;
 
-  void putImage(TileIdentity id, {required double zoom, required Image image}) {
-    if (_disposed) {
-      return;
-    }
-    final key = _toKey(id, zoom);
-    _cache.remove(key)?.dispose();
-    _cache[key] = image.clone();
-    _applyMaxSize();
-  }
+  @override
+  int get hashCode => hashValues(id, zoom);
 
-  Image? getImage(TileIdentity id, {required double zoom}) {
-    if (_disposed) {
-      return null;
-    }
-    final key = _toKey(id, zoom);
-    final image = _cache.remove(key);
-    if (image != null) {
-      cacheHit();
-      _cache[key] = image;
-      return image.clone();
-    } else {
-      cacheMiss();
-    }
-  }
+  @override
+  String toString() => 'ImageKey(id=$id,zoom=$zoom)';
+}
 
-  void _applyMaxSize() {
-    while (_cache.length > _maxSize) {
-      final oldest = _cache.keys.first;
-      final removed = _cache.remove(oldest)!;
-      removed.dispose();
-    }
-  }
+class MemoryImageCache extends Cache<ImageKey, Image> {
+  MemoryImageCache(int maxSize)
+      : super(maxSize: maxSize, copier: _Copier(), sizer: Sizer());
+}
 
-  void didHaveMemoryPressure() {
-    _clear();
-    _maxSize = _maxSize ~/ 2;
-  }
-
-  void dispose() {
-    _clear();
-  }
-
-  void _clear() {
-    _cache.values.forEach((image) {
-      image.dispose();
-    });
-    _cache.clear();
-  }
-
-  String _toKey(TileIdentity id, double zoom) =>
-      '${id.z}.${id.x}.${id.y}.$zoom';
+class _Copier extends Copier<Image> {
+  @override
+  Image? copy(Image? value) => value?.clone();
+  @override
+  void dispose(Image? value) => value?.dispose();
 }

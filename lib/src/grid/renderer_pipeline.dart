@@ -14,8 +14,7 @@ class RendererPipeline {
     _renderer = ImageRenderer(theme: theme, scale: scale);
   }
 
-  Future<Image> renderImage(
-      TileIdentity id, Tileset tileset, double zoom) async {
+  Future<Image> renderImage(TileIdentity id, Tileset tileset, int zoom) async {
     final job = _RenderingJob(id, tileset, zoom);
     queue.add(job);
     if (queue.length == 1) {
@@ -29,7 +28,7 @@ class RendererPipeline {
     try {
       int zoomDifference = job.zoom.toInt() - job.id.z.toInt();
       final image = await _renderer.render(job.tileset,
-          zoomScaleFactor: scale * zoomDifference, zoom: job.zoom);
+          zoomScaleFactor: scale * zoomDifference, zoom: job.zoom.toDouble());
       job.completer.complete(image);
     } catch (error, stack) {
       print(error);
@@ -52,7 +51,7 @@ class _RenderingJob {
   final completer = Completer<Image>();
   final TileIdentity id;
   final Tileset tileset;
-  final double zoom;
+  final int zoom;
 
   _RenderingJob(this.id, this.tileset, this.zoom);
 }

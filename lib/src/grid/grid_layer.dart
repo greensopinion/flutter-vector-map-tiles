@@ -7,6 +7,9 @@ import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../cache/caches.dart';
 import '../options.dart';
+import '../stream/caches_tile_provider.dart';
+import '../stream/provider_supplier.dart';
+import '../stream/tile_supplier.dart';
 import '../tile_identity.dart';
 import 'debounce.dart';
 import 'disposable_state.dart';
@@ -30,6 +33,7 @@ class VectorTileCompositeLayer extends StatefulWidget {
 class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
     with WidgetsBindingObserver {
   late Caches _caches;
+  late TileSupplier _tileSupplier;
   late final _cacheStats = ScheduledDebounce(_printCacheStats,
       delay: Duration(seconds: 1),
       jitter: Duration(milliseconds: 0),
@@ -88,7 +92,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
               () => widget.mapState.zoom),
           widget.mapState,
           widget.stream,
-          _caches)
+          _tileSupplier)
     ];
     if (backgroundTheme != null) {
       final background = VectorTileLayer(
@@ -97,7 +101,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
               options.showTileDebugInfo, true, _backgroundZoom),
           widget.mapState,
           widget.stream,
-          _caches);
+          _tileSupplier);
       layers.insert(0, background);
     }
     return Stack(children: layers);
@@ -109,8 +113,10 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
         pipeline: RendererPipeline(widget.options.theme,
             scale: widget.options.rasterImageScale),
         ttl: widget.options.fileCacheTtl,
+        maxTilesInMemory: widget.options.maxTilesInMemory,
         maxImagesInMemory: widget.options.maxImagesInMemory,
         maxSizeInBytes: widget.options.fileCacheMaximumSizeInBytes);
+    _tileSupplier = ProviderTileSupplier(CachesTileProvider(_caches));
   }
 
   void _printCacheStats() {
@@ -137,10 +143,10 @@ class VectorTileLayer extends StatefulWidget {
   final _LayerOptions options;
   final MapState mapState;
   final Stream<Null> stream;
-  final Caches caches;
+  final TileSupplier tileSupplier;
 
   const VectorTileLayer(
-      Key key, this.options, this.mapState, this.stream, this.caches)
+      Key key, this.options, this.mapState, this.stream, this.tileSupplier)
       : super(key: key);
 
   @override
@@ -191,7 +197,7 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
         () => _paintZoomScale,
         () => _zoom,
         widget.options.theme,
-        widget.caches,
+        widget.tileSupplier,
         widget.options.renderMode,
         widget.options.paintBackground,
         widget.options.showTileDebugInfo);

@@ -3,9 +3,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
-import '../cache/caches.dart';
 import '../options.dart';
-import '../provider_exception.dart';
+import '../stream/tile_supplier.dart';
 import '../tile_identity.dart';
 import 'slippy_map_translator.dart';
 
@@ -18,138 +17,73 @@ class VectorTileModel extends ChangeNotifier {
 
   final RenderMode renderMode;
   final TileIdentity tile;
+  final TileSupplier tileSupplier;
   final Theme theme;
   final bool paintBackground;
-  final Caches caches;
   final bool showTileDebugInfo;
   final ZoomScaleFunction zoomScaleFunction;
   final ZoomFunction zoomFunction;
   double lastRenderedZoom = double.negativeInfinity;
   double lastRenderedZoomScale = double.negativeInfinity;
-  late final TileTranslation translation;
-  late TileTranslation imageTranslation;
+  late final TileTranslation defaultTranslation;
+  TileTranslation? translation;
+  TileTranslation? imageTranslation;
   Tileset? tileset;
   ui.Image? image;
+  TileRequest? _tileRequest;
 
   VectorTileModel(
       this.renderMode,
-      this.caches,
+      this.tileSupplier,
       this.theme,
       this.tile,
       this.zoomScaleFunction,
       this.zoomFunction,
       this.paintBackground,
       this.showTileDebugInfo) {
-    final slippyMap = SlippyMapTranslator(caches.vectorTileCache.maximumZoom);
-    final normalizedTile = tile.normalize();
-    translation = slippyMap.translate(normalizedTile);
-    imageTranslation = translation;
+    defaultTranslation =
+        SlippyMapTranslator(tileSupplier.maximumZoom).translate(tile);
   }
 
   void startLoading() {
-    _loadWithAttempts(3);
+    final request = TileRequest(
+        tileId: tile.normalize(),
+        primaryFormat: renderMode == RenderMode.raster
+            ? TileFormat.raster
+            : TileFormat.vector,
+        secondaryFormat:
+            renderMode == RenderMode.mixed ? TileFormat.raster : null);
+    _tileRequest = request;
+    final stream = tileSupplier.stream(request);
+    stream.forEach(_receiveTile);
   }
 
-  void _loadWithAttempts(int attempts) async {
-    try {
-      await _loadOnce();
-    } on ProviderException catch (e, stack) {
-      print(e);
-      if (e.retryable == Retryable.retry) {
-        if (attempts > 0) {
-          Future.delayed(Duration(seconds: 3), () {
-            if (!_disposed) {
-              _loadWithAttempts(attempts - 1);
+  void _receiveTile(Tile received) {
+    final newTranslation = SlippyMapTranslator(tileSupplier.maximumZoom)
+        .specificZoomTranslation(tile, zoom: received.identity.z);
+    if (received.format == TileFormat.raster) {
+      if (_disposed) {
+        received.image?.dispose();
+      } else {
+        var hadImage = image != null;
+        image?.dispose();
+        image = received.image;
+        imageTranslation = newTranslation;
+        if (hadImage && renderMode != RenderMode.raster) {
+          Future.delayed(Duration(milliseconds: 300)).then((value) {
+            if (tileset == null && imageTranslation == newTranslation) {
+              notifyListeners();
             }
           });
-        } // keep retryable failures quiet
-      } else if (e.statusCode != null && e.statusCode == 400) {
-        // bad request; unsupported
-      } else {
-        print(stack);
-        rethrow;
-      }
-    }
-  }
-
-  Future<void> _loadOnce() async {
-    if (_disposed) {
-      return;
-    }
-    final vectorFuture = _retrieve(translation.translated);
-    bool loadImage = renderMode == RenderMode.raster;
-    if (renderMode != RenderMode.vector && this.image == null) {
-      loadImage = _presentImageTilePreviewIfPresent();
-      if (this.image != null) {
-        notifyListeners();
-      }
-    }
-    Map<String, VectorTile> tileBySource = await vectorFuture;
-    final preprocessedTileset =
-        TilesetPreprocessor(theme).preprocess(Tileset(tileBySource));
-    if (renderMode != RenderMode.raster) {
-      tileset = preprocessedTileset;
-    }
-    if (renderMode != RenderMode.vector &&
-        !_disposed &&
-        (this.image == null || loadImage)) {
-      await _updateImage(translation, preprocessedTileset);
-    }
-    notifyListeners();
-  }
-
-  Future<Map<String, VectorTile>> _retrieve(TileIdentity tile) async {
-    Map<String, Future<VectorTile>> futureBySource = {};
-    for (final source in caches.providerSources) {
-      futureBySource[source] = caches.vectorTileCache.retrieve(source, tile);
-    }
-    Map<String, VectorTile> tileBySource = {};
-    for (final entry in futureBySource.entries) {
-      VectorTile tile;
-      try {
-        tile = await entry.value;
-      } catch (error) {
-        if (error is ProviderException && error.statusCode == 404) {
-          print(error);
-          tile = VectorTile(layers: []);
         } else {
-          rethrow;
+          notifyListeners();
         }
       }
-      tileBySource[entry.key] = tile;
+    } else {
+      tileset = received.tileset;
+      translation = newTranslation;
+      notifyListeners();
     }
-    return tileBySource;
-  }
-
-  Future<bool> _updateImage(
-      TileTranslation translation, Tileset tileset) async {
-    final id = translation.translated;
-    final zoom = translation.original.z.toDouble();
-    final image = await caches.imageTileCache.retrieve(id, tileset, zoom: zoom);
-    caches.memoryImageCache.putImage(id, zoom: zoom, image: image);
-    return _applyImage(translation, image);
-  }
-
-  bool _updateImageIfPresent(TileTranslation translation, {int? minZoom}) {
-    final id = translation.translated;
-    ui.Image? image;
-    if (minZoom == null) {
-      minZoom = translation.translated.z;
-    }
-    for (int z = translation.original.z; z >= minZoom && image == null; --z) {
-      image = caches.memoryImageCache.getImage(id, zoom: z.toDouble());
-    }
-    return _applyImage(translation, image);
-  }
-
-  bool _applyImage(TileTranslation translation, ui.Image? image) {
-    if (_disposed) {
-      image?.dispose();
-      return false;
-    }
-    this.image = image;
-    this.imageTranslation = translation;
-    return this.image != null;
   }
 
   bool updateRendering() {
@@ -182,6 +116,7 @@ class VectorTileModel extends ChangeNotifier {
   @override
   void dispose() {
     super.dispose();
+    _tileRequest?.complete();
     image?.dispose();
     image = null;
     _disposed = true;
@@ -192,28 +127,5 @@ class VectorTileModel extends ChangeNotifier {
     if (!_disposed) {
       super.removeListener(listener);
     }
-  }
-
-  // returns true if alternative was presented
-  bool _presentImageTilePreviewIfPresent() {
-    _updateImageIfPresent(translation, minZoom: translation.original.z);
-    if (!_disposed && this.image == null) {
-      var alternativeLoaded = false;
-      final slippyMap = SlippyMapTranslator(caches.vectorTileCache.maximumZoom);
-      for (var altLevel = 1;
-          altLevel < tile.z && altLevel < 3 && !_disposed && !alternativeLoaded;
-          ++altLevel) {
-        final alternativeTranslation =
-            slippyMap.lowerZoomAlternative(tile, levels: altLevel);
-        if (alternativeTranslation.translated != translation.translated) {
-          alternativeLoaded = _updateImageIfPresent(alternativeTranslation);
-        }
-      }
-      if (!alternativeLoaded) {
-        alternativeLoaded = _updateImageIfPresent(translation);
-      }
-      return alternativeLoaded;
-    }
-    return false;
   }
 }

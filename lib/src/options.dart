@@ -62,8 +62,14 @@ class VectorTileLayerOptions extends LayerOptions {
   /// high can result in exceeding maximum allowable process memory
   /// size, resulting in the OS terminating the app (i.e. crashes).
   /// Only applicable for [renderMode] of `mixed` or `raster`.
-  final maxImagesInMemory;
+  final int maxImagesInMemory;
   static const DEFAULT_CACHE_MAX_IMAGES_IN_MEMORY = 40;
+
+  /// The maximum number of decoded vector tiles retained in the memory
+  /// vector tile cache.
+  /// Cached vector tiles eliminate the need to decode protobuf tile data.
+  final int maxTilesInMemory;
+  static const DEFAULT_CACHE_MAX_TILES_IN_MEMORY = 50;
 
   /// Indicates whether debug information should be shown for tiles
   final bool showTileDebugInfo;
@@ -80,6 +86,7 @@ class VectorTileLayerOptions extends LayerOptions {
       this.rasterImageScale = 3.0,
       this.renderMode = RenderMode.mixed,
       this.fileCacheTtl = DEFAULT_CACHE_TTL,
+      this.maxTilesInMemory = DEFAULT_CACHE_MAX_TILES_IN_MEMORY,
       this.maxImagesInMemory = DEFAULT_CACHE_MAX_IMAGES_IN_MEMORY,
       this.fileCacheMaximumSizeInBytes = DEFAULT_CACHE_MAX_SIZE,
       this.backgroundTheme,

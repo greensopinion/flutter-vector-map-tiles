@@ -10,12 +10,14 @@ import 'memory_image_cache.dart';
 import 'storage_cache.dart';
 import 'tile_image_cache.dart';
 import 'vector_tile_loading_cache.dart';
+import 'vector_tile_memory_cache.dart';
 
 class Caches {
   final ByteStorage _storage = ByteStorage(
       pather: () => getTemporaryDirectory()
           .then((value) => Directory('${value.path}/.vector_map')));
   late final StorageCache _cache;
+  late final VectorTileMemoryCache memoryVectorTileCache;
   late final VectorTileLoadingCache vectorTileCache;
   late final ImageTileLoadingCache imageTileCache;
   late final MemoryImageCache memoryImageCache;
@@ -25,11 +27,14 @@ class Caches {
       {required TileProviders providers,
       required RendererPipeline pipeline,
       required Duration ttl,
+      required int maxTilesInMemory,
       required int maxImagesInMemory,
       required int maxSizeInBytes}) {
     providerSources = providers.tileProviderBySource.keys.toList();
     _cache = StorageCache(_storage, ttl, maxSizeInBytes);
-    vectorTileCache = VectorTileLoadingCache(_cache, providers);
+    memoryVectorTileCache = VectorTileMemoryCache(maxTilesInMemory);
+    vectorTileCache =
+        VectorTileLoadingCache(_cache, memoryVectorTileCache, providers);
     imageTileCache = ImageTileLoadingCache(TileImageCache(_cache), pipeline);
     memoryImageCache = MemoryImageCache(maxImagesInMemory);
   }
@@ -38,9 +43,11 @@ class Caches {
 
   void dispose() {
     memoryImageCache.dispose();
+    memoryVectorTileCache.dispose();
   }
 
   void didHaveMemoryPressure() {
+    memoryVectorTileCache.didHaveMemoryPressure();
     memoryImageCache.didHaveMemoryPressure();
   }
 
@@ -48,6 +55,8 @@ class Caches {
     final cacheStats = <String>[];
     cacheStats
         .add('Storage cache hit ratio:           ${_cache.hitRatio.asPct()}%');
+    cacheStats.add(
+        'Vector tile cache hit ratio:       ${memoryVectorTileCache.hitRatio.asPct()}%');
     cacheStats.add(
         'Image tile cache hit ratio:        ${imageTileCache.hitRatio.asPct()}%');
     cacheStats.add(

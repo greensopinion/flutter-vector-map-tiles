@@ -1,13 +1,18 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'storage_cache.dart';
 import '../tile_identity.dart';
+import 'storage_cache.dart';
 
 class TileImageCache {
   final StorageCache _delegate;
 
   TileImageCache(this._delegate);
+
+  Future<bool> contains(TileIdentity tile, String modifier) async {
+    final key = _toKey(tile, modifier);
+    return await _delegate.exists(key);
+  }
 
   Future<Image?> retrieve(TileIdentity tile, String modifier) async {
     final key = _toKey(tile, modifier);

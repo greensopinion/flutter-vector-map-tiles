@@ -2,8 +2,8 @@ import 'package:flutter/material.dart' as material;
 import 'package:flutter/widgets.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
-import '../cache/caches.dart';
 import '../options.dart';
+import '../stream/tile_supplier.dart';
 import '../tile_identity.dart';
 import 'debounce.dart';
 import 'disposable_state.dart';
@@ -13,7 +13,7 @@ import 'tile_model.dart';
 class GridVectorTile extends StatefulWidget {
   final TileIdentity tileIdentity;
   final RenderMode renderMode;
-  final Caches caches;
+  final TileSupplier tileSupplier;
   final Theme theme;
   final ZoomScaleFunction zoomScaleFunction;
   final ZoomFunction zoomFunction;
@@ -24,7 +24,7 @@ class GridVectorTile extends StatefulWidget {
       {required Key key,
       required this.tileIdentity,
       required this.renderMode,
-      required this.caches,
+      required this.tileSupplier,
       required this.zoomScaleFunction,
       required this.zoomFunction,
       required this.theme,
@@ -47,7 +47,7 @@ class _GridVectorTile extends DisposableState<GridVectorTile>
     super.initState();
     _model = VectorTileModel(
         widget.renderMode,
-        widget.caches,
+        widget.tileSupplier,
         widget.theme,
         widget.tileIdentity,
         widget.zoomScaleFunction,
@@ -111,15 +111,16 @@ enum _PaintMode { vector, raster, background, none }
 
 class _VectorTilePainter extends CustomPainter {
   final VectorTileModel model;
-  late final ScheduledDebounce debounce;
+  TileIdentity? _lastPaintedId;
   var _lastPainted = _PaintMode.none;
   var _paintCount = 0;
+  late final ScheduledDebounce debounce;
 
   _VectorTilePainter(VectorTileModel model)
       : this.model = model,
         super(repaint: model) {
     debounce = ScheduledDebounce(_notifyIfNeeded,
-        delay: Duration(milliseconds: 200),
+        delay: Duration(milliseconds: 100),
         jitter: Duration(milliseconds: 100),
         maxAge: Duration(seconds: 10));
   }
@@ -134,9 +135,17 @@ class _VectorTilePainter extends CustomPainter {
       return;
     }
     final image = model.image;
-    final renderImage = (changed || model.tileset == null) && image != null;
+    final renderImage = (changed ||
+            model.tileset == null ||
+            (model.renderMode == RenderMode.mixed &&
+                (_lastPainted == _PaintMode.background ||
+                    _lastPainted == _PaintMode.none))) &&
+        image != null;
     final translation =
         renderImage ? model.imageTranslation : model.translation;
+    if (translation == null) {
+      return;
+    }
     final tileSizer = GridTileSizer(
         translation, model.zoomScaleFunction(), size, renderImage, image);
     canvas.save();
@@ -145,6 +154,7 @@ class _VectorTilePainter extends CustomPainter {
     if (renderImage) {
       canvas.drawImage(image!, Offset.zero, Paint());
       _lastPainted = _PaintMode.raster;
+      _lastPaintedId = translation.translated;
       if (model.renderMode == RenderMode.mixed) {
         debounce.update();
       }
@@ -155,6 +165,7 @@ class _VectorTilePainter extends CustomPainter {
           zoomScaleFactor: tileSizer.effectiveScale,
           zoom: model.lastRenderedZoom);
       _lastPainted = _PaintMode.vector;
+      _lastPaintedId = translation.translated;
     }
     canvas.restore();
     _paintTileDebugInfo(
@@ -163,7 +174,7 @@ class _VectorTilePainter extends CustomPainter {
 
   void _paintBackground(Canvas canvas, Size size) {
     final tileSizer = GridTileSizer(
-        model.translation, model.zoomScaleFunction(), size, false, null);
+        model.defaultTranslation, model.zoomScaleFunction(), size, false, null);
     canvas.save();
     canvas.clipRect(Offset.zero & size);
     tileSizer.apply(canvas);
@@ -173,10 +184,10 @@ class _VectorTilePainter extends CustomPainter {
         zoomScaleFactor: tileSizer.effectiveScale,
         zoom: model.lastRenderedZoom);
     _lastPainted = _PaintMode.background;
+    _lastPaintedId = null;
     canvas.restore();
     _paintTileDebugInfo(
         canvas, size, false, tileSizer.effectiveScale, tileSizer);
-    debounce.update();
   }
 
   void _paintTileDebugInfo(Canvas canvas, Size size, bool renderedImage,
@@ -220,12 +231,14 @@ class _VectorTilePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) =>
+  bool shouldRepaint(covariant _VectorTilePainter oldDelegate) =>
       model.hasChanged() ||
-      (_lastPainted == _PaintMode.none) ||
-      (_lastPainted == _PaintMode.background) ||
-      (_lastPainted != _PaintMode.vector &&
-          model.renderMode != RenderMode.raster);
+      (oldDelegate._lastPainted == _PaintMode.raster &&
+          (oldDelegate._lastPaintedId != model.imageTranslation?.translated ||
+              model.translation != null)) ||
+      (oldDelegate._lastPainted == _PaintMode.vector &&
+          oldDelegate._lastPaintedId != model.translation?.translated) ||
+      (oldDelegate._lastPainted == _PaintMode.background);
 }
 
 extension RectDebugExtension on Rect {

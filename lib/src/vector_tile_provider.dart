@@ -3,9 +3,9 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart';
 import 'package:http/retry.dart';
-import 'provider_exception.dart';
 
 import 'cache/memory_cache.dart';
+import 'provider_exception.dart';
 import 'tile_identity.dart';
 
 abstract class VectorTileProvider {
@@ -89,10 +89,10 @@ class MemoryCacheVectorTileProvider extends VectorTileProvider {
   @override
   Future<Uint8List> provide(TileIdentity tile) async {
     final key = tile.toCacheKey();
-    var value = _cache.getItem(key);
+    var value = _cache.get(key);
     if (value == null) {
       value = await delegate.provide(tile);
-      _cache.putItem(key, value);
+      _cache.put(key, value);
     }
     return value;
   }

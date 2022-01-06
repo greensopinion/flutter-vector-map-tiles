@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/plugin_api.dart';
-import 'grid/grid_layer.dart';
 
 import '../vector_map_tiles.dart';
+import 'grid/grid_layer.dart';
 
 /// A widget for a vector tile layer, to be used as a child
 /// of a [FlutterMap].

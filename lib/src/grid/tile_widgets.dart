@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../vector_map_tiles.dart';
-import '../cache/caches.dart';
+import '../stream/tile_supplier.dart';
 import 'grid_vector_tile.dart';
 import 'tile_model.dart';
 
@@ -11,7 +11,7 @@ class TileWidgets {
   final ZoomScaleFunction _zoomScaleFunction;
   final ZoomFunction _zoomFunction;
   final Theme _theme;
-  final Caches _caches;
+  final TileSupplier _tileSupplier;
   final RenderMode _renderMode;
   final bool paintBackground;
   final bool showTileDebugInfo;
@@ -20,7 +20,7 @@ class TileWidgets {
       this._zoomScaleFunction,
       this._zoomFunction,
       this._theme,
-      this._caches,
+      this._tileSupplier,
       this._renderMode,
       this.paintBackground,
       this.showTileDebugInfo);
@@ -43,7 +43,7 @@ class TileWidgets {
         key: Key('GridTile_${tile.z}_${tile.x}_${tile.y}_${_theme.id}'),
         tileIdentity: tile,
         renderMode: _renderMode,
-        caches: _caches,
+        tileSupplier: _tileSupplier,
         zoomScaleFunction: _zoomScaleFunction,
         zoomFunction: _zoomFunction,
         theme: _theme,
