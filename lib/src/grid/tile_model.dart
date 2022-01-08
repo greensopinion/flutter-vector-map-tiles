@@ -8,7 +8,7 @@ import '../stream/tile_supplier.dart';
 import '../tile_identity.dart';
 import 'slippy_map_translator.dart';
 
-typedef ZoomScaleFunction = double Function();
+typedef ZoomScaleFunction = double Function(int tileZoom);
 typedef ZoomFunction = double Function();
 
 class VectorTileModel extends ChangeNotifier {
@@ -19,7 +19,7 @@ class VectorTileModel extends ChangeNotifier {
   final TileIdentity tile;
   final TileSupplier tileSupplier;
   final Theme theme;
-  final bool paintBackground;
+  bool paintBackground;
   final bool showTileDebugInfo;
   final ZoomScaleFunction zoomScaleFunction;
   final ZoomFunction zoomFunction;
@@ -44,6 +44,8 @@ class VectorTileModel extends ChangeNotifier {
     defaultTranslation =
         SlippyMapTranslator(tileSupplier.maximumZoom).translate(tile);
   }
+
+  bool get hasData => image != null || tileset != null;
 
   void startLoading() {
     final request = TileRequest(
@@ -90,14 +92,14 @@ class VectorTileModel extends ChangeNotifier {
     final changed = hasChanged();
     if (changed) {
       lastRenderedZoom = zoomFunction();
-      lastRenderedZoomScale = zoomScaleFunction();
+      lastRenderedZoomScale = zoomScaleFunction(tile.z);
     }
     return changed;
   }
 
   bool hasChanged() {
     final lastRenderedZoom = zoomFunction();
-    final lastRenderedZoomScale = zoomScaleFunction();
+    final lastRenderedZoomScale = zoomScaleFunction(tile.z);
     return lastRenderedZoomScale != this.lastRenderedZoomScale ||
         lastRenderedZoom != this.lastRenderedZoom;
   }

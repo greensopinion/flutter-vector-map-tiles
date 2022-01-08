@@ -33,4 +33,21 @@ class TileIdentity extends CustomPoint<int> {
     }
     return TileIdentity(z, normalizedX, y);
   }
+
+  bool overlaps(TileIdentity other) {
+    return contains(other) || other.contains(this);
+  }
+
+  bool contains(TileIdentity other) {
+    final zoomDifference = other.z - z;
+    if (zoomDifference == 0) {
+      return this == other;
+    } else if (zoomDifference < 0) {
+      return false;
+    }
+    final divisor = pow(2, zoomDifference).toInt();
+    final translatedX = other.x ~/ divisor;
+    final translatedY = other.y ~/ divisor;
+    return translatedX == x && translatedY == y;
+  }
 }

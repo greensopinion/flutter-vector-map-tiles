@@ -89,6 +89,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
               options.renderMode,
               options.showTileDebugInfo,
               backgroundTheme == null,
+              false,
               () => widget.mapState.zoom),
           widget.mapState,
           widget.stream,
@@ -98,7 +99,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
       final background = VectorTileLayer(
           Key("${backgroundTheme.id}_background_VectorTileLayer"),
           _LayerOptions(backgroundTheme, RenderMode.vector,
-              options.showTileDebugInfo, true, _backgroundZoom),
+              options.showTileDebugInfo, true, true, _backgroundZoom),
           widget.mapState,
           widget.stream,
           _tileSupplier);
@@ -133,10 +134,11 @@ class _LayerOptions {
   final RenderMode renderMode;
   final bool showTileDebugInfo;
   final bool paintBackground;
+  final bool paintNoDataTiles;
   final double Function() mapZoom;
 
   _LayerOptions(this.theme, this.renderMode, this.showTileDebugInfo,
-      this.paintBackground, this.mapZoom);
+      this.paintBackground, this.paintNoDataTiles, this.mapZoom);
 }
 
 class VectorTileLayer extends StatefulWidget {
@@ -158,16 +160,17 @@ class VectorTileLayer extends StatefulWidget {
 class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
   StreamSubscription<Null>? _subscription;
   late TileWidgets _tileWidgets;
+  late final _ZoomScaler _zoomScaler;
 
   MapState get _mapState => widget.mapState;
+
   double get _zoom => widget.options.mapZoom();
   double get _clampedZoom => _zoom.roundToDouble();
-  double _paintZoomScale = 1.0;
 
   @override
   void initState() {
     super.initState();
-
+    _zoomScaler = _ZoomScaler(_mapState.options.crs);
     _createTileWidgets();
     _subscription = widget.stream.listen((event) {
       _update();
@@ -179,6 +182,7 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
   void dispose() {
     super.dispose();
     _subscription?.cancel();
+    _tileWidgets.dispose();
   }
 
   @override
@@ -194,26 +198,46 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
 
   void _createTileWidgets() {
     _tileWidgets = TileWidgets(
-        () => _paintZoomScale,
+        (tileZoom) => _zoomScaler.zoomScale(tileZoom),
         () => _zoom,
         widget.options.theme,
         widget.tileSupplier,
         widget.options.renderMode,
         widget.options.paintBackground,
         widget.options.showTileDebugInfo);
+    _tileWidgets.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_tileWidgets.all.isEmpty) {
+    _tileWidgets.updateWidgets();
+
+    final tiles = _tileWidgets.all.entries
+        .where((entry) =>
+            widget.options.paintNoDataTiles || entry.value.model.hasData)
+        .toList()
+      ..sort(_orderTileWidgets);
+    if (tiles.isEmpty) {
       return Container();
     }
-    _updatePaintZoomScale();
-    final positioner = GridTilePositioner(
-        TilePositioningState(_paintZoomScale, _mapState, _zoom));
-    final tileWidgets = _tileWidgets.all.entries
-        .map((entry) => positioner.positionTile(entry.key, entry.value))
-        .toList();
+    _zoomScaler.updateMapZoomScale(_mapState.zoom);
+
+    final tileWidgets = <Widget>[];
+    var positioner = GridTilePositioner(
+        tiles.first.key.z,
+        TilePositioningState(
+            _zoomScaler.zoomScale(tiles.first.key.z), _mapState, _zoom));
+    tiles.forEach((tile) {
+      if (tile.key.z != positioner.tileZoom) {
+        positioner = GridTilePositioner(
+            tile.key.z,
+            TilePositioningState(
+                _zoomScaler.zoomScale(tile.key.z), _mapState, _zoom));
+      }
+      tileWidgets.add(positioner.positionTile(tile.key, tile.value));
+    });
     return Stack(children: tileWidgets);
   }
 
@@ -260,14 +284,38 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
     }
     return tiles;
   }
+}
 
-  double _zoomScale(double mapZoom, double tileZoom) {
-    final crs = _mapState.options.crs;
-    return crs.scale(mapZoom) / crs.scale(tileZoom);
+int _orderTileWidgets(
+    MapEntry<TileIdentity, Widget> a, MapEntry<TileIdentity, Widget> b) {
+  int i = a.key.z.compareTo(b.key.z);
+  if (i == 0) {
+    i = a.key.x.compareTo(b.key.x);
+    if (i == 0) {
+      i = a.key.y.compareTo(b.key.y);
+    }
+  }
+  return i;
+}
+
+class _ZoomScaler {
+  final _crsScaleByZoom = <double>[];
+  var _mapZoomCrsScale = 1.0;
+  final Crs _crs;
+
+  _ZoomScaler(this._crs) {
+    _crsScaleByZoom.add(1.0);
+    for (int zoom = 1; zoom < 24; ++zoom) {
+      _crsScaleByZoom.add(_crs.scale(zoom.toDouble()).toDouble());
+    }
   }
 
-  void _updatePaintZoomScale() {
-    final tileZoom = _tileWidgets.all.keys.first.z;
-    _paintZoomScale = _zoomScale(widget.mapState.zoom, tileZoom.toDouble());
+  void updateMapZoomScale(double mapZoom) {
+    _mapZoomCrsScale = _crs.scale(mapZoom).toDouble();
+  }
+
+  double zoomScale(int tileZoom) {
+    var tileScale = _crsScaleByZoom[tileZoom];
+    return _mapZoomCrsScale / tileScale;
   }
 }

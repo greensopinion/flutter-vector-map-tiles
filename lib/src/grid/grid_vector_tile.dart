@@ -10,65 +10,17 @@ import 'disposable_state.dart';
 import 'grid_tile_positioner.dart';
 import 'tile_model.dart';
 
-class GridVectorTile extends StatefulWidget {
-  final TileIdentity tileIdentity;
-  final RenderMode renderMode;
-  final TileSupplier tileSupplier;
-  final Theme theme;
-  final ZoomScaleFunction zoomScaleFunction;
-  final ZoomFunction zoomFunction;
-  final bool paintBackground;
-  final bool showTileDebugInfo;
+class GridVectorTile extends material.StatelessWidget {
+  final VectorTileModel model;
 
-  const GridVectorTile(
-      {required Key key,
-      required this.tileIdentity,
-      required this.renderMode,
-      required this.tileSupplier,
-      required this.zoomScaleFunction,
-      required this.zoomFunction,
-      required this.theme,
-      required this.paintBackground,
-      required this.showTileDebugInfo})
+  const GridVectorTile({required Key key, required this.model})
       : super(key: key);
 
   @override
-  State<StatefulWidget> createState() {
-    return _GridVectorTile();
-  }
-}
-
-class _GridVectorTile extends DisposableState<GridVectorTile>
-    with material.SingleTickerProviderStateMixin {
-  late final VectorTileModel _model;
-
-  @override
-  void initState() {
-    super.initState();
-    _model = VectorTileModel(
-        widget.renderMode,
-        widget.tileSupplier,
-        widget.theme,
-        widget.tileIdentity,
-        widget.zoomScaleFunction,
-        widget.zoomFunction,
-        widget.paintBackground,
-        widget.showTileDebugInfo);
-    _model.startLoading();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  material.Widget build(material.BuildContext context) {
     return GridVectorTileBody(
-        key: Key(
-            'tileBody${widget.tileIdentity.z}_${widget.tileIdentity.x}_${widget.tileIdentity.y}'),
-        model: _model);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _model.dispose();
+        key: Key('tileBody${model.tile.z}_${model.tile.x}_${model.tile.y}'),
+        model: model);
   }
 }
 
@@ -94,7 +46,9 @@ class _GridVectorTileBodyState extends DisposableState<GridVectorTileBody> {
     super.initState();
     _painter = _VectorTilePainter(_model);
     _model.addListener(() {
-      setState(() {});
+      if (!disposed) {
+        setState(() {});
+      }
     });
   }
 
@@ -146,8 +100,8 @@ class _VectorTilePainter extends CustomPainter {
     if (translation == null) {
       return;
     }
-    final tileSizer = GridTileSizer(
-        translation, model.zoomScaleFunction(), size, renderImage, image);
+    final tileSizer = GridTileSizer(translation,
+        model.zoomScaleFunction(model.tile.z), size, renderImage, image);
     canvas.save();
     canvas.clipRect(Offset.zero & size);
     tileSizer.apply(canvas);
@@ -173,8 +127,8 @@ class _VectorTilePainter extends CustomPainter {
   }
 
   void _paintBackground(Canvas canvas, Size size) {
-    final tileSizer = GridTileSizer(
-        model.defaultTranslation, model.zoomScaleFunction(), size, false, null);
+    final tileSizer = GridTileSizer(model.defaultTranslation,
+        model.zoomScaleFunction(model.tile.z), size, false, null);
     canvas.save();
     canvas.clipRect(Offset.zero & size);
     tileSizer.apply(canvas);

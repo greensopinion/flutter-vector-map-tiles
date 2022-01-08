@@ -8,9 +8,10 @@ import '../tile_identity.dart';
 import 'slippy_map_translator.dart';
 
 class GridTilePositioner {
+  final int tileZoom;
   final TilePositioningState state;
 
-  GridTilePositioner(this.state);
+  GridTilePositioner(this.tileZoom, this.state);
 
   Widget positionTile(TileIdentity tile, Widget tileWidget) {
     final offset = _tileOffset(tile);
