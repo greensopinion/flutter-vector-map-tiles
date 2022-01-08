@@ -8,6 +8,7 @@ import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 import '../cache/caches.dart';
 import '../options.dart';
 import '../stream/caches_tile_provider.dart';
+import '../stream/preprocessing_tile_provider.dart';
 import '../stream/provider_supplier.dart';
 import '../stream/tile_supplier.dart';
 import '../tile_identity.dart';
@@ -117,7 +118,9 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
         maxTilesInMemory: widget.options.maxTilesInMemory,
         maxImagesInMemory: widget.options.maxImagesInMemory,
         maxSizeInBytes: widget.options.fileCacheMaximumSizeInBytes);
-    _tileSupplier = ProviderTileSupplier(CachesTileProvider(_caches));
+    _tileSupplier = ProviderTileSupplier(PreprocessingTileProvider(
+        CachesTileProvider(_caches),
+        TilesetPreprocessor(widget.options.theme)));
   }
 
   void _printCacheStats() {
