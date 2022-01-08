@@ -38,9 +38,6 @@ class TileWidgets extends ChangeNotifier {
 
   void updateWidgets() => _updateWidgets();
 
-  bool get hasNewModels => _newModels.isNotEmpty;
-  bool get hasObsoleteModels => _obsoleteModels.isNotEmpty;
-
   Map<TileIdentity, GridVectorTile> get all => _idToWidget;
 
   void _updateModels(List<TileIdentity> tiles) {

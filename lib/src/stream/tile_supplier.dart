@@ -47,6 +47,4 @@ abstract class TileProvider {
   int get maximumZoom;
   Future<Tile> provide(TileIdentity tileIdentity, TileFormat format,
       {double? zoom});
-  Future<Tile?> provideIfReady(TileIdentity tileIdentity, TileFormat format,
-      {double? zoom});
 }

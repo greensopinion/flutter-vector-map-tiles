@@ -18,16 +18,6 @@ class PreprocessingTileProvider extends TileProvider {
     return _preprocess(tile);
   }
 
-  @override
-  Future<Tile?> provideIfReady(TileIdentity tileIdentity, TileFormat format,
-      {double? zoom}) async {
-    final tile =
-        await _delegate.provideIfReady(tileIdentity, format, zoom: zoom);
-    if (tile != null) {
-      return _preprocess(tile);
-    }
-  }
-
   Future<Tile> _preprocess(Tile tile) async {
     if (tile.tileset != null) {
       return Tile(

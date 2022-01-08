@@ -19,28 +19,11 @@ class CachesTileProvider extends TileProvider {
   @override
   Future<Tile> provide(TileIdentity tileIdentity, TileFormat format,
       {double? zoom}) async {
-    final tile =
-        await _provide(tileIdentity, format, zoom: zoom, onlyIfPresent: false);
-    if (tile == null) {
-      throw 'illegal state';
-    }
-    return tile;
-  }
-
-  @override
-  Future<Tile?> provideIfReady(TileIdentity tileIdentity, TileFormat format,
-          {double? zoom}) =>
-      _provide(tileIdentity, format, zoom: zoom, onlyIfPresent: true);
-
-  @override
-  Future<Tile?> _provide(TileIdentity tileIdentity, TileFormat format,
-      {double? zoom, required bool onlyIfPresent}) async {
     if (format == TileFormat.vector) {
-      Map<String, Future<VectorTile?>> futureBySource = {};
+      Map<String, Future<VectorTile>> futureBySource = {};
       for (final source in _caches.providerSources) {
-        futureBySource[source] = onlyIfPresent
-            ? _caches.vectorTileCache.retrieveIfPresent(source, tileIdentity)
-            : _caches.vectorTileCache.retrieve(source, tileIdentity);
+        futureBySource[source] =
+            _caches.vectorTileCache.retrieve(source, tileIdentity);
       }
       Map<String, VectorTile> tileBySource = {};
       for (final entry in futureBySource.entries) {
@@ -54,9 +37,6 @@ class CachesTileProvider extends TileProvider {
           } else {
             rethrow;
           }
-        }
-        if (tile == null) {
-          return null;
         }
         tileBySource[entry.key] = tile;
       }
@@ -74,9 +54,6 @@ class CachesTileProvider extends TileProvider {
             format: format,
             tileset: null,
             image: image);
-      }
-      if (onlyIfPresent) {
-        return null;
       }
       final tile = await provide(tileIdentity, TileFormat.vector);
       final loaded = await _caches.imageTileCache
