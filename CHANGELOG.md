@@ -1,3 +1,8 @@
+## 1.2.40
+
+* improve rendering speed by moving some tile processing and protobuf decoding to an isolate
+* reduce flicker when zooming by rendering existing tiles until new tiles are ready
+
 ## 1.2.39
 
 * consume latest `vector_tile_renderer` to:
