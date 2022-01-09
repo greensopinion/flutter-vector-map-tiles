@@ -1,3 +1,7 @@
+## 1.2.43
+
+* reduce memory overhead
+* improve mixed mode efficiency by preferring to render tiles once if vector data is availble before image data
 ## 1.2.40
 
 * improve rendering speed by moving some tile processing and protobuf decoding to an isolate
