@@ -23,12 +23,12 @@ packages:
     source: hosted
     version: "2.1.1"
   async:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: async
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.7.0"
+    version: "2.8.2"
   boolean_selector:
     dependency: transitive
     description:

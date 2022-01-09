@@ -17,6 +17,7 @@ dependencies:
   path_provider: ^2.0.2
   vector_tile_renderer: ^2.1.6
    #path: ../dart-vector-tile-renderer
+  async: ^2.8.2
 
 dev_dependencies:
   test: ^1.17.5
