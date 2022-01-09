@@ -23,6 +23,13 @@ class PoolExecutor extends Executor {
   bool get disposed => _delegates[0].disposed;
 
   @override
+  List<Future<R>> submitAll<Q, R>(
+          ComputeCallback<Q, R> computeFunction, Q value) =>
+      _delegates
+          .map((delegate) => delegate.submit(computeFunction, value))
+          .toList();
+
+  @override
   Future<R> submit<Q, R>(ComputeCallback<Q, R> computeFunction, Q value) =>
       _nextDelegate().submit(computeFunction, value);
 

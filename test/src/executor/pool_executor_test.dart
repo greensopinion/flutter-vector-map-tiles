@@ -23,6 +23,16 @@ void main() {
     }
     expect(results, equals([2, 3, 4, 5, 6]));
   });
+
+  group('submitAll tasks:', () {
+    test('runs a task', () async {
+      final result = executor.submitAll(_task, 3);
+      expect(result.length, 3);
+      for (final future in result) {
+        expect(await future, equals(4));
+      }
+    });
+  });
 }
 
 dynamic _task(dynamic value) {

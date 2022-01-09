@@ -18,6 +18,12 @@ void main() {
     final result = await executor.submit(_task, 3);
     expect(result, equals(4));
   });
+
+  test('runs a submit all task', () async {
+    final result = executor.submitAll(_task, 3);
+    expect(result.length, 1);
+    expect(await result[0], equals(4));
+  });
 }
 
 dynamic _task(dynamic value) {

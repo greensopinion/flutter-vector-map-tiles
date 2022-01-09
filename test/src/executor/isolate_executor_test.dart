@@ -39,6 +39,14 @@ void main() {
     });
   });
 
+  group('submitAll tasks:', () {
+    test('runs a task', () async {
+      final result = executor.submitAll(_task, 3);
+      expect(result.length, 1);
+      expect(await result[0], equals(4));
+    });
+  });
+
   group('shuts down', () {
     test('can be disposed', () {
       executor.dispose();

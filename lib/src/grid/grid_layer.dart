@@ -128,7 +128,8 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
         maxSizeInBytes: widget.options.fileCacheMaximumSizeInBytes);
     _tileSupplier = ProviderTileSupplier(PreprocessingTileProvider(
         CachesTileProvider(_caches),
-        TilesetPreprocessor(widget.options.theme)));
+        TilesetPreprocessor(widget.options.theme),
+        _executor));
   }
 
   void _printCacheStats() {

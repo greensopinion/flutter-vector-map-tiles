@@ -32,6 +32,11 @@ class IsolateExecutor extends Executor {
 
   int get outstanding => _outstanding;
 
+  @override
+  List<Future<R>> submitAll<Q, R>(
+          ComputeCallback<Q, R> computeFunction, Q value) =>
+      [submit(computeFunction, value)];
+
   Future<R> submit<Q, R>(ComputeCallback<Q, R> computeFunction, Q value) async {
     if (_disposed) {
       throw 'disposed';

@@ -19,4 +19,9 @@ class DirectExecutor extends Executor {
     }
     return await computeFunction(value);
   }
+
+  @override
+  List<Future<R>> submitAll<Q, R>(
+          ComputeCallback<Q, R> computeFunction, Q value) =>
+      [submit(computeFunction, value)];
 }

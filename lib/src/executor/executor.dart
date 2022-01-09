@@ -6,6 +6,11 @@ import 'package:vector_map_tiles/src/executor/pool_executor.dart';
 
 abstract class Executor {
   Future<R> submit<Q, R>(ComputeCallback<Q, R> computeFunction, Q value);
+
+  /// submits the given function and value to all isolates in the executor
+  List<Future<R>> submitAll<Q, R>(
+      ComputeCallback<Q, R> computeFunction, Q value);
+
   void dispose();
   bool get disposed;
 }
