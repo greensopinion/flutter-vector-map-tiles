@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:vector_map_tiles/src/executor/executor.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../vector_map_tiles.dart';
@@ -11,27 +12,17 @@ class VectorTileLoadingCache {
   final VectorTileMemoryCache _memoryCache;
   final StorageCache _delegate;
   final TileProviders _providers;
-  final Map<String, Future<List<int>>> _futuresByKey = {};
+  final Map<String, Future<VectorTile>> _futuresByKey = {};
+  final Executor _executor;
 
-  VectorTileLoadingCache(this._delegate, this._memoryCache, this._providers);
+  VectorTileLoadingCache(
+      this._delegate, this._memoryCache, this._providers, this._executor);
 
   int get maximumZoom => _providers.tileProviderBySource.values
       .map((e) => e.maximumZoom)
       .reduce(min);
 
-  Future<VectorTile?> retrieveIfPresent(String source, TileIdentity tile) =>
-      _retrieve(source, tile, onlyIfPresent: true);
-
   Future<VectorTile> retrieve(String source, TileIdentity tile) async {
-    final retrieved = await _retrieve(source, tile, onlyIfPresent: false);
-    if (retrieved == null) {
-      throw 'illegal state';
-    }
-    return retrieved;
-  }
-
-  Future<VectorTile?> _retrieve(String source, TileIdentity tile,
-      {required bool onlyIfPresent}) async {
     var cachedTile = _memoryCache.get(TileKey(tile, source));
     if (cachedTile != null) {
       return cachedTile;
@@ -39,20 +30,11 @@ class VectorTileLoadingCache {
     final key = _toKey(source, tile);
     var future = _futuresByKey[key];
     if (future == null) {
-      if (onlyIfPresent) {
-        final cached = await _delegate.retrieve(key);
-        if (cached == null) {
-          return null;
-        }
-        future = Future.value(cached);
-      } else {
-        future = _loadBytes(source, key, tile);
-      }
+      future = _loadTile(source, key, tile);
       _futuresByKey[key] = future;
     }
     try {
-      final bytes = await future;
-      final vector = _read(bytes);
+      final vector = await future;
       _memoryCache.put(TileKey(tile, source), vector);
       return vector;
     } finally {
@@ -60,11 +42,14 @@ class VectorTileLoadingCache {
     }
   }
 
-  VectorTile _read(List<int> bytes) =>
-      VectorTileReader().read(Uint8List.fromList(bytes));
-
   String _toKey(String source, TileIdentity id) =>
       '${id.z}_${id.x}_${id.y}_$source.pbf';
+
+  Future<VectorTile> _loadTile(
+      String source, String key, TileIdentity tile) async {
+    final bytes = await _loadBytes(source, key, tile);
+    return _executor.submit(_readTileBytes, bytes);
+  }
 
   Future<List<int>> _loadBytes(
       String source, String key, TileIdentity tile) async {
@@ -76,3 +61,6 @@ class VectorTileLoadingCache {
     return bytes;
   }
 }
+
+VectorTile _readTileBytes(List<int> bytes) =>
+    VectorTileReader().read(Uint8List.fromList(bytes));

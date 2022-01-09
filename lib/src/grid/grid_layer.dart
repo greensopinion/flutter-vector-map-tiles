@@ -1,11 +1,15 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_map/plugin_api.dart';
+import 'package:vector_map_tiles/src/executor/direct_executor.dart';
+import 'package:vector_map_tiles/src/executor/pool_executor.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../cache/caches.dart';
+import '../executor/executor.dart';
 import '../options.dart';
 import '../stream/caches_tile_provider.dart';
 import '../stream/preprocessing_tile_provider.dart';
@@ -33,6 +37,7 @@ class VectorTileCompositeLayer extends StatefulWidget {
 
 class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
     with WidgetsBindingObserver {
+  late Executor _executor;
   late Caches _caches;
   late TileSupplier _tileSupplier;
   late final _cacheStats = ScheduledDebounce(_printCacheStats,
@@ -44,6 +49,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
   @override
   void initState() {
     super.initState();
+    _executor = newExecutor();
     _createCaches();
     Future.delayed(Duration(seconds: 3), () {
       _caches.applyConstraints();
@@ -60,6 +66,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
     super.dispose();
     _subscription?.cancel();
     _caches.dispose();
+    _executor.dispose();
   }
 
   @override
@@ -111,6 +118,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
 
   void _createCaches() {
     _caches = Caches(
+        executor: _executor,
         providers: widget.options.tileProviders,
         pipeline: RendererPipeline(widget.options.theme,
             scale: widget.options.rasterImageScale),

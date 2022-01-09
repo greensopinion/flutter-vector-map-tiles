@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
+import 'package:vector_map_tiles/src/executor/executor.dart';
 
 import '../../vector_map_tiles.dart';
 import '../grid/renderer_pipeline.dart';
@@ -13,6 +14,7 @@ import 'vector_tile_loading_cache.dart';
 import 'vector_tile_memory_cache.dart';
 
 class Caches {
+  final Executor executor;
   final ByteStorage _storage = ByteStorage(
       pather: () => getTemporaryDirectory()
           .then((value) => Directory('${value.path}/.vector_map')));
@@ -26,6 +28,7 @@ class Caches {
   Caches(
       {required TileProviders providers,
       required RendererPipeline pipeline,
+      required this.executor,
       required Duration ttl,
       required int maxTilesInMemory,
       required int maxImagesInMemory,
@@ -33,8 +36,8 @@ class Caches {
     providerSources = providers.tileProviderBySource.keys.toList();
     _cache = StorageCache(_storage, ttl, maxSizeInBytes);
     memoryVectorTileCache = VectorTileMemoryCache(maxTilesInMemory);
-    vectorTileCache =
-        VectorTileLoadingCache(_cache, memoryVectorTileCache, providers);
+    vectorTileCache = VectorTileLoadingCache(
+        _cache, memoryVectorTileCache, providers, executor);
     imageTileCache = ImageTileLoadingCache(TileImageCache(_cache), pipeline);
     memoryImageCache = MemoryImageCache(maxImagesInMemory);
   }
