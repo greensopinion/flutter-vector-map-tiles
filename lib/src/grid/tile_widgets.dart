@@ -3,14 +3,15 @@ import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../vector_map_tiles.dart';
 import '../stream/tile_supplier.dart';
+import '../tile_viewport.dart';
 import 'grid_vector_tile.dart';
 import 'tile_model.dart';
 
 class TileWidgets extends ChangeNotifier {
   bool _disposed = false;
   Map<TileIdentity, VectorTileModel> _idToModel = {};
-  Map<TileIdentity, VectorTileModel> _obsoleteModels = {};
-  List<VectorTileModel> _newModels = [];
+  Map<TileIdentity, VectorTileModel> _temporaryRetainModels = {};
+  Map<TileIdentity, VectorTileModel> _loadingModels = {};
   Map<TileIdentity, GridVectorTile> _idToWidget = {};
   final ZoomScaleFunction _zoomScaleFunction;
   final ZoomFunction _zoomFunction;
@@ -29,29 +30,24 @@ class TileWidgets extends ChangeNotifier {
       this.paintBackground,
       this.showTileDebugInfo);
 
-  void update(List<TileIdentity> tiles) {
+  void update(TileViewport viewport, List<TileIdentity> tiles) {
     if (tiles.isEmpty || _disposed) {
       return;
     }
-    _updateModels(tiles);
+    _updateModels(viewport, tiles);
   }
 
   void updateWidgets() => _updateWidgets();
 
   Map<TileIdentity, GridVectorTile> get all => _idToWidget;
 
-  void _updateModels(List<TileIdentity> tiles) {
-    final newZoom = tiles.first.z;
-    final obsoleteNewModels =
-        _newModels.where((newModel) => newModel.tile.z != newZoom).toList();
-    obsoleteNewModels.forEach((obsoleteNewModel) {
-      _newModels.remove(obsoleteNewModel);
-      _obsoleteModels[obsoleteNewModel.tile] = obsoleteNewModel;
-    });
+  void _updateModels(TileViewport viewport, List<TileIdentity> tiles) {
+    Map<TileIdentity, VectorTileModel> previousIdToModel = _idToModel;
 
-    Map<TileIdentity, VectorTileModel> idToModel = {};
+    _idToModel = {};
+
     tiles.forEach((tile) {
-      var model = _idToModel[tile] ?? _obsoleteModels[tile];
+      var model = previousIdToModel[tile];
       if (model == null) {
         model = VectorTileModel(
             _renderMode,
@@ -62,32 +58,41 @@ class TileWidgets extends ChangeNotifier {
             _zoomFunction,
             paintBackground,
             showTileDebugInfo);
-        _newModels.add(model);
         model.addListener(_scheduleClearNewModels);
+        _loadingModels[tile] = model;
         model.startLoading();
       } else {
-        _idToModel.remove(tile);
-        _obsoleteModels.remove(tile);
+        previousIdToModel.remove(tile);
       }
-      idToModel[tile] = model;
+      _idToModel[tile] = model;
     });
-    _obsoleteModels.addAll(_idToModel);
-    final entriesToDiscard = _obsoleteModels.entries
-        .where((entry) => (entry.key.z - newZoom).abs() > _maxZoomDifference)
-        .toList();
-    entriesToDiscard.forEach((entry) {
-      _obsoleteModels.remove(entry.key);
-      entry.value.dispose();
+    final newZoom = viewport.zoom;
+    final entriesToRemove = previousIdToModel.entries.where((previousEntry) {
+      if (previousEntry.key.z != newZoom && !previousEntry.value.hasData) {
+        return true;
+      }
+      final zoomDifference = previousEntry.key.z - newZoom;
+      if (zoomDifference > _maxSmallerZoomDifference ||
+          zoomDifference < _maxLargerZoomDifference) {
+        return true;
+      }
+      if (!viewport.overlaps(previousEntry.key)) {
+        return true;
+      }
+      return false;
+    }).toList();
+    entriesToRemove.forEach((toDispose) {
+      previousIdToModel.remove(toDispose.key);
     });
-    idToModel.addAll(_obsoleteModels);
-    _idToModel = idToModel;
-    if (_newModels.isEmpty) {
-      _removeObsoleteModels();
-    }
+    _temporaryRetainModels = previousIdToModel;
+    _temporaryRetainModels.forEach((key, value) {
+      _idToModel[key] = value;
+    });
+    notifyListeners();
   }
 
   void _scheduleClearNewModels() {
-    if (_newModels.length == 1) {
+    if (_loadingModels.length == 1) {
       _clearNewModels();
     } else {
       Future.delayed(Duration(milliseconds: 100))
@@ -96,17 +101,14 @@ class TileWidgets extends ChangeNotifier {
   }
 
   void _clearNewModels() {
-    if (_newModels.isNotEmpty) {
+    if (_loadingModels.isNotEmpty) {
       final readyModels =
-          _newModels.where((m) => m.hasData || m.disposed).toList();
+          _loadingModels.values.where((m) => m.hasData).toList();
       readyModels.forEach((m) {
-        if (!m.disposed) {
-          _idToModel[m.tile] = m;
-        }
         m.removeListener(_scheduleClearNewModels);
-        _newModels.remove(m);
+        _loadingModels.remove(m.tile);
       });
-      if (_newModels.isEmpty) {
+      if (_loadingModels.isEmpty) {
         _removeObsoleteModels();
       } else {
         _pruneObsoleteModels();
@@ -116,47 +118,48 @@ class TileWidgets extends ChangeNotifier {
   }
 
   void _removeObsoleteModels() {
-    if (_obsoleteModels.isNotEmpty) {
-      _obsoleteModels.forEach((tile, model) {
-        _idToModel.remove(tile);
-        model.dispose();
-      });
-      _obsoleteModels.clear();
-    }
+    _temporaryRetainModels.forEach((tile, model) {
+      _idToModel.remove(tile);
+      _loadingModels.remove(tile);
+    });
+    _temporaryRetainModels.clear();
   }
 
   void _pruneObsoleteModels() {
-    final allObsoleteEntries = _obsoleteModels.entries.toList();
+    final allObsoleteEntries = _temporaryRetainModels.entries.toList();
     allObsoleteEntries.forEach((entry) {
       final obsoleteModel = entry.value;
 
       final containing = _idToModel.values.any((candidate) =>
           candidate.hasData &&
-          !_obsoleteModels.containsKey(candidate.tile) &&
+          !_temporaryRetainModels.containsKey(candidate.tile) &&
           candidate.tile.contains(obsoleteModel.tile));
       var shouldRemove = containing;
       if (!shouldRemove) {
         final contained = _idToModel.values.where((candidate) =>
-            !_obsoleteModels.containsKey(candidate.tile) &&
+            !_temporaryRetainModels.containsKey(candidate.tile) &&
             obsoleteModel.tile.contains(candidate.tile));
         shouldRemove =
             contained.isNotEmpty && contained.every((model) => model.hasData);
       }
       if (shouldRemove) {
-        _obsoleteModels.remove(entry.key);
+        _temporaryRetainModels.remove(entry.key);
         _idToModel.remove(entry.key);
-        obsoleteModel.dispose();
+        _loadingModels.remove(entry.key);
       }
     });
   }
 
   void dispose() {
-    super.dispose();
-    _disposed = true;
-    _idToModel.values.forEach((model) => model.dispose());
-    _idToModel.clear();
-    _obsoleteModels.clear();
-    _newModels.clear();
+    if (!_disposed) {
+      super.dispose();
+      _disposed = true;
+      _idToWidget.clear();
+      _idToModel.values.forEach((model) => model.dispose());
+      _idToModel.clear();
+      _loadingModels.clear();
+      _temporaryRetainModels.clear();
+    }
   }
 
   @override
@@ -182,4 +185,12 @@ class TileWidgets extends ChangeNotifier {
   }
 }
 
-final _maxZoomDifference = 2;
+// The larger the allowable difference, the more likely that map data will
+// be drawn to screen while zooming when new tiles need to be loaded, since
+// existing tiles can be drawn in place of new ones.
+//
+// A larger zoom difference also results in higher memory consumption since
+// off-screen painting onto a canvas consumes a lot of memory, and can
+// result in app crashes.
+final _maxSmallerZoomDifference = 3;
+final _maxLargerZoomDifference = -2;

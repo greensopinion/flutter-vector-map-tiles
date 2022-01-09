@@ -77,7 +77,7 @@ class VectorTileModel extends ChangeNotifier {
               notifyListeners();
             }
           });
-        } else {
+        } else if (tileset == null) {
           notifyListeners();
         }
       }
@@ -117,11 +117,14 @@ class VectorTileModel extends ChangeNotifier {
 
   @override
   void dispose() {
-    super.dispose();
-    _tileRequest?.complete();
-    image?.dispose();
-    image = null;
-    _disposed = true;
+    if (!_disposed) {
+      super.dispose();
+      _tileRequest?.complete();
+      image?.dispose();
+      image = null;
+      tileset = null;
+      _disposed = true;
+    }
   }
 
   @override

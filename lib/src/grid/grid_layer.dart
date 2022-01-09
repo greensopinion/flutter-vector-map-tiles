@@ -1,21 +1,20 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_map/plugin_api.dart';
-import 'package:vector_map_tiles/src/executor/direct_executor.dart';
-import 'package:vector_map_tiles/src/executor/pool_executor.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../cache/caches.dart';
 import '../executor/executor.dart';
 import '../options.dart';
 import '../stream/caches_tile_provider.dart';
+import '../stream/delay_provider.dart';
 import '../stream/preprocessing_tile_provider.dart';
 import '../stream/provider_supplier.dart';
 import '../stream/tile_supplier.dart';
 import '../tile_identity.dart';
+import '../tile_viewport.dart';
 import 'debounce.dart';
 import 'disposable_state.dart';
 import 'grid_tile_positioner.dart';
@@ -126,10 +125,11 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
         maxTilesInMemory: widget.options.maxTilesInMemory,
         maxImagesInMemory: widget.options.maxImagesInMemory,
         maxSizeInBytes: widget.options.fileCacheMaximumSizeInBytes);
-    _tileSupplier = ProviderTileSupplier(PreprocessingTileProvider(
-        CachesTileProvider(_caches),
-        TilesetPreprocessor(widget.options.theme),
-        _executor));
+    _tileSupplier = ProviderTileSupplier(DelayProvider(
+            PreprocessingTileProvider(CachesTileProvider(_caches),
+                TilesetPreprocessor(widget.options.theme), _executor),
+            widget.options.tileDelay)
+        .orDelegate());
   }
 
   void _printCacheStats() {
@@ -264,9 +264,9 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
 
   void _updateTiles() {
     final pixelBounds = _tiledPixelBounds();
-    final tileRange = _pixelBoundsToTileRange(pixelBounds);
-    final tiles = _expand(tileRange);
-    _tileWidgets.update(tiles);
+    final tileViewport = _pixelBoundsToTileViewport(pixelBounds);
+    final tiles = _expand(tileViewport);
+    _tileWidgets.update(tileViewport, tiles);
   }
 
   Bounds _tiledPixelBounds() {
@@ -279,18 +279,23 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
     return Bounds(centerPoint - halfSize, centerPoint + halfSize);
   }
 
-  Bounds _pixelBoundsToTileRange(Bounds bounds) => Bounds(
-        bounds.min.unscaleBy(tileSize).floor(),
-        bounds.max.unscaleBy(tileSize).ceil() - const CustomPoint(1, 1),
-      );
+  TileViewport _pixelBoundsToTileViewport(Bounds pixelBounds) {
+    final zoom = _clampedZoom.toInt();
+    final a = pixelBounds.min.unscaleBy(tileSize).floor();
+    final b =
+        pixelBounds.max.unscaleBy(tileSize).ceil() - const CustomPoint(1, 1);
+    final topLeft = CustomPoint<int>(a.x.toInt(), a.y.toInt());
+    final bottomRight = CustomPoint<int>(b.x.toInt(), b.y.toInt());
+    return TileViewport(zoom, Bounds<int>(topLeft, bottomRight));
+  }
 
-  List<TileIdentity> _expand(Bounds range) {
-    final zoom = _clampedZoom;
+  List<TileIdentity> _expand(TileViewport viewport) {
+    final bounds = viewport.bounds;
     final tiles = <TileIdentity>[];
-    for (num x = range.min.x; x <= range.max.x; ++x) {
-      for (num y = range.min.y; y <= range.max.y; ++y) {
-        if (x.toInt() >= 0 && y.toInt() >= 0) {
-          tiles.add(TileIdentity(zoom.toInt(), x.toInt(), y.toInt()));
+    for (int x = bounds.min.x; x <= bounds.max.x; ++x) {
+      for (int y = bounds.min.y; y <= bounds.max.y; ++y) {
+        if (x >= 0 && y >= 0) {
+          tiles.add(TileIdentity(viewport.zoom, x, y));
         }
       }
     }

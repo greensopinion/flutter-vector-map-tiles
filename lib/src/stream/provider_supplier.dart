@@ -16,7 +16,7 @@ class ProviderTileSupplier extends TileSupplier {
   int get maximumZoom => _provider.maximumZoom;
 
   @override
-  Stream<Tile> stream(TileRequest request) async* {
+  Stream<Tile> stream(TileRequest request) {
     TileIdentity tileId = request.tileId;
     if (tileId.z > maximumZoom) {
       tileId = _translator
@@ -24,31 +24,40 @@ class ProviderTileSupplier extends TileSupplier {
           .translated;
     }
 
+    final streamController = _StreamFutureState();
     // start retrieval right away for the tile that we want
-    final mainTile =
-        _provider.provide(tileId, request.primaryFormat).toCompleter();
-    var providedMainTile = false;
-
+    streamController.add(_provider.provide(tileId, request.primaryFormat));
     final secondaryFormat = request.secondaryFormat;
     if (secondaryFormat != null) {
-      final secondary = _provider
-          .provide(tileId, secondaryFormat, zoom: request.tileId.z.toDouble())
-          .toCompleter();
-      if (mainTile.isCompleted) {
-        yield await mainTile.future;
-        providedMainTile = true;
-      }
-      final secondaryTile = await secondary.future;
-      if (mainTile.isCompleted) {
-        yield await mainTile.future;
-        providedMainTile = true;
-      }
-      yield secondaryTile;
+      streamController.add(_provider.provide(tileId, secondaryFormat,
+          zoom: request.tileId.z.toDouble()));
     }
-    if (!request.completed && !providedMainTile) {
-      yield await mainTile.future;
+    return streamController.stream;
+  }
+}
+
+class _StreamFutureState {
+  var _count = 0;
+  // ignore: close_sinks
+  final _controller = StreamController<Tile>();
+
+  Stream<Tile> get stream => _controller.stream;
+
+  void add(Future<Tile> future) {
+    ++_count;
+    future.then((value) {
+      _controller.sink.add(value);
+      _countDown();
+    }).onError((error, stackTrace) {
+      _controller.sink.addError(error ?? 'unknown', stackTrace);
+      _countDown();
+    });
+  }
+
+  void _countDown() {
+    if (--_count == 0) {
+      _controller.sink.close();
     }
-    request.complete();
   }
 }
 

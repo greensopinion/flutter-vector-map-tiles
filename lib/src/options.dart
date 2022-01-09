@@ -63,7 +63,7 @@ class VectorTileLayerOptions extends LayerOptions {
   /// size, resulting in the OS terminating the app (i.e. crashes).
   /// Only applicable for [renderMode] of `mixed` or `raster`.
   final int maxImagesInMemory;
-  static const DEFAULT_CACHE_MAX_IMAGES_IN_MEMORY = 40;
+  static const DEFAULT_CACHE_MAX_IMAGES_IN_MEMORY = 0;
 
   /// The maximum number of decoded vector tiles retained in the memory
   /// vector tile cache.
@@ -80,6 +80,10 @@ class VectorTileLayerOptions extends LayerOptions {
   /// Draws background from a vector tile source when available
   final Theme? backgroundTheme;
 
+  /// The delay that should be applied to tile loading, useful for
+  /// slowing down the map to observe how it behaves as tiles are loading
+  final Duration tileDelay;
+
   VectorTileLayerOptions(
       {required this.tileProviders,
       required this.theme,
@@ -91,8 +95,9 @@ class VectorTileLayerOptions extends LayerOptions {
       this.fileCacheMaximumSizeInBytes = DEFAULT_CACHE_MAX_SIZE,
       this.backgroundTheme,
       this.showTileDebugInfo = false,
-      this.logCacheStats = false}) {
+      this.logCacheStats = false,
+      this.tileDelay = const Duration(milliseconds: 0)}) {
     assert(rasterImageScale >= 1.0 && rasterImageScale <= 5.0);
-    assert(maxImagesInMemory >= 1 && maxImagesInMemory <= 200);
+    assert(maxImagesInMemory >= 0 && maxImagesInMemory <= 200);
   }
 }

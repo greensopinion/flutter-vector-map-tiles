@@ -53,6 +53,12 @@ class _GridVectorTileBodyState extends DisposableState<GridVectorTileBody> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    _model.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return RepaintBoundary(
         key: Key(
@@ -81,6 +87,9 @@ class _VectorTilePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    if (model.disposed) {
+      return;
+    }
     bool changed = model.updateRendering();
     if (model.tileset == null && model.image == null) {
       if (model.paintBackground) {
