@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:vector_map_tiles/src/stream/tile_supplier.dart';
+import 'tile_supplier.dart';
 
 import '../../vector_map_tiles.dart';
 

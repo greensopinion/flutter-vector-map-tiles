@@ -1,8 +1,7 @@
 import 'dart:async';
 
-import '../tile_identity.dart';
-
 import '../grid/slippy_map_translator.dart';
+import '../tile_identity.dart';
 import 'tile_supplier.dart';
 
 class ProviderTileSupplier extends TileSupplier {

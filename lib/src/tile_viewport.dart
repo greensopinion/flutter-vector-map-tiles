@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter_map/plugin_api.dart';
-import 'package:vector_map_tiles/vector_map_tiles.dart';
+import '../vector_map_tiles.dart';
 
 class TileViewport {
   final int zoom;

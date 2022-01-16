@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../options.dart';
-import '../stream/tile_supplier.dart';
 import '../tile_identity.dart';
 import 'debounce.dart';
 import 'disposable_state.dart';

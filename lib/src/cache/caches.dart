@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
-import 'package:vector_map_tiles/src/executor/executor.dart';
+import '../executor/executor.dart';
 
 import '../../vector_map_tiles.dart';
 import '../grid/renderer_pipeline.dart';

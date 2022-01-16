@@ -1,10 +1,9 @@
 import 'dart:async';
 
-import 'package:vector_map_tiles/src/executor/executor.dart';
-
-import 'tile_supplier.dart';
-import '../tile_identity.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
+
+import '../executor/executor.dart';
+import 'tile_supplier.dart';
 
 class PreprocessingTileProvider extends TileProvider {
   final TileProvider _delegate;

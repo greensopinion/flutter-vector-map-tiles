@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
+import 'isolate_executor.dart';
 
 import 'direct_executor.dart';
 import 'pool_executor.dart';
@@ -35,5 +36,5 @@ class CancellationException implements Exception {
 }
 
 Executor newExecutor() => kDebugMode
-    ? DirectExecutor()
+    ? IsolateExecutor()
     : PoolExecutor(concurrency: max(Platform.numberOfProcessors - 2, 1));
