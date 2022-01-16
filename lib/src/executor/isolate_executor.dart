@@ -29,6 +29,11 @@ class IsolateExecutor extends Executor {
     _stream = null;
   }
 
+  bool hasJobWithDeduplicationKey(Job job) =>
+      job.deduplicationKey != null &&
+      _jobByKey.values.any(
+          (otherJob) => otherJob.job.deduplicationKey == job.deduplicationKey);
+
   @override
   bool get disposed => _disposed;
 
@@ -53,6 +58,7 @@ class IsolateExecutor extends Executor {
       return await internalJob.completer.future;
     } finally {
       --_outstanding;
+      _jobByKey.remove(key);
     }
   }
 
@@ -64,6 +70,7 @@ class IsolateExecutor extends Executor {
   void _submitOne() {
     _queue.removeWhere((job) {
       if (job.job.isCancelled) {
+        _jobByKey.remove(job.key);
         job.completer.completeError(CancellationException());
         return true;
       }
@@ -117,7 +124,10 @@ class IsolateExecutor extends Executor {
     } else if (result is _JobOutput) {
       --_submitted;
       final work = _jobByKey.remove(result.key);
-      work?.completer.complete(result.message);
+      if (work != null) {
+        work.completer.complete(result.message);
+        _completeWithDeduplication(work, result.message);
+      }
     } else {
       print('unexpected message: $result');
     }
@@ -128,6 +138,21 @@ class IsolateExecutor extends Executor {
   String _newKey() {
     final thisKey = _keySeed++;
     return '$thisKey';
+  }
+
+  void _completeWithDeduplication(_Job work, result) {
+    final deduplicationKey = work.job.deduplicationKey;
+    if (deduplicationKey != null) {
+      _queue.removeWhere((queued) {
+        if (!queued.job.isCancelled &&
+            queued.job.deduplicationKey == deduplicationKey) {
+          _jobByKey.remove(queued.key);
+          queued.completer.complete(result);
+          return true;
+        }
+        return false;
+      });
+    }
   }
 }
 

@@ -5,3 +5,7 @@ extension ListExtension<T> on List<T> {
     return copy;
   }
 }
+
+extension IterableExtension<T> on Iterable<T> {
+  T? get firstOrNull => isEmpty ? null : first;
+}

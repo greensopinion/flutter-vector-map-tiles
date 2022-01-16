@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:ui';
 
-import '../executor/executor.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../vector_map_tiles.dart';
+import '../executor/executor.dart';
 
 enum TileFormat { vector, raster }
 

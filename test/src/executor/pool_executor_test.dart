@@ -17,7 +17,8 @@ void main() {
 
   test('runs multiple tasks', () async {
     final futures = [1, 2, 3, 4, 5]
-        .map((e) => executor.submit(Job(_testJobName, _task, e)))
+        .map((e) => executor
+            .submit(Job(_testJobName, _task, e, deduplicationKey: null)))
         .toList();
     final results = [];
     for (final future in futures) {
@@ -28,7 +29,8 @@ void main() {
 
   group('submitAll tasks:', () {
     test('runs a task', () async {
-      final result = executor.submitAll(Job(_testJobName, _task, 3));
+      final result = executor
+          .submitAll(Job(_testJobName, _task, 3, deduplicationKey: null));
       expect(result.length, 3);
       for (final future in result) {
         expect(await future, equals(4));

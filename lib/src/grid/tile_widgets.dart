@@ -192,5 +192,5 @@ class TileWidgets extends ChangeNotifier {
 // A larger zoom difference also results in higher memory consumption since
 // off-screen painting onto a canvas consumes a lot of memory, and can
 // result in app crashes.
-final _maxSmallerZoomDifference = 3;
-final _maxLargerZoomDifference = -2;
+final _maxSmallerZoomDifference = 2;
+final _maxLargerZoomDifference = -1;

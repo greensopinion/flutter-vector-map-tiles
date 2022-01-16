@@ -1,8 +1,8 @@
 import 'dart:ui';
 
-import '../executor/executor.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
+import '../executor/executor.dart';
 import '../grid/renderer_pipeline.dart';
 import '../tile_identity.dart';
 import 'cache_stats.dart';

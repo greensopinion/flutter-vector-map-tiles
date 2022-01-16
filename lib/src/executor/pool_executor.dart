@@ -1,5 +1,4 @@
-import 'package:flutter/foundation.dart';
-
+import '../extensions.dart';
 import 'executor.dart';
 import 'isolate_executor.dart';
 
@@ -27,9 +26,15 @@ class PoolExecutor extends Executor {
       _delegates.map((delegate) => delegate.submit(job)).toList();
 
   @override
-  Future<R> submit<Q, R>(Job<Q, R> job) => _nextDelegate().submit(job);
+  Future<R> submit<Q, R>(Job<Q, R> job) => _nextDelegate(job).submit(job);
 
-  Executor _nextDelegate() {
+  Executor _nextDelegate(Job job) {
+    final affinityDelegate = _delegates
+        .where((delegate) => delegate.hasJobWithDeduplicationKey(job))
+        .firstOrNull;
+    if (affinityDelegate != null) {
+      return affinityDelegate;
+    }
     for (int attempt = 0; attempt < _delegates.length; ++attempt) {
       final delegate = _delegates[_nextIndex()];
       if (delegate.outstanding == 0) {

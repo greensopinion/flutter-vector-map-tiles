@@ -18,8 +18,9 @@ class PreprocessingTileProvider extends TileProvider {
   }
 
   void _initialize() async {
-    final futures = _executor.submitAll(
-        Job('setup preprocessor', _setupPreprocessor, _preprocessor));
+    final futures = _executor.submitAll(Job(
+        'setup preprocessor', _setupPreprocessor, _preprocessor,
+        deduplicationKey: null));
     for (final future in futures) {
       await future;
     }
@@ -41,9 +42,10 @@ class PreprocessingTileProvider extends TileProvider {
       if (!_ready) {
         await _readyCompleter.future;
       }
+      final deduplicationKey = 'preprocess: ${tile.identity}';
       final preprocessed = await _executor.submit(Job(
-          'preprocess: ${tile.identity}', _preprocessTile, tile.tileset!,
-          cancelled: request.cancelled));
+          deduplicationKey, _preprocessTile, tile.tileset!,
+          cancelled: request.cancelled, deduplicationKey: deduplicationKey));
       return Tile(
           identity: tile.identity, format: tile.format, tileset: preprocessed);
     }

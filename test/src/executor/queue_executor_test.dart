@@ -1,18 +1,16 @@
 import 'package:test/test.dart';
 import 'package:vector_map_tiles/src/executor/executor.dart';
-import 'package:vector_map_tiles/src/executor/isolate_executor.dart';
+import 'package:vector_map_tiles/src/executor/queue_executor.dart';
 
 void main() {
-  var executor = IsolateExecutor();
+  var executor = QueueExecutor();
 
   setUp(() {
-    if (executor.disposed) {
-      executor = IsolateExecutor();
-    }
+    executor = QueueExecutor();
   });
 
   tearDown(() {
-    executor.dispose();
+    _delayValues = [];
   });
 
   group("executes tasks:", () {
@@ -45,17 +43,15 @@ void main() {
 
     test('executes in LIFO order', () async {
       final longRunningTask = executor
-          .submit(Job(_testJobName, _delayTask, 1000, deduplicationKey: null));
+          .submit(Job(_testJobName, _delayTask, 10, deduplicationKey: null));
       final firstShortTask = executor
-          .submit(Job(_testJobName, _delayTask, 1, deduplicationKey: null));
+          .submit(Job(_testJobName, _delayTask, 20, deduplicationKey: null));
       final secondShortTask = executor
-          .submit(Job(_testJobName, _delayTask, 2, deduplicationKey: null));
+          .submit(Job(_testJobName, _delayTask, 30, deduplicationKey: null));
       final longResult = await longRunningTask;
-      final firstShortResult = await firstShortTask;
-      final secondShortResult = await secondShortTask;
-      expect(longResult, [1000]);
-      expect(firstShortResult, [1000, 2, 1]);
-      expect(secondShortResult, [1000, 2]);
+      await firstShortTask;
+      await secondShortTask;
+      expect(longResult, [30, 20, 10]);
     });
 
     test('rejects tasks when task is cancelled', () async {
@@ -91,9 +87,9 @@ void main() {
       final firstShortResult = await firstShortTask;
       final secondShortResult = await secondShortTask;
 
-      expect(longResult, [1000]);
-      expect(firstShortResult, [1000]);
-      expect(secondShortResult, [1000]);
+      expect(longResult, 4);
+      expect(firstShortResult, 4);
+      expect(secondShortResult, 4);
     });
   });
 
@@ -131,7 +127,7 @@ dynamic _throwingTask(dynamic value) {
   throw value;
 }
 
-final _delayValues = [];
+var _delayValues = [];
 
 dynamic _delayTask(dynamic value) async {
   await Future.delayed(Duration(milliseconds: value));

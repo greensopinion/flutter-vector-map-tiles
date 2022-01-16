@@ -168,15 +168,11 @@ class _VectorTilePainter extends CustomPainter {
           foreground: Paint()..color = Color.fromARGB(0xff, 0, 0, 0),
           fontSize: 15);
       final roundedScale = (scale * 1000).roundToDouble() / 1000;
-      final renderedOffset = Offset(
-          -tileSizer.translationDelta.dx, -tileSizer.translationDelta.dy);
-      final renderedBox = renderedOffset & size;
-      final tileBox = tileSizer.tileClip(size, scale);
       final text = TextPainter(
           text: TextSpan(
               style: textStyle,
               text:
-                  '${model.tile}\nscale=$roundedScale\nsize=$size\ntranslation=${tileSizer.translationDelta}\nbox=${renderedBox.debugString()}\ntileBox=${tileBox.debugString()}\npaintCount=$_paintCount'),
+                  '${model.tile}\nscale=$roundedScale\npaintCount=$_paintCount'),
           textAlign: TextAlign.start,
           textDirection: TextDirection.ltr)
         ..layout();
