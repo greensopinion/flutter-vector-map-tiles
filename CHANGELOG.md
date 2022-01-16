@@ -1,3 +1,8 @@
+## 1.2.44
+
+* performance improvement
+* reduce memory overhead
+* eliminate use of isolates since it's not stable enough for production usage
 ## 1.2.43
 
 * reduce memory overhead
