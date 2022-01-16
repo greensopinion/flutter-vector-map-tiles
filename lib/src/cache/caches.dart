@@ -7,11 +7,11 @@ import '../../vector_map_tiles.dart';
 import '../grid/renderer_pipeline.dart';
 import 'byte_storage.dart';
 import 'image_tile_loading_cache.dart';
+import 'memory_cache.dart';
 import 'memory_image_cache.dart';
 import 'storage_cache.dart';
 import 'tile_image_cache.dart';
 import 'vector_tile_loading_cache.dart';
-import 'vector_tile_memory_cache.dart';
 
 class Caches {
   final Executor executor;
@@ -19,8 +19,8 @@ class Caches {
       pather: () => getTemporaryDirectory()
           .then((value) => Directory('${value.path}/.vector_map')));
   late final StorageCache _cache;
-  late final VectorTileMemoryCache memoryVectorTileCache;
   late final VectorTileLoadingCache vectorTileCache;
+  late final MemoryCache memoryVectorTileCache;
   late final ImageTileLoadingCache imageTileCache;
   late final MemoryImageCache memoryImageCache;
   late final List<String> providerSources;
@@ -30,12 +30,12 @@ class Caches {
       required RendererPipeline pipeline,
       required this.executor,
       required Duration ttl,
-      required int maxTilesInMemory,
+      required int memoryTileCacheMaxSize,
       required int maxImagesInMemory,
       required int maxSizeInBytes}) {
     providerSources = providers.tileProviderBySource.keys.toList();
     _cache = StorageCache(_storage, ttl, maxSizeInBytes);
-    memoryVectorTileCache = VectorTileMemoryCache(maxTilesInMemory);
+    memoryVectorTileCache = MemoryCache(maxSizeBytes: memoryTileCacheMaxSize);
     vectorTileCache = VectorTileLoadingCache(
         _cache, memoryVectorTileCache, providers, executor);
     imageTileCache = ImageTileLoadingCache(TileImageCache(_cache), pipeline);
@@ -59,11 +59,11 @@ class Caches {
     cacheStats
         .add('Storage cache hit ratio:           ${_cache.hitRatio.asPct()}%');
     cacheStats.add(
-        'Vector tile cache hit ratio:       ${memoryVectorTileCache.hitRatio.asPct()}%');
+        'Vector tile cache hit ratio:       ${memoryVectorTileCache.hitRatio.asPct()}% size: ${memoryVectorTileCache.size}');
     cacheStats.add(
         'Image tile cache hit ratio:        ${imageTileCache.hitRatio.asPct()}%');
     cacheStats.add(
-        'Image cache hit ratio:             ${memoryImageCache.hitRatio.asPct()}%');
+        'Image cache hit ratio:             ${memoryImageCache.hitRatio.asPct()}% size: ${memoryImageCache.size}');
     return cacheStats.join('\n');
   }
 }

@@ -122,7 +122,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
         pipeline: RendererPipeline(widget.options.theme,
             scale: widget.options.rasterImageScale),
         ttl: widget.options.fileCacheTtl,
-        maxTilesInMemory: widget.options.maxTilesInMemory,
+        memoryTileCacheMaxSize: widget.options.memoryTileCacheMaxSize,
         maxImagesInMemory: widget.options.maxImagesInMemory,
         maxSizeInBytes: widget.options.fileCacheMaximumSizeInBytes);
     _tileSupplier = ProviderTileSupplier(DelayProvider(

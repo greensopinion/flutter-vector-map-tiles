@@ -68,8 +68,17 @@ class VectorTileLayerOptions extends LayerOptions {
   /// The maximum number of decoded vector tiles retained in the memory
   /// vector tile cache.
   /// Cached vector tiles eliminate the need to decode protobuf tile data.
+  /// Deprecated: no longer used, see [memoryTileCacheMaxSize] instead
+  @deprecated
   final int maxTilesInMemory;
+
+  /// Deprecated: no longer used, see [DEFAULT_TILE_CACHE_MAX_SIZE] instead
+  @deprecated
   static const DEFAULT_CACHE_MAX_TILES_IN_MEMORY = 50;
+
+  /// The maximum size in bytes of the memory vector tile cache.
+  final int memoryTileCacheMaxSize;
+  static const DEFAULT_TILE_CACHE_MAX_SIZE = 1024 * 1024 * 10;
 
   /// Indicates whether debug information should be shown for tiles
   final bool showTileDebugInfo;
@@ -91,6 +100,7 @@ class VectorTileLayerOptions extends LayerOptions {
       this.renderMode = RenderMode.mixed,
       this.fileCacheTtl = DEFAULT_CACHE_TTL,
       this.maxTilesInMemory = DEFAULT_CACHE_MAX_TILES_IN_MEMORY,
+      this.memoryTileCacheMaxSize = DEFAULT_TILE_CACHE_MAX_SIZE,
       this.maxImagesInMemory = DEFAULT_CACHE_MAX_IMAGES_IN_MEMORY,
       this.fileCacheMaximumSizeInBytes = DEFAULT_CACHE_MAX_SIZE,
       this.backgroundTheme,

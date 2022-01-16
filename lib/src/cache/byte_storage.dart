@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:path_provider/path_provider.dart';
 
@@ -37,7 +38,7 @@ class ByteStorage {
     return Directory(root);
   }
 
-  Future<void> write(String path, List<int> bytes) async {
+  Future<void> write(String path, Uint8List bytes) async {
     final file = await fileOf(path);
     if (!await file.parent.exists()) {
       await file.parent.create(recursive: true);
@@ -45,7 +46,7 @@ class ByteStorage {
     await file.writeAsBytes(bytes);
   }
 
-  Future<List<int>?> read(String path) async {
+  Future<Uint8List?> read(String path) async {
     final file = await fileOf(path);
     if (await file.exists()) {
       return file.readAsBytes();

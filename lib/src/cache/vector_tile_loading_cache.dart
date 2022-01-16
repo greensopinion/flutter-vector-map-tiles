@@ -1,15 +1,15 @@
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:vector_map_tiles/src/executor/executor.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../vector_map_tiles.dart';
+import '../executor/executor.dart';
+import 'memory_cache.dart';
 import 'storage_cache.dart';
-import 'vector_tile_memory_cache.dart';
 
 class VectorTileLoadingCache {
-  final VectorTileMemoryCache _memoryCache;
+  final MemoryCache _memoryCache;
   final StorageCache _delegate;
   final TileProviders _providers;
   final Map<String, Future<VectorTile>> _futuresByKey = {};
@@ -23,22 +23,20 @@ class VectorTileLoadingCache {
       .reduce(min);
 
   Future<VectorTile> retrieve(String source, TileIdentity tile) async {
-    var cachedTile = _memoryCache.get(TileKey(tile, source));
-    if (cachedTile != null) {
-      return cachedTile;
-    }
     final key = _toKey(source, tile);
     var future = _futuresByKey[key];
+    var loaded = false;
     if (future == null) {
+      loaded = true;
       future = _loadTile(source, key, tile);
       _futuresByKey[key] = future;
     }
     try {
-      final vector = await future;
-      _memoryCache.put(TileKey(tile, source), vector);
-      return vector;
+      return await future;
     } finally {
-      _futuresByKey.remove(key);
+      if (loaded) {
+        _futuresByKey.remove(key);
+      }
     }
   }
 
@@ -53,9 +51,10 @@ class VectorTileLoadingCache {
 
   Future<List<int>> _loadBytes(
       String source, String key, TileIdentity tile) async {
-    var bytes = await _delegate.retrieve(key);
+    var bytes = _memoryCache.get(key) ?? await _delegate.retrieve(key);
     if (bytes == null) {
       bytes = await _providers.get(source).provide(tile);
+      _memoryCache.put(key, bytes);
       await _delegate.put(key, bytes);
     }
     return bytes;

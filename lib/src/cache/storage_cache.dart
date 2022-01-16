@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'byte_storage.dart';
 import 'cache_stats.dart';
@@ -12,11 +13,11 @@ class StorageCache with CacheStats {
 
   StorageCache(this._storage, this._ttl, this._maxSizeInBytes);
 
-  Future<List<int>?> remove(String key) async {
+  Future<void> remove(String key) async {
     await _storage.delete(key);
   }
 
-  Future<List<int>?> retrieve(String key) async {
+  Future<Uint8List?> retrieve(String key) async {
     try {
       final bytes = await _storage.read(key);
       if (bytes == null) {
@@ -31,7 +32,7 @@ class StorageCache with CacheStats {
     }
   }
 
-  Future<void> put(String key, List<int> data) async {
+  Future<void> put(String key, Uint8List data) async {
     if (++_putCount % 20 == 0) {
       await _applyMaxSize(await _storage.storageDirectory());
     }
