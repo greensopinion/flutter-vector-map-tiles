@@ -22,9 +22,8 @@ class DelayProvider extends TileProvider {
   }
 
   @override
-  Future<Tile> provide(TileIdentity tileIdentity, TileFormat format,
-      {double? zoom}) async {
-    final tile = _delegate.provide(tileIdentity, format, zoom: zoom);
+  Future<Tile> provide(TileProviderRequest request) async {
+    final tile = _delegate.provide(request);
     final durationWithJitter =
         Duration(milliseconds: _random.nextInt(_delay.inMilliseconds));
     await Future.delayed(durationWithJitter);

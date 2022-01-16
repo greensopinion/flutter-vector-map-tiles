@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'executor.dart';
 
 class DirectExecutor extends Executor {
@@ -11,14 +13,22 @@ class DirectExecutor extends Executor {
   bool get disposed => _disposed;
 
   @override
-  Future<R> submit<Q, R>(Job<Q, R> job) async {
+  Future<R> submit<Q, R>(Job<Q, R> job) {
     if (_disposed) {
       throw 'disposed';
     }
-    if (job.isCancelled) {
-      throw CancellationException();
-    }
-    return await job.computeFunction(job.value);
+    final completer = Completer<R>();
+    scheduleMicrotask(() async {
+      try {
+        if (job.isCancelled) {
+          throw CancellationException();
+        }
+        completer.complete(await job.computeFunction(job.value));
+      } catch (error, stack) {
+        completer.completeError(error, stack);
+      }
+    });
+    return completer.future;
   }
 
   @override

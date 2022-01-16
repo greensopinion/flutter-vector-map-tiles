@@ -1,31 +1,39 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:vector_map_tiles/src/executor/executor.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../vector_map_tiles.dart';
 
 enum TileFormat { vector, raster }
 
-class TileRequest {
+abstract class CancellableTileRequest {
   final TileIdentity tileId;
+  final CancellationCallback _cancelled;
+
+  CancellableTileRequest(this.tileId, this._cancelled);
+
+  bool get isCancelled => _cancelled();
+  CancellationCallback get cancelled => _cancelled;
+
+  void testCancelled() {
+    if (isCancelled) {
+      throw CancellationException();
+    }
+  }
+}
+
+class TileRequest extends CancellableTileRequest {
   final TileFormat primaryFormat;
   final TileFormat? secondaryFormat;
-  bool _completed = false;
 
   TileRequest(
-      {required this.tileId,
+      {required TileIdentity tileId,
       required this.primaryFormat,
-      this.secondaryFormat});
-
-  get completed => _completed;
-
-  /// Indicates that the request is complete, either from the requestor or the
-  /// requestee. Can be used to short-circuit a request so that further work
-  /// is avoided, i.e. when the results are no longer needed.
-  void complete() {
-    _completed = true;
-  }
+      this.secondaryFormat,
+      required CancellationCallback cancelled})
+      : super(tileId, cancelled);
 }
 
 class Tile {
@@ -43,8 +51,19 @@ abstract class TileSupplier {
   Stream<Tile> stream(TileRequest request);
 }
 
+class TileProviderRequest extends CancellableTileRequest {
+  final TileFormat format;
+  final double? zoom;
+
+  TileProviderRequest(
+      {required TileIdentity tileId,
+      required this.format,
+      this.zoom,
+      required CancellationCallback cancelled})
+      : super(tileId, cancelled);
+}
+
 abstract class TileProvider {
   int get maximumZoom;
-  Future<Tile> provide(TileIdentity tileIdentity, TileFormat format,
-      {double? zoom});
+  Future<Tile> provide(TileProviderRequest request);
 }

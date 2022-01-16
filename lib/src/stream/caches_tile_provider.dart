@@ -17,16 +17,16 @@ class CachesTileProvider extends TileProvider {
   int get maximumZoom => _caches.vectorTileCache.maximumZoom;
 
   @override
-  Future<Tile> provide(TileIdentity tileIdentity, TileFormat format,
-      {double? zoom}) async {
-    if (format == TileFormat.vector) {
+  Future<Tile> provide(TileProviderRequest request) async {
+    if (request.format == TileFormat.vector) {
       Map<String, Future<VectorTile>> futureBySource = {};
       for (final source in _caches.providerSources) {
-        futureBySource[source] =
-            _caches.vectorTileCache.retrieve(source, tileIdentity);
+        futureBySource[source] = _caches.vectorTileCache
+            .retrieve(source, request.tileId, cancelled: request.cancelled);
       }
       Map<String, VectorTile> tileBySource = {};
       for (final entry in futureBySource.entries) {
+        request.testCancelled();
         VectorTile? tile;
         try {
           tile = await entry.value;
@@ -41,27 +41,33 @@ class CachesTileProvider extends TileProvider {
         tileBySource[entry.key] = tile;
       }
       return Tile(
-          identity: tileIdentity,
-          format: format,
+          identity: request.tileId,
+          format: request.format,
           tileset: Tileset(tileBySource));
     } else {
-      final effectiveZoom = zoom == null ? tileIdentity.z : zoom.ceil();
-      final imageKey = ImageKey(tileIdentity, effectiveZoom);
+      final effectiveZoom = request.zoom?.ceil() ?? request.tileId.z;
+      final imageKey = ImageKey(request.tileId, effectiveZoom);
       final image = _caches.memoryImageCache.get(imageKey);
       if (image != null) {
         return Tile(
-            identity: tileIdentity,
-            format: format,
+            identity: request.tileId,
+            format: TileFormat.raster,
             tileset: null,
             image: image);
       }
-      final tile = await provide(tileIdentity, TileFormat.vector);
-      final loaded = await _caches.imageTileCache
-          .retrieve(tile.identity, tile.tileset!, zoom: effectiveZoom);
+      final tile = await provide(TileProviderRequest(
+          tileId: request.tileId,
+          format: TileFormat.vector,
+          zoom: request.zoom,
+          cancelled: request.cancelled));
+      request.testCancelled();
+      final loaded = await _caches.imageTileCache.retrieve(
+          tile.identity, tile.tileset!,
+          zoom: effectiveZoom, cancelled: request.cancelled);
       _caches.memoryImageCache.put(imageKey, loaded);
       return Tile(
           identity: tile.identity,
-          format: format,
+          format: TileFormat.raster,
           tileset: null,
           image: loaded);
     }

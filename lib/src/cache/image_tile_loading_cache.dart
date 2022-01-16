@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:vector_map_tiles/src/executor/executor.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../grid/renderer_pipeline.dart';
@@ -17,11 +18,12 @@ class ImageTileLoadingCache with CacheStats {
   double get scale => _pipeline.scale;
 
   Future<Image> retrieve(TileIdentity identity, Tileset tileset,
-      {required int zoom}) async {
+      {required int zoom, required CancellationCallback cancelled}) async {
     final key = _key(identity, zoom: zoom);
     var future = _futuresByKey[key];
     if (future == null) {
-      future = _ReferenceCountedImage(_load(identity, tileset, zoom: zoom));
+      future = _ReferenceCountedImage(
+          _load(identity, tileset, zoom: zoom, cancelled: cancelled));
       _futuresByKey[key] = future;
     } else {
       future.reference();
@@ -39,12 +41,13 @@ class ImageTileLoadingCache with CacheStats {
   }
 
   Future<Image> _load(TileIdentity identity, Tileset tileset,
-      {required int zoom}) async {
+      {required int zoom, required CancellationCallback cancelled}) async {
     final modifier = _toModifier(zoom);
     final image = await delegate.retrieve(identity, modifier);
     if (image == null) {
       cacheMiss();
-      final rendered = await _pipeline.renderImage(identity, tileset, zoom);
+      final rendered = await _pipeline.renderImage(identity, tileset, zoom,
+          cancelled: cancelled);
       await delegate.put(identity, rendered, modifier);
       return rendered;
     } else {

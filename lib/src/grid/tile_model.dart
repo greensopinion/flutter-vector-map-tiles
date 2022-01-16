@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
+import 'package:vector_map_tiles/src/executor/executor.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../options.dart';
@@ -47,17 +48,22 @@ class VectorTileModel extends ChangeNotifier {
 
   bool get hasData => image != null || tileset != null;
 
-  void startLoading() {
+  void startLoading() async {
     final request = TileRequest(
         tileId: tile.normalize(),
         primaryFormat: renderMode == RenderMode.raster
             ? TileFormat.raster
             : TileFormat.vector,
         secondaryFormat:
-            renderMode == RenderMode.mixed ? TileFormat.raster : null);
+            renderMode == RenderMode.mixed ? TileFormat.raster : null,
+        cancelled: () => _disposed);
     _tileRequest = request;
     final stream = tileSupplier.stream(request);
-    stream.forEach(_receiveTile);
+    try {
+      await stream.forEach(_receiveTile);
+    } on CancellationException {
+      // ignore, expected
+    }
   }
 
   void _receiveTile(Tile received) {
@@ -119,7 +125,6 @@ class VectorTileModel extends ChangeNotifier {
   void dispose() {
     if (!_disposed) {
       super.dispose();
-      _tileRequest?.complete();
       image?.dispose();
       image = null;
       tileset = null;

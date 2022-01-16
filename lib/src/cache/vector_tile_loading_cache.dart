@@ -22,13 +22,14 @@ class VectorTileLoadingCache {
       .map((e) => e.maximumZoom)
       .reduce(min);
 
-  Future<VectorTile> retrieve(String source, TileIdentity tile) async {
+  Future<VectorTile> retrieve(String source, TileIdentity tile,
+      {required CancellationCallback cancelled}) async {
     final key = _toKey(source, tile);
     var future = _futuresByKey[key];
     var loaded = false;
     if (future == null) {
       loaded = true;
-      future = _loadTile(source, key, tile);
+      future = _loadTile(source, key, tile, cancelled);
       _futuresByKey[key] = future;
     }
     try {
@@ -43,13 +44,14 @@ class VectorTileLoadingCache {
   String _toKey(String source, TileIdentity id) =>
       '${id.z}_${id.x}_${id.y}_$source.pbf';
 
-  Future<VectorTile> _loadTile(
-      String source, String key, TileIdentity tile) async {
+  Future<VectorTile> _loadTile(String source, String key, TileIdentity tile,
+      CancellationCallback cancelled) async {
     final bytes = await _loadBytes(source, key, tile);
-    return _executor.submit(Job('read bytes: $tile', _readTileBytes, bytes));
+    return _executor.submit(
+        Job('read bytes: $tile', _readTileBytes, bytes, cancelled: cancelled));
   }
 
-  Future<List<int>> _loadBytes(
+  Future<Uint8List> _loadBytes(
       String source, String key, TileIdentity tile) async {
     var bytes = _memoryCache.get(key) ?? await _delegate.retrieve(key);
     if (bytes == null) {
@@ -61,5 +63,4 @@ class VectorTileLoadingCache {
   }
 }
 
-VectorTile _readTileBytes(List<int> bytes) =>
-    VectorTileReader().read(Uint8List.fromList(bytes));
+VectorTile _readTileBytes(Uint8List bytes) => VectorTileReader().read(bytes);

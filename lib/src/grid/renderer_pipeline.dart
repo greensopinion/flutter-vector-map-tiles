@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:ui';
+import 'package:vector_map_tiles/src/executor/executor.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../tile_identity.dart';
@@ -14,8 +15,9 @@ class RendererPipeline {
     _renderer = ImageRenderer(theme: theme, scale: scale);
   }
 
-  Future<Image> renderImage(TileIdentity id, Tileset tileset, int zoom) async {
-    final job = _RenderingJob(id, tileset, zoom);
+  Future<Image> renderImage(TileIdentity id, Tileset tileset, int zoom,
+      {required CancellationCallback cancelled}) async {
+    final job = _RenderingJob(id, tileset, zoom, cancelled);
     queue.add(job);
     if (queue.length == 1) {
       _scheduleOne();
@@ -26,6 +28,9 @@ class RendererPipeline {
   void _renderOne() async {
     final job = queue.removeLast();
     try {
+      if (job.cancelled()) {
+        throw CancellationException();
+      }
       int zoomDifference = job.zoom.toInt() - job.id.z.toInt();
       final image = await _renderer.render(job.tileset,
           zoomScaleFactor: scale * zoomDifference, zoom: job.zoom.toDouble());
@@ -52,6 +57,7 @@ class _RenderingJob {
   final TileIdentity id;
   final Tileset tileset;
   final int zoom;
+  final CancellationCallback cancelled;
 
-  _RenderingJob(this.id, this.tileset, this.zoom);
+  _RenderingJob(this.id, this.tileset, this.zoom, this.cancelled);
 }

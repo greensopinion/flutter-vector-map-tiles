@@ -32,19 +32,19 @@ class PreprocessingTileProvider extends TileProvider {
   int get maximumZoom => _delegate.maximumZoom;
 
   @override
-  Future<Tile> provide(TileIdentity tileIdentity, TileFormat format,
-      {double? zoom}) async {
-    final tile = await _delegate.provide(tileIdentity, format, zoom: zoom);
-    return _preprocess(tile);
+  Future<Tile> provide(TileProviderRequest request) async {
+    final tile = await _delegate.provide(request);
+    return _preprocess(request, tile);
   }
 
-  Future<Tile> _preprocess(Tile tile) async {
+  Future<Tile> _preprocess(TileProviderRequest request, Tile tile) async {
     if (tile.tileset != null) {
       if (!_ready) {
         await _readyCompleter.future;
       }
-      final preprocessed = await _executor.submit(
-          Job('preprocess: ${tile.identity}', _preprocessTile, tile.tileset!));
+      final preprocessed = await _executor.submit(Job(
+          'preprocess: ${tile.identity}', _preprocessTile, tile.tileset!,
+          cancelled: request.cancelled));
       return Tile(
           identity: tile.identity, format: tile.format, tileset: preprocessed);
     }

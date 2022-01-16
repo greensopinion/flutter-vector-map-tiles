@@ -26,11 +26,17 @@ class ProviderTileSupplier extends TileSupplier {
 
     final streamController = _StreamFutureState();
     // start retrieval right away for the tile that we want
-    streamController.add(_provider.provide(tileId, request.primaryFormat));
+    streamController.add(_provider.provide(TileProviderRequest(
+        tileId: tileId,
+        format: request.primaryFormat,
+        cancelled: request.cancelled)));
     final secondaryFormat = request.secondaryFormat;
     if (secondaryFormat != null) {
-      streamController.add(_provider.provide(tileId, secondaryFormat,
-          zoom: request.tileId.z.toDouble()));
+      streamController.add(_provider.provide(TileProviderRequest(
+          tileId: tileId,
+          format: secondaryFormat,
+          cancelled: request.cancelled,
+          zoom: request.tileId.z.toDouble())));
     }
     return streamController.stream;
   }
@@ -58,14 +64,5 @@ class _StreamFutureState {
     if (--_count == 0) {
       _controller.sink.close();
     }
-  }
-}
-
-extension _FutureExtension<T> on Future<T> {
-  Completer<T> toCompleter() {
-    final completer = Completer<T>();
-    then((value) => completer.complete(value)).onError((error, stackTrace) =>
-        completer.completeError(error ?? 'error', stackTrace));
-    return completer;
   }
 }

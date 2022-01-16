@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 
@@ -32,5 +34,6 @@ class CancellationException implements Exception {
   CancellationException();
 }
 
-Executor newExecutor() =>
-    kDebugMode ? DirectExecutor() : PoolExecutor(concurrency: 3);
+Executor newExecutor() => kDebugMode
+    ? DirectExecutor()
+    : PoolExecutor(concurrency: max(Platform.numberOfProcessors - 2, 1));
