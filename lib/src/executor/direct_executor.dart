@@ -15,6 +15,9 @@ class DirectExecutor extends Executor {
     if (_disposed) {
       throw 'disposed';
     }
+    if (job.isCancelled) {
+      throw CancellationException();
+    }
     return await job.computeFunction(job.value);
   }
 

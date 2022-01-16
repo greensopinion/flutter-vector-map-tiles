@@ -5,12 +5,17 @@ import 'package:flutter/foundation.dart';
 import 'direct_executor.dart';
 import 'pool_executor.dart';
 
+typedef CancellationCallback = bool Function();
+
 class Job<Q, R> {
   final String name;
   final ComputeCallback<Q, R> computeFunction;
   final Q value;
+  final CancellationCallback? cancelled;
 
-  Job(this.name, this.computeFunction, this.value);
+  Job(this.name, this.computeFunction, this.value, {this.cancelled});
+
+  bool get isCancelled => cancelled == null ? false : cancelled!();
 }
 
 abstract class Executor {
@@ -21,6 +26,10 @@ abstract class Executor {
 
   void dispose();
   bool get disposed;
+}
+
+class CancellationException implements Exception {
+  CancellationException();
 }
 
 Executor newExecutor() =>

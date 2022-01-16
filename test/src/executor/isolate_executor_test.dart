@@ -52,6 +52,16 @@ void main() {
       expect(firstShortResult, [1000, 2, 1]);
       expect(secondShortResult, [1000, 2]);
     });
+
+    test('rejects tasks when task is cancelled', () async {
+      try {
+        await executor.submit(Job(_testJobName, (message) => _task, 'a-message',
+            cancelled: () => true));
+        throw 'expected an error';
+      } on CancellationException {
+        // ignore
+      }
+    });
   });
 
   group('submitAll tasks:', () {

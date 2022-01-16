@@ -25,6 +25,26 @@ void main() {
     expect(result.length, 1);
     expect(await result[0], equals(4));
   });
+
+  test('rejects tasks when disposed', () async {
+    executor.dispose();
+    try {
+      await executor.submit(Job(_testJobName, (message) => _task, 'a-message'));
+      throw 'expected an error';
+    } catch (error) {
+      expect(error, 'disposed');
+    }
+  });
+
+  test('rejects tasks when task is cancelled', () async {
+    try {
+      await executor.submit(Job(_testJobName, (message) => _task, 'a-message',
+          cancelled: () => true));
+      throw 'expected an error';
+    } on CancellationException {
+      // ignore
+    }
+  });
 }
 
 dynamic _task(dynamic value) {

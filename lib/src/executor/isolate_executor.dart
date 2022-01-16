@@ -62,7 +62,14 @@ class IsolateExecutor extends Executor {
   }
 
   void _submitOne() {
-    while (_submitted == 0 && _queue.isNotEmpty) {
+    _queue.removeWhere((job) {
+      if (job.job.isCancelled) {
+        job.completer.completeError(CancellationException());
+        return true;
+      }
+      return false;
+    });
+    if (_submitted == 0 && _queue.isNotEmpty) {
       final job = _queue.removeLast(); //LIFO
       ++_submitted;
       _submit(job);
