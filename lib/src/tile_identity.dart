@@ -17,7 +17,7 @@ class TileIdentity extends CustomPoint<int> {
   int get hashCode => hashValues(x, y, z);
 
   @override
-  String toString() => 'TileIdentity(z=$z,x=$x,y=$y)';
+  String toString() => 'z=$z,x=$x,y=$y';
 
   TileIdentity normalize() {
     final maxX = pow(2, z).toInt();

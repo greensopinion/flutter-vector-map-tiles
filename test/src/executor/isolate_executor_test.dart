@@ -1,4 +1,5 @@
 import 'package:test/test.dart';
+import 'package:vector_map_tiles/src/executor/executor.dart';
 import 'package:vector_map_tiles/src/executor/isolate_executor.dart';
 
 void main() {
@@ -16,12 +17,13 @@ void main() {
 
   group("executes tasks:", () {
     test('a single task', () async {
-      final result = await executor.submit(_task, 1);
+      final result = await executor.submit(Job(_testJobName, _task, 1));
       expect(result, equals(2));
     });
     test('multiple tasks', () async {
-      final futures =
-          [1, 2, 3, 4].map((e) => executor.submit(_task, e)).toList();
+      final futures = [1, 2, 3, 4]
+          .map((e) => executor.submit(Job(_testJobName, _task, e)))
+          .toList();
       final results = [];
       for (final future in futures) {
         results.add(await future);
@@ -31,7 +33,7 @@ void main() {
     test('propagates an exception', () async {
       final message = 'intentional failure';
       try {
-        await executor.submit(_throwingTask, message);
+        await executor.submit(Job(_testJobName, _throwingTask, message));
         throw 'expected a failure';
       } catch (error) {
         expect(error, equals(message));
@@ -39,9 +41,10 @@ void main() {
     });
 
     test('executes in LIFO order', () async {
-      final longRunningTask = executor.submit(_delayTask, 1000);
-      final firstShortTask = executor.submit(_delayTask, 1);
-      final secondShortTask = executor.submit(_delayTask, 2);
+      final longRunningTask =
+          executor.submit(Job(_testJobName, _delayTask, 1000));
+      final firstShortTask = executor.submit(Job(_testJobName, _delayTask, 1));
+      final secondShortTask = executor.submit(Job(_testJobName, _delayTask, 2));
       final longResult = await longRunningTask;
       final firstShortResult = await firstShortTask;
       final secondShortResult = await secondShortTask;
@@ -53,7 +56,7 @@ void main() {
 
   group('submitAll tasks:', () {
     test('runs a task', () async {
-      final result = executor.submitAll(_task, 3);
+      final result = executor.submitAll(Job(_testJobName, _task, 3));
       expect(result.length, 1);
       expect(await result[0], equals(4));
     });
@@ -75,7 +78,8 @@ void main() {
     test('rejects tasks when disposed', () async {
       executor.dispose();
       try {
-        await executor.submit((message) => _task, 'a-message');
+        await executor
+            .submit(Job(_testJobName, (message) => _task, 'a-message'));
         throw 'expected an error';
       } catch (error) {
         expect(error, 'disposed');
@@ -99,3 +103,5 @@ dynamic _delayTask(dynamic value) async {
   _delayValues.add(value);
   return _delayValues;
 }
+
+const _testJobName = 'test';

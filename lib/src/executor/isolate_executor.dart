@@ -35,11 +35,9 @@ class IsolateExecutor extends Executor {
   int get outstanding => _outstanding;
 
   @override
-  List<Future<R>> submitAll<Q, R>(
-          ComputeCallback<Q, R> computeFunction, Q value) =>
-      [submit(computeFunction, value)];
+  List<Future<R>> submitAll<Q, R>(Job<Q, R> job) => [submit(job)];
 
-  Future<R> submit<Q, R>(ComputeCallback<Q, R> computeFunction, Q value) async {
+  Future<R> submit<Q, R>(Job<Q, R> job) async {
     if (_disposed) {
       throw 'disposed';
     }
@@ -47,12 +45,12 @@ class IsolateExecutor extends Executor {
       await _ready.future;
     }
     final key = _newKey();
-    final job = _Job<Q, R>(key, _JobInput<Q, R>(key, computeFunction, value));
-    _jobByKey[key] = job;
+    final internalJob = _Job<Q, R>(key, job);
+    _jobByKey[key] = internalJob;
     ++_outstanding;
     try {
-      _queueJob(job);
-      return await job.completer.future;
+      _queueJob(internalJob);
+      return await internalJob.completer.future;
     } finally {
       --_outstanding;
     }
@@ -128,10 +126,12 @@ class IsolateExecutor extends Executor {
 
 class _Job<Q, R> {
   final String key;
-  final _JobInput<Q, R> input;
+  final Job<Q, R> job;
   final completer = Completer();
 
-  _Job(this.key, this.input);
+  _Job(this.key, this.job);
+
+  _JobInput<Q, R> get input => _JobInput(key, job.computeFunction, job.value);
 }
 
 class _JobInput<Q, R> {

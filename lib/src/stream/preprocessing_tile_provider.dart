@@ -19,7 +19,8 @@ class PreprocessingTileProvider extends TileProvider {
   }
 
   void _initialize() async {
-    final futures = _executor.submitAll(_setupPreprocessor, _preprocessor);
+    final futures = _executor.submitAll(
+        Job('setup preprocessor', _setupPreprocessor, _preprocessor));
     for (final future in futures) {
       await future;
     }
@@ -42,8 +43,8 @@ class PreprocessingTileProvider extends TileProvider {
       if (!_ready) {
         await _readyCompleter.future;
       }
-      final preprocessed =
-          await _executor.submit(_preprocessTile, tile.tileset!);
+      final preprocessed = await _executor.submit(
+          Job('preprocess: ${tile.identity}', _preprocessTile, tile.tileset!));
       return Tile(
           identity: tile.identity, format: tile.format, tileset: preprocessed);
     }

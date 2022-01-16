@@ -46,7 +46,7 @@ class VectorTileLoadingCache {
   Future<VectorTile> _loadTile(
       String source, String key, TileIdentity tile) async {
     final bytes = await _loadBytes(source, key, tile);
-    return _executor.submit(_readTileBytes, bytes);
+    return _executor.submit(Job('read bytes: $tile', _readTileBytes, bytes));
   }
 
   Future<List<int>> _loadBytes(

@@ -1,4 +1,5 @@
 import 'package:test/test.dart';
+import 'package:vector_map_tiles/src/executor/executor.dart';
 import 'package:vector_map_tiles/src/executor/pool_executor.dart';
 
 void main() {
@@ -15,8 +16,9 @@ void main() {
   });
 
   test('runs multiple tasks', () async {
-    final futures =
-        [1, 2, 3, 4, 5].map((e) => executor.submit(_task, e)).toList();
+    final futures = [1, 2, 3, 4, 5]
+        .map((e) => executor.submit(Job(_testJobName, _task, e)))
+        .toList();
     final results = [];
     for (final future in futures) {
       results.add(await future);
@@ -26,7 +28,7 @@ void main() {
 
   group('submitAll tasks:', () {
     test('runs a task', () async {
-      final result = executor.submitAll(_task, 3);
+      final result = executor.submitAll(Job(_testJobName, _task, 3));
       expect(result.length, 3);
       for (final future in result) {
         expect(await future, equals(4));
@@ -38,3 +40,5 @@ void main() {
 dynamic _task(dynamic value) {
   return value + 1;
 }
+
+const _testJobName = 'test';

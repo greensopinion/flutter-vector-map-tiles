@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 import 'executor.dart';
 
 class DirectExecutor extends Executor {
@@ -13,15 +11,13 @@ class DirectExecutor extends Executor {
   bool get disposed => _disposed;
 
   @override
-  Future<R> submit<Q, R>(ComputeCallback<Q, R> computeFunction, Q value) async {
+  Future<R> submit<Q, R>(Job<Q, R> job) async {
     if (_disposed) {
       throw 'disposed';
     }
-    return await computeFunction(value);
+    return await job.computeFunction(job.value);
   }
 
   @override
-  List<Future<R>> submitAll<Q, R>(
-          ComputeCallback<Q, R> computeFunction, Q value) =>
-      [submit(computeFunction, value)];
+  List<Future<R>> submitAll<Q, R>(Job<Q, R> job) => [submit(job)];
 }
