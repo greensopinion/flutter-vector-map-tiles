@@ -15,6 +15,8 @@ class IsolateExecutor extends Executor {
   final Map<String, _Job> _jobByKey = {};
   var _keySeed = 0;
   var _outstanding = 0;
+  var _submitted = 0;
+  var _queue = <_Job>[];
 
   IsolateExecutor() {
     _start();
@@ -49,10 +51,23 @@ class IsolateExecutor extends Executor {
     _jobByKey[key] = job;
     ++_outstanding;
     try {
-      _submit(job);
+      _queueJob(job);
       return await job.completer.future;
     } finally {
       --_outstanding;
+    }
+  }
+
+  void _queueJob(_Job work) {
+    _queue.add(work); //LIFO
+    _submitOne();
+  }
+
+  void _submitOne() {
+    while (_submitted == 0 && _queue.isNotEmpty) {
+      final job = _queue.removeLast(); //LIFO
+      ++_submitted;
+      _submit(job);
     }
   }
 
@@ -87,6 +102,7 @@ class IsolateExecutor extends Executor {
     final result = await stream.next;
     if (result is _Error) {
       if (result.key != null) {
+        --_submitted;
         final work = _jobByKey.remove(result.key);
         work?.completer.completeError(result.error, result.stack);
       } else {
@@ -94,13 +110,13 @@ class IsolateExecutor extends Executor {
         print(result.stack);
       }
     } else if (result is _JobOutput) {
+      --_submitted;
       final work = _jobByKey.remove(result.key);
-      if (work != null) {
-        work.completer.complete(result.message);
-      }
+      work?.completer.complete(result.message);
     } else {
       print('unexpected message: $result');
     }
+    _submitOne();
     _receiveWork();
   }
 

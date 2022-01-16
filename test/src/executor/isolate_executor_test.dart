@@ -37,6 +37,18 @@ void main() {
         expect(error, equals(message));
       }
     });
+
+    test('executes in LIFO order', () async {
+      final longRunningTask = executor.submit(_delayTask, 1000);
+      final firstShortTask = executor.submit(_delayTask, 1);
+      final secondShortTask = executor.submit(_delayTask, 2);
+      final longResult = await longRunningTask;
+      final firstShortResult = await firstShortTask;
+      final secondShortResult = await secondShortTask;
+      expect(longResult, [1000]);
+      expect(firstShortResult, [1000, 2, 1]);
+      expect(secondShortResult, [1000, 2]);
+    });
   });
 
   group('submitAll tasks:', () {
@@ -78,4 +90,12 @@ dynamic _task(dynamic value) {
 
 dynamic _throwingTask(dynamic value) {
   throw value;
+}
+
+final _delayValues = [];
+
+dynamic _delayTask(dynamic value) async {
+  await Future.delayed(Duration(milliseconds: value));
+  _delayValues.add(value);
+  return _delayValues;
 }
