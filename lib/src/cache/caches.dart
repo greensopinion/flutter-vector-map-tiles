@@ -37,7 +37,7 @@ class Caches {
     _cache = StorageCache(_storage, ttl, maxSizeInBytes);
     memoryVectorTileCache = MemoryCache(maxSizeBytes: memoryTileCacheMaxSize);
     vectorTileCache = VectorTileLoadingCache(
-        _cache, memoryVectorTileCache, providers, executor);
+        _cache, memoryVectorTileCache, providers, executor, pipeline.theme);
     imageTileCache = ImageTileLoadingCache(TileImageCache(_cache), pipeline);
     memoryImageCache = MemoryImageCache(maxImagesInMemory);
   }

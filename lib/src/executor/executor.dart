@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
+import 'pool_executor.dart';
 import 'queue_executor.dart';
 
 typedef CancellationCallback = bool Function();

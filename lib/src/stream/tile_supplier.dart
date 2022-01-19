@@ -36,19 +36,19 @@ class TileRequest extends CancellableTileRequest {
       : super(tileId, cancelled);
 }
 
-class Tile {
+class TileResponse {
   final TileIdentity identity;
   final TileFormat format;
   final Tileset? tileset;
   final Image? image;
 
-  Tile(
+  TileResponse(
       {required this.identity, required this.format, this.tileset, this.image});
 }
 
 abstract class TileSupplier {
   int get maximumZoom;
-  Stream<Tile> stream(TileRequest request);
+  Stream<TileResponse> stream(TileRequest request);
 }
 
 class TileProviderRequest extends CancellableTileRequest {
@@ -65,5 +65,5 @@ class TileProviderRequest extends CancellableTileRequest {
 
 abstract class TileProvider {
   int get maximumZoom;
-  Future<Tile> provide(TileProviderRequest request);
+  Future<TileResponse> provide(TileProviderRequest request);
 }

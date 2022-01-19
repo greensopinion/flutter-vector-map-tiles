@@ -2,8 +2,6 @@ import 'dart:math';
 
 import 'tile_supplier.dart';
 
-import '../../vector_map_tiles.dart';
-
 class DelayProvider extends TileProvider {
   final TileProvider _delegate;
   final Duration _delay;
@@ -22,7 +20,7 @@ class DelayProvider extends TileProvider {
   }
 
   @override
-  Future<Tile> provide(TileProviderRequest request) async {
+  Future<TileResponse> provide(TileProviderRequest request) async {
     final tile = _delegate.provide(request);
     final durationWithJitter =
         Duration(milliseconds: _random.nextInt(_delay.inMilliseconds));
