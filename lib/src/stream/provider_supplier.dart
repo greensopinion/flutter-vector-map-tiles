@@ -43,7 +43,6 @@ class ProviderTileSupplier extends TileSupplier {
 
 class _StreamFutureState {
   var _count = 0;
-  // ignore: close_sinks
   final _controller = StreamController<TileResponse>();
 
   Stream<TileResponse> get stream => _controller.stream;
@@ -61,7 +60,7 @@ class _StreamFutureState {
 
   void _countDown() {
     if (--_count == 0) {
-      _controller.sink.close();
+      _controller.close();
     }
   }
 }
