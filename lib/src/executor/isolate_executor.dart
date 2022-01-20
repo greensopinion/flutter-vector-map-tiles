@@ -23,10 +23,13 @@ class IsolateExecutor extends Executor {
   }
 
   void dispose() {
-    _disposed = true;
-    _sendPort?.send(null);
-    _sendPort = null;
-    _stream = null;
+    if (!_disposed) {
+      _disposed = true;
+      _sendPort?.send(null);
+      _sendPort = null;
+      _stream = null;
+      _completeCancelled(cancelAll: true);
+    }
   }
 
   bool hasJobWithDeduplicationKey(Job job) =>
@@ -68,19 +71,23 @@ class IsolateExecutor extends Executor {
   }
 
   void _submitOne() {
+    _completeCancelled(cancelAll: false);
+    if (_submitted == 0 && _queue.isNotEmpty) {
+      final job = _queue.removeLast(); //LIFO
+      ++_submitted;
+      _submit(job);
+    }
+  }
+
+  void _completeCancelled({required bool cancelAll}) {
     _queue.removeWhere((job) {
-      if (job.job.isCancelled) {
+      if (cancelAll || job.job.isCancelled) {
         _jobByKey.remove(job.key);
         job.completer.completeError(CancellationException());
         return true;
       }
       return false;
     });
-    if (_submitted == 0 && _queue.isNotEmpty) {
-      final job = _queue.removeLast(); //LIFO
-      ++_submitted;
-      _submit(job);
-    }
   }
 
   void _submit(_Job work) {
@@ -194,23 +201,26 @@ class _Error {
 Future<void> _executorService(SendPort port) async {
   final commandPort = ReceivePort();
   final commandStream = StreamQueue<dynamic>(commandPort);
+  try {
+    port.send(commandPort.sendPort);
 
-  port.send(commandPort.sendPort);
-
-  while (true) {
-    final command = await commandStream.next;
-    if (command is _JobInput) {
-      command.apply().then((result) {
-        port.send(_JobOutput(command.key, result));
-      }).onError((error, stack) {
-        port.send(_Error(command.key, error, stack));
-      });
-    } else if (command != null) {
-      port.send(_Error(null, 'Unexpected message: $command', null));
-    } else {
-      break;
+    while (true) {
+      final command = await commandStream.next;
+      if (command is _JobInput) {
+        command.apply().then((result) {
+          port.send(_JobOutput(command.key, result));
+        }).onError((error, stack) {
+          port.send(_Error(command.key, error, stack));
+        });
+      } else if (command != null) {
+        port.send(_Error(null, 'Unexpected message: $command', null));
+      } else {
+        break;
+      }
     }
+  } finally {
+    commandStream.cancel(immediate: true);
+    commandPort.close();
   }
-  commandStream.cancel(immediate: true);
   Isolate.exit();
 }

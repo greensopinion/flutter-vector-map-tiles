@@ -13,9 +13,9 @@ class PoolExecutor extends Executor {
 
   @override
   void dispose() {
-    _delegates.forEach((delegate) {
+    for (final delegate in _delegates) {
       delegate.dispose();
-    });
+    }
   }
 
   @override
