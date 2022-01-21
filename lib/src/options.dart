@@ -99,7 +99,7 @@ class VectorTileLayerOptions extends LayerOptions {
       this.rasterImageScale = 3.0,
       this.renderMode = RenderMode.mixed,
       this.fileCacheTtl = DEFAULT_CACHE_TTL,
-      this.maxTilesInMemory = DEFAULT_CACHE_MAX_TILES_IN_MEMORY,
+      this.maxTilesInMemory = 0,
       this.memoryTileCacheMaxSize = DEFAULT_TILE_CACHE_MAX_SIZE,
       this.maxImagesInMemory = DEFAULT_CACHE_MAX_IMAGES_IN_MEMORY,
       this.fileCacheMaximumSizeInBytes = DEFAULT_CACHE_MAX_SIZE,
