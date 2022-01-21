@@ -1,3 +1,6 @@
+## 1.3.45
+
+* reduce memory overhead even more
 ## 1.2.44
 
 * performance improvement
