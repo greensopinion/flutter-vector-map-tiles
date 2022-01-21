@@ -1,4 +1,4 @@
-## 1.3.45
+## 1.3.46
 
 * reduce memory overhead even more
 ## 1.2.44
