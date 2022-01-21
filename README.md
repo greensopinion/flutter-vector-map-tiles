@@ -100,6 +100,14 @@ FlutterMap(
 This plugin is fairly new and has not yet been broadly used. It's feature complete enough to be a v1, but does
 have performance issues on larger screens such as on a tablet or very old devices.
 
+## Development
+
+### Continuous Integration
+
+CI with GitHub Actions:
+
+[![CI status](https://github.com/greensopinion/flutter-vector-map-tiles/actions/workflows/CI.yaml/badge.svg)](https://github.com/greensopinion/flutter-vector-map-tiles/actions)
+
 ## License
 
 Copyright 2021 David Green
