@@ -1,9 +1,9 @@
+import 'dart:async';
+
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../cache/caches.dart';
 import '../cache/memory_image_cache.dart';
-import '../provider_exception.dart';
-import '../tile_identity.dart';
 import 'tile_supplier.dart';
 
 class CachesTileProvider extends TileProvider {
@@ -17,30 +17,19 @@ class CachesTileProvider extends TileProvider {
   int get maximumZoom => _caches.vectorTileCache.maximumZoom;
 
   @override
-  Future<Tile> provide(TileProviderRequest request) async {
+  Future<TileResponse> provide(TileProviderRequest request) async {
     if (request.format == TileFormat.vector) {
-      Map<String, Future<VectorTile>> futureBySource = {};
+      Map<String, Future<Tile>> futureBySource = {};
       for (final source in _caches.providerSources) {
         futureBySource[source] = _caches.vectorTileCache
             .retrieve(source, request.tileId, cancelled: request.cancelled);
       }
-      Map<String, VectorTile> tileBySource = {};
+      Map<String, Tile> tileBySource = {};
       for (final entry in futureBySource.entries) {
         request.testCancelled();
-        VectorTile? tile;
-        try {
-          tile = await entry.value;
-        } catch (error) {
-          if (error is ProviderException && error.statusCode == 404) {
-            print(error);
-            tile = VectorTile(layers: []);
-          } else {
-            rethrow;
-          }
-        }
-        tileBySource[entry.key] = tile;
+        tileBySource[entry.key] = await entry.value;
       }
-      return Tile(
+      return TileResponse(
           identity: request.tileId,
           format: request.format,
           tileset: Tileset(tileBySource));
@@ -49,7 +38,7 @@ class CachesTileProvider extends TileProvider {
       final imageKey = ImageKey(request.tileId, effectiveZoom);
       final image = _caches.memoryImageCache.get(imageKey);
       if (image != null) {
-        return Tile(
+        return TileResponse(
             identity: request.tileId,
             format: TileFormat.raster,
             tileset: null,
@@ -65,7 +54,7 @@ class CachesTileProvider extends TileProvider {
           tile.identity, tile.tileset!,
           zoom: effectiveZoom, cancelled: request.cancelled);
       _caches.memoryImageCache.put(imageKey, loaded);
-      return Tile(
+      return TileResponse(
           identity: tile.identity,
           format: TileFormat.raster,
           tileset: null,

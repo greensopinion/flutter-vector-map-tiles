@@ -9,7 +9,10 @@ class QueueExecutor extends Executor {
 
   @override
   void dispose() {
-    _disposed = true;
+    if (!_disposed) {
+      _disposed = true;
+      _completeCancelled(cancelAll: true);
+    }
   }
 
   @override
@@ -17,6 +20,9 @@ class QueueExecutor extends Executor {
 
   @override
   Future<R> submit<Q, R>(Job<Q, R> job) {
+    if (_disposed) {
+      throw 'disposed';
+    }
     final internalJob = _Job(job);
     _queue.add(internalJob); //LIFO
     _schedule();
@@ -27,8 +33,7 @@ class QueueExecutor extends Executor {
   List<Future<R>> submitAll<Q, R>(Job<Q, R> job) => [submit(job)];
 
   void _schedule() {
-    _completeCancelled();
-    if (!_scheduled && _queue.isNotEmpty) {
+    if (!_disposed && !_scheduled && _queue.isNotEmpty) {
       _scheduled = true;
       scheduleMicrotask(_runOneAndReschedule);
     }
@@ -36,7 +41,8 @@ class QueueExecutor extends Executor {
 
   void _runOneAndReschedule() async {
     _scheduled = false;
-    if (_queue.isNotEmpty) {
+    _completeCancelled(cancelAll: false);
+    if (_queue.isNotEmpty && !_disposed) {
       final job = _queue.removeLast(); //LIFO
       try {
         if (_disposed) {
@@ -47,10 +53,12 @@ class QueueExecutor extends Executor {
         }
         final result = await job.apply();
         job.completer.complete(result);
-        _completeCancelled();
+        _completeCancelled(cancelAll: false);
         _completeDuplicates(job, result);
       } catch (error, stack) {
-        job.completer.completeError(error, stack);
+        if (!job.completer.isCompleted) {
+          job.completer.completeError(error, stack);
+        }
       }
     }
     _schedule();
@@ -69,7 +77,17 @@ class QueueExecutor extends Executor {
     }
   }
 
-  void _completeCancelled() {}
+  void _completeCancelled({required bool cancelAll}) {
+    _queue.removeWhere((queued) {
+      if (cancelAll || queued.request.isCancelled) {
+        if (!queued.completer.isCompleted) {
+          queued.completer.completeError(CancellationException());
+        }
+        return true;
+      }
+      return false;
+    });
+  }
 }
 
 class _Job<Q, R> {

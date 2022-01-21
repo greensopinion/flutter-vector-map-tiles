@@ -31,7 +31,6 @@ class VectorTileModel extends ChangeNotifier {
   TileTranslation? imageTranslation;
   Tileset? tileset;
   ui.Image? image;
-  TileRequest? _tileRequest;
 
   VectorTileModel(
       this.renderMode,
@@ -57,7 +56,6 @@ class VectorTileModel extends ChangeNotifier {
         secondaryFormat:
             renderMode == RenderMode.mixed ? TileFormat.raster : null,
         cancelled: () => _disposed);
-    _tileRequest = request;
     final stream = tileSupplier.stream(request);
     try {
       await stream.forEach(_receiveTile);
@@ -66,7 +64,7 @@ class VectorTileModel extends ChangeNotifier {
     }
   }
 
-  void _receiveTile(Tile received) {
+  void _receiveTile(TileResponse received) {
     final newTranslation = SlippyMapTranslator(tileSupplier.maximumZoom)
         .specificZoomTranslation(tile, zoom: received.identity.z);
     if (received.format == TileFormat.raster) {

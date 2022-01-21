@@ -3,7 +3,9 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:vector_map_tiles/vector_map_tiles.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
+// ignore: implementation_imports
 import 'package:vector_tile_renderer/src/themes/light_theme.dart';
+// ignore: uri_does_not_exist
 import 'api_key.dart';
 
 void main() {
@@ -90,6 +92,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   String _urlTemplate() {
     // Stadia Maps source https://docs.stadiamaps.com/vector/
+    // ignore: undefined_identifier
     return 'https://tiles.stadiamaps.com/data/openmaptiles/{z}/{x}/{y}.pbf?api_key=$apiKey';
 
     // Mapbox source https://docs.mapbox.com/api/maps/vector-tiles/#example-request-retrieve-vector-tiles

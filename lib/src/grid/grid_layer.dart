@@ -241,7 +241,7 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
         tiles.first.key.z,
         TilePositioningState(
             _zoomScaler.zoomScale(tiles.first.key.z), _mapState, _zoom));
-    tiles.forEach((tile) {
+    for (final tile in tiles) {
       if (tile.key.z != positioner.tileZoom) {
         positioner = GridTilePositioner(
             tile.key.z,
@@ -249,7 +249,7 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
                 _zoomScaler.zoomScale(tile.key.z), _mapState, _zoom));
       }
       tileWidgets.add(positioner.positionTile(tile.key, tile.value));
-    });
+    }
     return Stack(children: tileWidgets);
   }
 

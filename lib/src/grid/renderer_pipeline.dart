@@ -25,7 +25,10 @@ class RendererPipeline {
     return job.completer.future;
   }
 
-  void _renderOne() async {
+  Future<void> _renderOne() async {
+    if (queue.isEmpty) {
+      return;
+    }
     final job = queue.removeLast();
     try {
       if (job.cancelled()) {
@@ -43,8 +46,8 @@ class RendererPipeline {
   }
 
   void _scheduleOne() {
-    scheduleMicrotask(() {
-      _renderOne();
+    scheduleMicrotask(() async {
+      await _renderOne();
       if (queue.isNotEmpty) {
         _scheduleOne();
       }

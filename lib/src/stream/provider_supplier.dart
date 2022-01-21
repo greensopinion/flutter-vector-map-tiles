@@ -15,7 +15,7 @@ class ProviderTileSupplier extends TileSupplier {
   int get maximumZoom => _provider.maximumZoom;
 
   @override
-  Stream<Tile> stream(TileRequest request) {
+  Stream<TileResponse> stream(TileRequest request) {
     TileIdentity tileId = request.tileId;
     if (tileId.z > maximumZoom) {
       tileId = _translator
@@ -43,12 +43,11 @@ class ProviderTileSupplier extends TileSupplier {
 
 class _StreamFutureState {
   var _count = 0;
-  // ignore: close_sinks
-  final _controller = StreamController<Tile>();
+  final _controller = StreamController<TileResponse>();
 
-  Stream<Tile> get stream => _controller.stream;
+  Stream<TileResponse> get stream => _controller.stream;
 
-  void add(Future<Tile> future) {
+  void add(Future<TileResponse> future) {
     ++_count;
     future.then((value) {
       _controller.sink.add(value);
@@ -61,7 +60,7 @@ class _StreamFutureState {
 
   void _countDown() {
     if (--_count == 0) {
-      _controller.sink.close();
+      _controller.close();
     }
   }
 }
