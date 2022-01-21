@@ -344,14 +344,14 @@ packages:
       name: vector_tile
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.3.1"
+    version: "0.3.2"
   vector_tile_renderer:
     dependency: transitive
     description:
       name: vector_tile_renderer
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.6"
+    version: "2.2.7"
   win32:
     dependency: transitive
     description:
