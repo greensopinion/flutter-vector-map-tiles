@@ -56,9 +56,15 @@ class VectorTileModel extends ChangeNotifier {
         secondaryFormat:
             renderMode == RenderMode.mixed ? TileFormat.raster : null,
         cancelled: () => _disposed);
-    final stream = tileSupplier.stream(request);
+    final futures = tileSupplier.stream(request);
+    for (final future in futures) {
+      future.whenComplete(() => _tileReady(future));
+    }
+  }
+
+  void _tileReady(Future<TileResponse> future) async {
     try {
-      await stream.forEach(_receiveTile);
+      _receiveTile(await future);
     } on CancellationException {
       // ignore, expected
     }

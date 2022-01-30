@@ -48,7 +48,7 @@ class TileResponse {
 
 abstract class TileSupplier {
   int get maximumZoom;
-  Stream<TileResponse> stream(TileRequest request);
+  List<Future<TileResponse>> stream(TileRequest request);
 }
 
 class TileProviderRequest extends CancellableTileRequest {
