@@ -16,6 +16,7 @@ class TileWidgets extends ChangeNotifier {
   final ZoomScaleFunction _zoomScaleFunction;
   final ZoomFunction _zoomFunction;
   final Theme _theme;
+  final Theme? _symbolTheme;
   final TileSupplier _tileSupplier;
   final RenderMode _renderMode;
   final bool paintBackground;
@@ -25,6 +26,7 @@ class TileWidgets extends ChangeNotifier {
       this._zoomScaleFunction,
       this._zoomFunction,
       this._theme,
+      this._symbolTheme,
       this._tileSupplier,
       this._renderMode,
       this.paintBackground,
@@ -53,6 +55,7 @@ class TileWidgets extends ChangeNotifier {
             _renderMode,
             _tileSupplier,
             _theme,
+            _symbolTheme,
             tile,
             _zoomScaleFunction,
             _zoomFunction,

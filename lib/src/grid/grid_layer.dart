@@ -88,16 +88,25 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
   Widget build(BuildContext context) {
     final options = widget.options;
     final backgroundTheme = options.backgroundTheme;
+    var theme = options.theme;
+    Theme? symbolTheme;
+    if (options.renderMode == RenderMode.layered_vector) {
+      symbolTheme = theme.copyWith(types: {ThemeLayerType.symbol});
+      theme = theme.copyWith(types: {
+        ThemeLayerType.background,
+        ThemeLayerType.fill,
+        ThemeLayerType.line
+      });
+    }
     final layers = <Widget>[
       VectorTileLayer(
           Key("${options.theme.id}_VectorTileLayer"),
-          _LayerOptions(
-              options.theme,
-              options.renderMode,
-              options.showTileDebugInfo,
-              backgroundTheme == null,
-              false,
-              () => widget.mapState.zoom),
+          _LayerOptions(theme, options.renderMode,
+              symbolTheme: symbolTheme,
+              showTileDebugInfo: options.showTileDebugInfo,
+              paintBackground: backgroundTheme == null,
+              paintNoDataTiles: false,
+              mapZoom: () => widget.mapState.zoom),
           widget.mapState,
           widget.stream,
           _tileSupplier)
@@ -106,7 +115,10 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
       final background = VectorTileLayer(
           Key("${backgroundTheme.id}_background_VectorTileLayer"),
           _LayerOptions(backgroundTheme, RenderMode.vector,
-              options.showTileDebugInfo, true, true, _backgroundZoom),
+              showTileDebugInfo: options.showTileDebugInfo,
+              paintBackground: true,
+              paintNoDataTiles: true,
+              mapZoom: _backgroundZoom),
           widget.mapState,
           widget.stream,
           _tileSupplier);
@@ -143,14 +155,19 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
 
 class _LayerOptions {
   final Theme theme;
+  final Theme? symbolTheme;
   final RenderMode renderMode;
   final bool showTileDebugInfo;
   final bool paintBackground;
   final bool paintNoDataTiles;
   final double Function() mapZoom;
 
-  _LayerOptions(this.theme, this.renderMode, this.showTileDebugInfo,
-      this.paintBackground, this.paintNoDataTiles, this.mapZoom);
+  _LayerOptions(this.theme, this.renderMode,
+      {this.symbolTheme,
+      required this.showTileDebugInfo,
+      required this.paintBackground,
+      required this.paintNoDataTiles,
+      required this.mapZoom});
 }
 
 class VectorTileLayer extends StatefulWidget {
@@ -213,6 +230,7 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
         (tileZoom) => _zoomScaler.zoomScale(tileZoom),
         () => _zoom,
         widget.options.theme,
+        widget.options.symbolTheme,
         widget.tileSupplier,
         widget.options.renderMode,
         widget.options.paintBackground,

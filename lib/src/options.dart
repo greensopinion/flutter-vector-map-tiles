@@ -7,6 +7,10 @@ enum RenderMode {
   /// tiles are rendered using vectors only
   vector,
 
+  /// tiles are rendered using vectors only, layered so that rendering
+  /// can occur over multiple frames (text is not displayed while zooming).
+  layered_vector,
+
   /// tiles are rendered using vectors when idle, and raster images when
   /// zooming. Can improve the frame rate and reduce jank.
   mixed,

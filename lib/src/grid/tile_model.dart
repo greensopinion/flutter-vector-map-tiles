@@ -20,6 +20,7 @@ class VectorTileModel extends ChangeNotifier {
   final TileIdentity tile;
   final TileSupplier tileSupplier;
   final Theme theme;
+  final Theme? symbolTheme;
   bool paintBackground;
   final bool showTileDebugInfo;
   final ZoomScaleFunction zoomScaleFunction;
@@ -36,6 +37,7 @@ class VectorTileModel extends ChangeNotifier {
       this.renderMode,
       this.tileSupplier,
       this.theme,
+      this.symbolTheme,
       this.tile,
       this.zoomScaleFunction,
       this.zoomFunction,

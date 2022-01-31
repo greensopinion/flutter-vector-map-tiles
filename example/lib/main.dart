@@ -59,7 +59,9 @@ class _MyHomePageState extends State<MyHomePage> {
               // instead this vector tile layer replaces the standard tile layer
               VectorTileLayerOptions(
                   theme: _mapTheme(),
-                  backgroundTheme: _backgroundTheme(),
+                  // backgroundTheme: _backgroundTheme(),
+                  renderMode: RenderMode.layered_vector,
+                  showTileDebugInfo: true,
                   tileProviders: TileProviders(
                       {'openmaptiles': _cachingTileProvider(_urlTemplate())})),
             ],
