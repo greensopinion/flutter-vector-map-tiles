@@ -108,7 +108,7 @@ class _DelayedPainterState extends DisposableState<_DelayedPainter> {
 
   _DelayedPainterState(this.painter) {
     debounce = ScheduledDebounce(_notifyUpdate,
-        delay: Duration(milliseconds: 800),
+        delay: Duration(milliseconds: 500),
         jitter: Duration(milliseconds: 100),
         maxAge: Duration(seconds: 10));
     painter.options.model.addListener(() {
