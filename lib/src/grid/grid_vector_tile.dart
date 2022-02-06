@@ -212,8 +212,8 @@ class _VectorTilePainter extends CustomPainter {
       _lastPaintedId = translation.translated;
     }
     canvas.restore();
-    _paintTileDebugInfo(
-        canvas, size, renderImage, tileSizer.effectiveScale, tileSizer);
+    _paintTileDebugInfo(canvas, size, renderImage, tileSizer.effectiveScale,
+        tileSizer, model.lastRenderedZoom);
   }
 
   void _paintBackground(Canvas canvas, Size size) {
@@ -231,12 +231,12 @@ class _VectorTilePainter extends CustomPainter {
     _lastPainted = _PaintMode.background;
     _lastPaintedId = null;
     canvas.restore();
-    _paintTileDebugInfo(
-        canvas, size, false, tileSizer.effectiveScale, tileSizer);
+    _paintTileDebugInfo(canvas, size, false, tileSizer.effectiveScale,
+        tileSizer, model.lastRenderedZoom);
   }
 
   void _paintTileDebugInfo(Canvas canvas, Size size, bool renderedImage,
-      double scale, GridTileSizer tileSizer) {
+      double scale, GridTileSizer tileSizer, double zoom) {
     if (options.showTileDebugInfo) {
       ++_paintCount;
       final paint = Paint()
@@ -255,7 +255,7 @@ class _VectorTilePainter extends CustomPainter {
           text: TextSpan(
               style: textStyle,
               text:
-                  '${options.model.tile}\nscale=$roundedScale\npaintCount=$_paintCount'),
+                  '${options.model.tile} zoom=$zoom\nscale=$roundedScale\npaintCount=$_paintCount'),
           textAlign: TextAlign.start,
           textDirection: TextDirection.ltr)
         ..layout();
