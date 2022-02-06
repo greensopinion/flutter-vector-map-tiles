@@ -105,7 +105,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
               symbolTheme: symbolTheme,
               showTileDebugInfo: options.showTileDebugInfo,
               paintBackground: backgroundTheme == null,
-              paintNoDataTiles: false,
+              paintNoDataTiles: true,
               mapZoom: () => widget.mapState.zoom),
           widget.mapState,
           widget.stream,

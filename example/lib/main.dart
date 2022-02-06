@@ -61,7 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   theme: _mapTheme(),
                   // backgroundTheme: _backgroundTheme(),
                   renderMode: RenderMode.layered_vector,
-                  showTileDebugInfo: true,
+                  // showTileDebugInfo: true,
                   tileProviders: TileProviders(
                       {'openmaptiles': _cachingTileProvider(_urlTemplate())})),
             ],
