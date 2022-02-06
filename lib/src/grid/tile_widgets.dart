@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:flutter/widgets.dart';
+import 'package:vector_map_tiles/src/grid/slippy_map_translator.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../vector_map_tiles.dart';
@@ -46,7 +49,8 @@ class TileWidgets extends ChangeNotifier {
 
     _idToModel = {};
 
-    tiles.forEach((tile) {
+    Set<TileIdentity> effectiveTiles = _reduce(tiles);
+    effectiveTiles.forEach((tile) {
       var model = previousIdToModel[tile];
       if (model == null) {
         model = VectorTileModel(
@@ -99,5 +103,16 @@ class TileWidgets extends ChangeNotifier {
     return GridVectorTile(
         key: Key('GridTile_${tile.z}_${tile.x}_${tile.y}_${_theme.id}'),
         model: model);
+  }
+
+  Set<TileIdentity> _reduce(List<TileIdentity> tiles) {
+    final translator = SlippyMapTranslator(_tileSupplier.maximumZoom);
+    final reduced = <TileIdentity>{};
+    for (final tile in tiles) {
+      final translation = translator.specificZoomTranslation(tile,
+          zoom: min(_tileSupplier.maximumZoom, tile.z));
+      reduced.add(translation.translated);
+    }
+    return reduced;
   }
 }
