@@ -104,6 +104,8 @@ class _DelayedPainterState extends DisposableState<_DelayedPainter> {
   final _VectorTilePainter painter;
   var _render = false;
 
+  bool get shouldPaint => _render;
+
   _DelayedPainterState(this.painter) {
     debounce = ScheduledDebounce(_notifyUpdate,
         delay: Duration(milliseconds: 800),
@@ -114,17 +116,20 @@ class _DelayedPainterState extends DisposableState<_DelayedPainter> {
     });
   }
 
+  void painted() {
+    if (_render) {
+      _render = false;
+    } else {
+      debounce.update();
+    }
+  }
+
   @override
   material.Widget build(material.BuildContext context) {
-    if (!_render) {
-      debounce.update();
-      return material.Container();
-    }
-    _render = false;
     return RepaintBoundary(
         key: Key(
             'tileBodyBoundarySymbols${painter.options.model.tile.z}_${painter.options.model.tile.x}_${painter.options.model.tile.y}'),
-        child: CustomPaint(painter: painter));
+        child: CustomPaint(painter: _DelayedCustomPainter(this, painter)));
   }
 
   void _notifyUpdate() {
@@ -133,6 +138,26 @@ class _DelayedPainterState extends DisposableState<_DelayedPainter> {
         _render = true;
       });
     }
+  }
+}
+
+class _DelayedCustomPainter extends material.CustomPainter {
+  final _DelayedPainterState _state;
+  final material.CustomPainter _delegate;
+
+  _DelayedCustomPainter(this._state, this._delegate);
+
+  @override
+  void paint(material.Canvas canvas, material.Size size) {
+    if (_state.shouldPaint) {
+      _delegate.paint(canvas, size);
+    }
+    _state.painted();
+  }
+
+  @override
+  bool shouldRepaint(covariant material.CustomPainter oldDelegate) {
+    return true;
   }
 }
 
