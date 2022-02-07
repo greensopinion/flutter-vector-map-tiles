@@ -149,7 +149,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
   }
 
   double _backgroundZoom() {
-    return max(1, min(14, widget.mapState.zoom - 2).roundToDouble());
+    return max(1, (widget.mapState.zoom - 1).floorToDouble());
   }
 }
 
