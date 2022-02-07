@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:vector_map_tiles/src/executor/pool_executor.dart';
 
 import 'queue_executor.dart';
 
@@ -33,5 +34,5 @@ class CancellationException implements Exception {
   CancellationException();
 }
 
-Executor newExecutor() => QueueExecutor();
-// kDebugMode ? IsolateExecutor() : PoolExecutor(concurrency: 2);
+Executor newExecutor() =>
+    kDebugMode ? QueueExecutor() : PoolExecutor(concurrency: 2);
