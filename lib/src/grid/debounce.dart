@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 class ScheduledDebounce {
@@ -48,7 +49,7 @@ class ScheduledDebounce {
     final elapsed =
         DateTime.now().millisecondsSinceEpoch - start!.millisecondsSinceEpoch;
     if (elapsed >= maxAge.inMilliseconds) {
-      _run();
+      scheduleMicrotask(_run);
     }
   }
 
