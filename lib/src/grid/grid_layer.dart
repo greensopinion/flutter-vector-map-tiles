@@ -10,7 +10,7 @@ import '../executor/executor.dart';
 import '../options.dart';
 import '../stream/caches_tile_provider.dart';
 import '../stream/delay_provider.dart';
-import '../stream/preprocessing_tile_provider.dart';
+import '../stream/tileset_executor_preprocessor.dart';
 import '../stream/provider_supplier.dart';
 import '../stream/tile_supplier.dart';
 import '../tile_identity.dart';
@@ -138,8 +138,10 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
         maxImagesInMemory: widget.options.maxImagesInMemory,
         maxSizeInBytes: widget.options.fileCacheMaximumSizeInBytes);
     _tileSupplier = ProviderTileSupplier(DelayProvider(
-            PreprocessingTileProvider(CachesTileProvider(_caches),
-                TilesetPreprocessor(widget.options.theme), _executor),
+            CachesTileProvider(
+                _caches,
+                TilesetExecutorPreprocessor(
+                    TilesetPreprocessor(widget.options.theme), _executor)),
             widget.options.tileDelay)
         .orDelegate());
   }
