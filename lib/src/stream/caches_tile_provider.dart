@@ -5,13 +5,13 @@ import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 import '../cache/caches.dart';
 import '../cache/memory_image_cache.dart';
 import 'tile_supplier.dart';
+import 'tileset_executor_preprocessor.dart';
 
 class CachesTileProvider extends TileProvider {
   final Caches _caches;
+  final TilesetExecutorPreprocessor _preprocessor;
 
-  CachesTileProvider(
-    this._caches,
-  );
+  CachesTileProvider(this._caches, this._preprocessor);
 
   @override
   int get maximumZoom => _caches.vectorTileCache.maximumZoom;
@@ -29,10 +29,10 @@ class CachesTileProvider extends TileProvider {
         request.testCancelled();
         tileBySource[entry.key] = await entry.value;
       }
+      final tileset = await _preprocessor.preprocess(
+          request.tileId, Tileset(tileBySource), request.cancelled);
       return TileResponse(
-          identity: request.tileId,
-          format: request.format,
-          tileset: Tileset(tileBySource));
+          identity: request.tileId, format: request.format, tileset: tileset);
     } else {
       final effectiveZoom = request.zoom?.ceil() ?? request.tileId.z;
       final imageKey = ImageKey(request.tileId, effectiveZoom);
