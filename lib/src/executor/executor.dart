@@ -34,5 +34,5 @@ class CancellationException implements Exception {
   CancellationException();
 }
 
-Executor newExecutor() =>
-    kDebugMode ? QueueExecutor() : PoolExecutor(concurrency: 2);
+Executor newExecutor({required int concurrency}) =>
+    kDebugMode ? QueueExecutor() : PoolExecutor(concurrency: concurrency);
