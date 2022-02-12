@@ -1,3 +1,11 @@
+## 1.4.0
+
+* performance improvements
+* removed deprecated options
+* added MacOS to example platforms
+* added concurrency option to enable/disable use of isolates
+* moved symbol rendering to a layer when rendering in vector mode
+* reduce memory overhead
 ## 1.3.46
 
 * reduce memory overhead even more
