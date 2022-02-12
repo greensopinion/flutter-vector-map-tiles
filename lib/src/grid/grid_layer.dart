@@ -90,7 +90,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
     final backgroundTheme = options.backgroundTheme;
     var theme = options.theme;
     Theme? symbolTheme;
-    if (options.renderMode == RenderMode.layered_vector) {
+    if (options.renderMode == RenderMode.vector) {
       symbolTheme = theme.copyWith(types: {ThemeLayerType.symbol});
       theme = theme.copyWith(types: {
         ThemeLayerType.background,
