@@ -51,6 +51,7 @@ class ByteStorage {
     if (await file.exists()) {
       return file.readAsBytes();
     }
+    return null;
   }
 
   Future<void> delete(String path) async {
@@ -58,5 +59,6 @@ class ByteStorage {
     if (await file.exists()) {
       await file.delete();
     }
+    return null;
   }
 }
