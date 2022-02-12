@@ -86,9 +86,9 @@ packages:
   flutter_map:
     dependency: transitive
     description:
-      path: "../../flutter_map"
-      relative: true
-    source: path
+      name: flutter_map
+      url: "https://pub.dartlang.org"
+    source: hosted
     version: "0.14.0"
   flutter_test:
     dependency: "direct dev"
@@ -137,6 +137,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.12.11"
+  material_color_utilities:
+    dependency: transitive
+    description:
+      name: material_color_utilities
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.3"
   meta:
     dependency: transitive
     description:
@@ -295,7 +302,7 @@ packages:
       name: test_api
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.3"
+    version: "0.4.8"
   transparent_image:
     dependency: transitive
     description:
@@ -348,10 +355,10 @@ packages:
   vector_tile_renderer:
     dependency: transitive
     description:
-      path: "../../dart-vector-tile-renderer"
-      relative: true
-    source: path
-    version: "2.2.8"
+      name: vector_tile_renderer
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.3.0"
   win32:
     dependency: transitive
     description:
