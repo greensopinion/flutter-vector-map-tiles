@@ -82,6 +82,15 @@ class VectorTileLayerOptions extends LayerOptions {
   /// slowing down the map to observe how it behaves as tiles are loading
   final Duration tileDelay;
 
+  /// The level of concurrency to use, must be >= 0.
+  /// When set to 1 or higher, [isolates](https://dart.dev/guides/language/concurrency)
+  /// are used for computations to offload expensive operations from the UI thread.
+  /// This setting has no effect in debug mode.
+  final int concurrency;
+
+  /// The default [concurrency] to use.
+  static const DEFAULT_CONCURRENCY = 2;
+
   VectorTileLayerOptions(
       {required this.tileProviders,
       required this.theme,
@@ -91,11 +100,13 @@ class VectorTileLayerOptions extends LayerOptions {
       this.memoryTileCacheMaxSize = DEFAULT_TILE_CACHE_MAX_SIZE,
       this.maxImagesInMemory = DEFAULT_CACHE_MAX_IMAGES_IN_MEMORY,
       this.fileCacheMaximumSizeInBytes = DEFAULT_CACHE_MAX_SIZE,
+      this.concurrency = DEFAULT_CONCURRENCY,
       this.backgroundTheme,
       this.showTileDebugInfo = false,
       this.logCacheStats = false,
       this.tileDelay = const Duration(milliseconds: 0)}) {
     assert(rasterImageScale >= 1.0 && rasterImageScale <= 5.0);
     assert(maxImagesInMemory >= 0 && maxImagesInMemory <= 200);
+    assert(concurrency >= 0 && concurrency <= 100);
   }
 }
