@@ -1,10 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' as material;
+import 'package:flutter/widgets.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:vector_map_tiles/vector_map_tiles.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
-// ignore: implementation_imports
-import 'package:vector_tile_renderer/src/themes/light_theme.dart';
 // ignore: uri_does_not_exist
 import 'api_key.dart';
 
@@ -16,9 +15,9 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return material.MaterialApp(
       title: 'vector_map_tiles Example',
-      theme: ThemeData.light(),
+      theme: material.ThemeData.light(),
       home: MyHomePage(title: 'vector_map_tiles Example'),
     );
   }
@@ -36,8 +35,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
+    return material.Scaffold(
+        appBar: material.AppBar(
           title: Text(widget.title),
         ),
         body: SafeArea(
@@ -59,8 +58,8 @@ class _MyHomePageState extends State<MyHomePage> {
               // instead this vector tile layer replaces the standard tile layer
               VectorTileLayerOptions(
                   theme: _mapTheme(),
-                  // backgroundTheme: _backgroundTheme(),
-                  renderMode: RenderMode.layered_vector,
+                  backgroundTheme: _backgroundTheme(),
+                  renderMode: RenderMode.vector,
                   // showTileDebugInfo: true,
                   tileProviders: TileProviders(
                       {'openmaptiles': _cachingTileProvider(_urlTemplate())})),
@@ -80,7 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
         maxSizeBytes: 1024 * 1024 * 2);
   }
 
-  _mapTheme() {
+  Theme _mapTheme() {
     // maps are rendered using themes
     // to provide a dark theme do something like this:
     // if (MediaQuery.of(context).platformBrightness == Brightness.dark) return myDarkTheme();
@@ -88,8 +87,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   _backgroundTheme() {
-    return ThemeReader().readAsBackground(lightThemeData(),
-        layerPredicate: defaultBackgroundLayerPredicate);
+    return _mapTheme()
+        .copyWith(types: {ThemeLayerType.background, ThemeLayerType.fill});
   }
 
   String _urlTemplate() {
