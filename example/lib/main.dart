@@ -8,23 +8,25 @@ import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 import 'api_key.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({material.Key? key}) : super(key: key);
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return material.MaterialApp(
       title: 'vector_map_tiles Example',
       theme: material.ThemeData.light(),
-      home: MyHomePage(title: 'vector_map_tiles Example'),
+      home: const MyHomePage(title: 'vector_map_tiles Example'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, required this.title}) : super(key: key);
+  const MyHomePage({Key? key, required this.title}) : super(key: key);
 
   final String title;
 

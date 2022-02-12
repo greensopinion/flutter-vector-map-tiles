@@ -31,6 +31,7 @@ class TileImageCache {
         await _removeQuietly(key);
       }
     }
+    return null;
   }
 
   Future<void> _removeQuietly(String key) async {
