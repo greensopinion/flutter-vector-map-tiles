@@ -145,7 +145,6 @@ class VectorTileModel extends ChangeNotifier {
       super.dispose();
       image?.dispose();
       image = null;
-      tileset = null;
       _disposed = true;
 
       if (!_firstRendered) {

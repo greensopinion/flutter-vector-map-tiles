@@ -204,12 +204,12 @@ class _VectorTilePainter extends CustomPainter {
       return;
     }
     final image = model.image;
-    final renderImage = (changed ||
+    final renderImage = image != null &&
+        (changed ||
             model.tileset == null ||
             (options.renderMode == RenderMode.mixed &&
                 (_lastPainted == _PaintMode.background ||
-                    _lastPainted == _PaintMode.none))) &&
-        image != null;
+                    _lastPainted == _PaintMode.none)));
     final translation =
         renderImage ? model.imageTranslation : model.translation;
     if (translation == null) {
