@@ -14,6 +14,8 @@ class TileWidgets extends ChangeNotifier {
   bool _disposed = false;
   Map<TileIdentity, VectorTileModel> _idToModel = {};
   Map<TileIdentity, GridVectorTile> _idToWidget = {};
+  final List<VectorTileModel> _loadingModels = [];
+  List<VectorTileModel> _substitutionModels = [];
   final ZoomScaleFunction _zoomScaleFunction;
   final ZoomFunction _zoomFunction;
   final Theme _theme;
@@ -22,6 +24,7 @@ class TileWidgets extends ChangeNotifier {
   final RenderMode _renderMode;
   final bool paintBackground;
   final bool showTileDebugInfo;
+  final bool substituteTilesWhileLoading;
 
   TileWidgets(
       this._zoomScaleFunction,
@@ -30,6 +33,7 @@ class TileWidgets extends ChangeNotifier {
       this._symbolTheme,
       this._tileSupplier,
       this._renderMode,
+      this.substituteTilesWhileLoading,
       this.paintBackground,
       this.showTileDebugInfo);
 
@@ -46,12 +50,26 @@ class TileWidgets extends ChangeNotifier {
 
   void _updateModels(TileViewport viewport, List<TileIdentity> tiles) {
     Map<TileIdentity, VectorTileModel> previousIdToModel = _idToModel;
-
     _idToModel = {};
 
     Set<TileIdentity> effectiveTiles = _reduce(tiles);
+    if (substituteTilesWhileLoading && effectiveTiles.isNotEmpty) {
+      final z = effectiveTiles.first.z;
+      final obsoleteSubstitutions = _substitutionModels
+          .where((m) =>
+              m.disposed || (m.tile.z - z).abs() > _maxSubstitutionDifference)
+          .toList();
+      for (final obsolete in obsoleteSubstitutions) {
+        _removeAndDispose(obsolete);
+      }
+    }
     effectiveTiles.forEach((tile) {
       var model = previousIdToModel[tile];
+      if (model != null && model.disposed) {
+        _removeAndDispose(model);
+        previousIdToModel.remove(tile);
+        model = null;
+      }
       if (model == null) {
         model = VectorTileModel(
             _renderMode,
@@ -63,13 +81,25 @@ class TileWidgets extends ChangeNotifier {
             _zoomFunction,
             paintBackground,
             showTileDebugInfo);
+        model.addListener(_modelChanged);
+        _loadingModels.add(model);
         model.startLoading();
       } else {
         previousIdToModel.remove(tile);
       }
       _idToModel[tile] = model;
     });
-    previousIdToModel.values.forEach((it) => it.dispose());
+    if (substituteTilesWhileLoading) {
+      _substitutionModels =
+          _substitutionTiles(previousIdToModel, _loadingModels);
+      for (final substitution in _substitutionModels) {
+        previousIdToModel.remove(substitution.tile);
+        _idToModel[substitution.tile] = substitution;
+      }
+    }
+    previousIdToModel.values.forEach((it) {
+      _removeAndDispose(it);
+    });
     notifyListeners();
   }
 
@@ -78,8 +108,37 @@ class TileWidgets extends ChangeNotifier {
       super.dispose();
       _disposed = true;
       _idToWidget.clear();
-      _idToModel.values.forEach((model) => model.dispose());
+      _idToModel.values.forEach(_removeAndDispose);
       _idToModel.clear();
+      _loadingModels.clear();
+      _substitutionModels.clear();
+    }
+  }
+
+  void _modelChanged() {
+    if (_disposed) {
+      return;
+    }
+    var loaded = _loadingModels.where((model) => model.hasData).toList();
+    if (loaded.isNotEmpty) {
+      bool changed = false;
+      for (final model in loaded) {
+        _loadingModels.remove(model);
+        model.removeListener(_modelChanged);
+        changed =
+            changed || (!model.disposed && _idToModel.containsKey(model.tile));
+      }
+      if (changed) {
+        for (final substitution in _substitutionModels.toList()) {
+          final overlappingTiles = _idToModel.values.where((m) =>
+              m.tile != substitution.tile &&
+              m.tile.overlaps(substitution.tile));
+          if (overlappingTiles.every((m) => m.hasData)) {
+            _removeAndDispose(substitution);
+          }
+        }
+        notifyListeners();
+      }
     }
   }
 
@@ -93,7 +152,11 @@ class TileWidgets extends ChangeNotifier {
   void _updateWidgets() {
     Map<TileIdentity, GridVectorTile> idToWidget = {};
     _idToModel.forEach((tile, model) {
-      idToWidget[tile] = _idToWidget[tile] ?? _createWidget(model);
+      var previous = _idToWidget[tile];
+      if (previous != null && previous.model.disposed) {
+        previous = null;
+      }
+      idToWidget[tile] = previous ?? _createWidget(model);
     });
     _idToWidget = idToWidget;
   }
@@ -101,7 +164,8 @@ class TileWidgets extends ChangeNotifier {
   GridVectorTile _createWidget(VectorTileModel model) {
     final tile = model.tile;
     return GridVectorTile(
-        key: Key('GridTile_${tile.z}_${tile.x}_${tile.y}_${_theme.id}'),
+        key: Key(
+            'GridTile_${tile.z}_${tile.x}_${tile.y}_${_theme.id}_${identityHashCode(model)}'),
         model: model);
   }
 
@@ -115,4 +179,27 @@ class TileWidgets extends ChangeNotifier {
     }
     return reduced;
   }
+
+  List<VectorTileModel> _substitutionTiles(
+          Map<TileIdentity, VectorTileModel> possibleSubstitutions,
+          List<VectorTileModel> loadingModels) =>
+      possibleSubstitutions.values
+          .where((candidate) => candidate.hasData && !candidate.disposed)
+          .where((candidate) => loadingModels.any((m) {
+                final zoomDiff = (m.tile.z - candidate.tile.z).abs();
+                return zoomDiff > 0 &&
+                    zoomDiff <= _maxSubstitutionDifference &&
+                    m.tile.overlaps(candidate.tile);
+              }))
+          .toList();
+
+  void _removeAndDispose(VectorTileModel obsolete) {
+    _substitutionModels.remove(obsolete);
+    _loadingModels.remove(obsolete);
+    _idToModel.remove(obsolete.tile);
+    _idToWidget.remove(obsolete.tile);
+    obsolete.dispose();
+  }
 }
+
+const _maxSubstitutionDifference = 1;
