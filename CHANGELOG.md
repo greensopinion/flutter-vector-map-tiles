@@ -1,3 +1,8 @@
+## 1.4.1
+
+* bug fixes
+* performance improvements
+* reduced flicker when zooming
 ## 1.4.0
 
 * performance improvements
