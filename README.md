@@ -97,7 +97,7 @@ FlutterMap(
 
 ## Adding Hillshade
 
-A vector tile hillshade layer can be added to your maps by followign these steps:
+A vector tile hillshade layer can be added to your maps by following these steps:
 
 1. Add hillshade to your theme:
 
