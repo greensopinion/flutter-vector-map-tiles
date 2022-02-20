@@ -95,6 +95,115 @@ FlutterMap(
   ]);
 ```
 
+## Adding Hillshade
+
+A vector tile hillshade layer can be added to your maps by followign these steps:
+
+1. Add hillshade to your theme:
+
+```json
+      "sources": {
+        "openmaptiles": {"type": "vector", "url": ""},
+        "hillshade": {"type": "vector", "url": ""} // add hillshade to sources
+      },
+      "layers": [
+        // background and landcover and water features come here
+
+        // add hillshade to layers right after the water layer and before other features
+        {
+          "id": "hillshade_faint",
+          "type": "fill",
+          "source": "hillshade",
+          "source-layer": "hillshade",
+          "filter": [
+            "all",
+            ["==", "class", "shadow"],
+            ["==", "level", 89]
+          ],
+          "paint": {"fill-color": "#000", "fill-opacity": 0.02}
+        },
+        {
+          "id": "hillshade_medium",
+          "type": "fill",
+          "source": "hillshade",
+          "source-layer": "hillshade",
+          "filter": [
+            "all",
+            ["==", "class", "shadow"],
+            ["==", "level", 78]
+          ],
+          "paint": {"fill-color": "#000", "fill-opacity": 0.04}
+        },
+        {
+          "id": "hillshade_dark",
+          "type": "fill",
+          "source": "hillshade",
+          "source-layer": "hillshade",
+          "filter": [
+            "all",
+            ["==", "class", "shadow"],
+            ["==", "level", 67]
+          ],
+          "paint": {"fill-color": "#000", "fill-opacity": 0.06}
+        },
+        {
+          "id": "hillshade_extreme",
+          "type": "fill",
+          "source": "hillshade",
+          "source-layer": "hillshade",
+          "filter": [
+            "all",
+            ["==", "class", "shadow"],
+            ["==", "level", 56]
+          ],
+          "paint": {"fill-color": "#000", "fill-opacity": 0.08}
+        },
+        {
+          "id": "hillshade_highlight_medium",
+          "type": "fill",
+          "source": "hillshade",
+          "source-layer": "hillshade",
+          "filter": [
+            "all",
+            ["==", "class", "highlight"],
+            ["==", "level", 90]
+          ],
+          "paint": {"fill-color": "#fff", "fill-opacity": 0.04}
+        },
+        {
+          "id": "hillshade_highlight_bright",
+          "type": "fill",
+          "source": "hillshade",
+          "source-layer": "hillshade",
+          "filter": [
+            "all",
+            ["==", "class", "highlight"],
+            ["==", "level", 94]
+          ],
+          "paint": {"fill-color": "#fff", "fill-opacity": 0.08}
+        },
+
+        // other features come here (roads etc.)
+      ]
+```
+
+2. Add Hillshade Vector Layer to Sources
+
+```dart
+  VectorTileLayerOptions(
+    theme: _mapTheme(),
+    backgroundTheme: _backgroundTheme(),
+    renderMode: RenderMode.vector,
+    tileProviders: TileProviders({
+      'openmaptiles': _cachingTileProvider(_urlTemplate()),
+      'hillshade': _cachingTileProvider(_hillshadeUrlTemplate())
+    })
+
+
+    String _hillshadeUrlTemplate() =>
+      'https://api.mapbox.com/v4/mapbox.mapbox-terrain-v2/{z}/{x}/{y}.mvt?access_token=$mapboxApiKey';    
+```
+
 ## Status
 
 This plugin is fairly new and has not yet been broadly used. It's feature complete enough to be a v1, but does
