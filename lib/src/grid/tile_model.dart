@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
@@ -5,6 +6,7 @@ import '../executor/executor.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../options.dart';
+import '../profiler.dart';
 import '../stream/tile_supplier.dart';
 import '../tile_identity.dart';
 import 'slippy_map_translator.dart';
@@ -32,6 +34,8 @@ class VectorTileModel extends ChangeNotifier {
   TileTranslation? imageTranslation;
   Tileset? tileset;
   ui.Image? image;
+  late final TimelineTask _firstRenderedTask;
+  bool _firstRendered = false;
 
   VectorTileModel(
       this.renderMode,
@@ -45,9 +49,17 @@ class VectorTileModel extends ChangeNotifier {
       this.showTileDebugInfo) {
     defaultTranslation =
         SlippyMapTranslator(tileSupplier.maximumZoom).translate(tile);
+    _firstRenderedTask = tileRenderingTask(tile);
   }
 
   bool get hasData => image != null || tileset != null;
+
+  void rendered() {
+    if (!_firstRendered) {
+      _firstRendered = true;
+      _firstRenderedTask.finish();
+    }
+  }
 
   void startLoading() async {
     final request = TileRequest(
@@ -135,6 +147,11 @@ class VectorTileModel extends ChangeNotifier {
       image = null;
       tileset = null;
       _disposed = true;
+
+      if (!_firstRendered) {
+        _firstRendered = true;
+        _firstRenderedTask.finish(arguments: {'cancelled': true});
+      }
     }
   }
 

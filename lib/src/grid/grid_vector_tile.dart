@@ -239,6 +239,7 @@ class _VectorTilePainter extends CustomPainter {
     canvas.restore();
     _paintTileDebugInfo(canvas, size, renderImage, tileSizer.effectiveScale,
         tileSizer, model.lastRenderedZoom);
+    model.rendered();
   }
 
   void _paintBackground(Canvas canvas, Size size) {
