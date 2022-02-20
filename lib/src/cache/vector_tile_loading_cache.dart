@@ -76,8 +76,8 @@ class VectorTileLoadingCache {
       }
       rethrow;
     }
-    return _executor.submit(Job('read bytes: $tile', _createTile, bytes,
-        cancelled: cancelled, deduplicationKey: 'decode bytes: $tile'));
+    return _executor.submit(Job('read $source bytes: $tile', _createTile, bytes,
+        cancelled: cancelled, deduplicationKey: 'decode $source bytes: $tile'));
   }
 
   Future<Uint8List> _loadBytes(
