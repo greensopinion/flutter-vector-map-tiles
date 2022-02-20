@@ -204,6 +204,10 @@ A vector tile hillshade layer can be added to your maps by followign these steps
       'https://api.mapbox.com/v4/mapbox.mapbox-terrain-v2/{z}/{x}/{y}.mvt?access_token=$mapboxApiKey';    
 ```
 
+## Attribution
+
+Examples provided in `vector_map_tiles` make use of Mapbox and Stadia Maps, both of which require attribution.
+Be sure to read the terms of service of your tile data provider to ensure that you understand their attribution requirements.
 ## Status
 
 This plugin is fairly new and has not yet been broadly used. It's feature complete enough to be a v1, but does
