@@ -105,7 +105,8 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
               symbolTheme: symbolTheme,
               showTileDebugInfo: options.showTileDebugInfo,
               paintBackground: backgroundTheme == null,
-              paintNoDataTiles: true,
+              substituteTilesWhileLoading: true,
+              paintNoDataTiles: false,
               mapZoom: () => widget.mapState.zoom),
           widget.mapState,
           widget.stream,
@@ -117,6 +118,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
           _LayerOptions(backgroundTheme, RenderMode.vector,
               showTileDebugInfo: options.showTileDebugInfo,
               paintBackground: true,
+              substituteTilesWhileLoading: false,
               paintNoDataTiles: true,
               mapZoom: _backgroundZoom),
           widget.mapState,
@@ -161,6 +163,7 @@ class _LayerOptions {
   final RenderMode renderMode;
   final bool showTileDebugInfo;
   final bool paintBackground;
+  final bool substituteTilesWhileLoading;
   final bool paintNoDataTiles;
   final double Function() mapZoom;
 
@@ -169,6 +172,7 @@ class _LayerOptions {
       required this.showTileDebugInfo,
       required this.paintBackground,
       required this.paintNoDataTiles,
+      required this.substituteTilesWhileLoading,
       required this.mapZoom});
 }
 
@@ -196,7 +200,7 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
   MapState get _mapState => widget.mapState;
 
   double get _zoom => widget.options.mapZoom();
-  double get _clampedZoom => _zoom.roundToDouble();
+  double get _clampedZoom => max(1.0, _zoom.floorToDouble());
 
   @override
   void initState() {
@@ -235,6 +239,7 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
         widget.options.symbolTheme,
         widget.tileSupplier,
         widget.options.renderMode,
+        widget.options.substituteTilesWhileLoading,
         widget.options.paintBackground,
         widget.options.showTileDebugInfo);
     _tileWidgets.addListener(() {
