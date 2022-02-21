@@ -15,7 +15,7 @@ class VectorTileLoadingCache {
   final MemoryCache _memoryCache;
   final StorageCache _delegate;
   final TileProviders _providers;
-  final Map<String, Future<Tile>> _futuresByKey = {};
+  final Map<String, Future<Uint8List>> _byteFuturesByKey = {};
   final Executor _executor;
   bool _ready = false;
   final _readyCompleter = Completer<bool>();
@@ -35,20 +35,7 @@ class VectorTileLoadingCache {
       await _readyCompleter.future;
     }
     final key = _toKey(source, tile);
-    var future = _futuresByKey[key];
-    var loaded = false;
-    if (future == null) {
-      loaded = true;
-      future = _loadTile(source, key, tile, cancelled);
-      _futuresByKey[key] = future;
-    }
-    try {
-      return await future;
-    } finally {
-      if (loaded) {
-        _futuresByKey.remove(key);
-      }
-    }
+    return await _loadTile(source, key, tile, cancelled);
   }
 
   void _initialize() async {
@@ -66,15 +53,26 @@ class VectorTileLoadingCache {
 
   Future<Tile> _loadTile(String source, String key, TileIdentity tile,
       CancellationCallback cancelled) async {
+    var future = _byteFuturesByKey[key];
+    var loaded = false;
+    if (future == null) {
+      loaded = true;
+      future = _loadBytes(source, key, tile);
+      _byteFuturesByKey[key] = future;
+    }
     Uint8List bytes;
     try {
-      bytes = await _loadBytes(source, key, tile);
+      bytes = await future;
     } on ProviderException catch (error) {
       if (error.statusCode == 404) {
         return TileFactory(_theme, Logger.noop())
             .create(VectorTile(layers: []));
       }
       rethrow;
+    } finally {
+      if (loaded) {
+        _byteFuturesByKey.remove(key);
+      }
     }
     return _executor.submit(Job('read $source bytes: $tile', _createTile, bytes,
         cancelled: cancelled, deduplicationKey: 'decode $source bytes: $tile'));

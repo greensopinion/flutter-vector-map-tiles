@@ -108,7 +108,7 @@ class TileWidgets extends ChangeNotifier {
       super.dispose();
       _disposed = true;
       _idToWidget.clear();
-      _idToModel.values.forEach(_removeAndDispose);
+      _idToModel.values.toList().forEach(_removeAndDispose);
       _idToModel.clear();
       _loadingModels.clear();
       _substitutionModels.clear();
@@ -164,8 +164,7 @@ class TileWidgets extends ChangeNotifier {
   GridVectorTile _createWidget(VectorTileModel model) {
     final tile = model.tile;
     return GridVectorTile(
-        key: Key(
-            'GridTile_${tile.z}_${tile.x}_${tile.y}_${_theme.id}_${identityHashCode(model)}'),
+        key: Key('GridTile_${tile.z}_${tile.x}_${tile.y}_${_theme.id}'),
         model: model);
   }
 
