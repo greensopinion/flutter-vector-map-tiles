@@ -1,3 +1,6 @@
+## 1.4.2
+
+* fixed issue where tiles occasionally wouldn't render when using a background theme
 ## 1.4.1
 
 * bug fixes
