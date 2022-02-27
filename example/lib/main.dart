@@ -62,7 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   theme: _mapTheme(),
                   backgroundTheme: _backgroundTheme(),
                   renderMode: RenderMode.vector,
-                  // showTileDebugInfo: true,
+                  showTileDebugInfo: true,
                   tileProviders: TileProviders(
                       {'openmaptiles': _cachingTileProvider(_urlTemplate())})),
             ],
@@ -96,7 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String _urlTemplate() {
     // Stadia Maps source https://docs.stadiamaps.com/vector/
     // ignore: undefined_identifier
-    return 'https://tiles.stadiamaps.com/data/openmaptiles/{z}/{x}/{y}.pbf?api_key=$apiKey';
+    return 'https://tiles.stadiamaps.com/data/openmaptiles/{z}/{x}/{y}.pbf?api_key=$stadiaMapsApiKey';
 
     // Mapbox source https://docs.mapbox.com/api/maps/vector-tiles/#example-request-retrieve-vector-tiles
     // return 'https://api.mapbox.com/v4/mapbox.mapbox-streets-v8/{z}/{x}/{y}.mvt?access_token=$apiKey',
