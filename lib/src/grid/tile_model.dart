@@ -72,15 +72,18 @@ class VectorTileModel extends ChangeNotifier {
         cancelled: () => _disposed);
     final futures = tileSupplier.stream(request);
     for (final future in futures) {
-      future.whenComplete(() => _tileReady(future));
+      future
+          .then(_receiveTile)
+          .catchError(_tileError, test: (it) => it is CancellationException);
     }
   }
 
-  void _tileReady(Future<TileResponse> future) async {
-    try {
-      _receiveTile(await future);
-    } on CancellationException {
-      // ignore, expected
+  void _tileError(error, stack) async {
+    if (error is CancellationException) {
+      // expected, ignore
+    } else {
+      // should never reach here, but rethrow in case
+      throw error;
     }
   }
 
