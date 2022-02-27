@@ -47,7 +47,7 @@ class IsolateExecutor extends Executor {
 
   Future<R> submit<Q, R>(Job<Q, R> job) async {
     if (_disposed) {
-      throw 'disposed';
+      throw CancellationException();
     }
     if (!_isReady) {
       await _ready.future;
@@ -71,7 +71,7 @@ class IsolateExecutor extends Executor {
   }
 
   void _submitOne() {
-    _completeCancelled(cancelAll: false);
+    _completeCancelled(cancelAll: _disposed);
     if (_submitted == 0 && _queue.isNotEmpty) {
       final job = _queue.removeLast(); //LIFO
       ++_submitted;

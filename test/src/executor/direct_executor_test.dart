@@ -34,8 +34,8 @@ void main() {
       await executor.submit(Job(_testJobName, (message) => _task, 'a-message',
           deduplicationKey: null));
       throw 'expected an error';
-    } catch (error) {
-      expect(error, 'disposed');
+    } on CancellationException catch (_) {
+      // expected, ignore
     }
   });
 

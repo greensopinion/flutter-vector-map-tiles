@@ -13,14 +13,14 @@ class DirectExecutor extends Executor {
   bool get disposed => _disposed;
 
   @override
-  Future<R> submit<Q, R>(Job<Q, R> job) {
+  Future<R> submit<Q, R>(Job<Q, R> job) async {
     if (_disposed) {
-      throw 'disposed';
+      throw CancellationException();
     }
     final completer = Completer<R>();
     scheduleMicrotask(() async {
       try {
-        if (job.isCancelled) {
+        if (_disposed || job.isCancelled) {
           throw CancellationException();
         }
         completer.complete(await job.computeFunction(job.value));

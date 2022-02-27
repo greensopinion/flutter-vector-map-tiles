@@ -19,9 +19,9 @@ class QueueExecutor extends Executor {
   bool get disposed => _disposed;
 
   @override
-  Future<R> submit<Q, R>(Job<Q, R> job) {
+  Future<R> submit<Q, R>(Job<Q, R> job) async {
     if (_disposed) {
-      throw 'disposed';
+      throw CancellationException();
     }
     final internalJob = _Job(job);
     _queue.add(internalJob); //LIFO
@@ -41,14 +41,11 @@ class QueueExecutor extends Executor {
 
   void _runOneAndReschedule() async {
     _scheduled = false;
-    _completeCancelled(cancelAll: false);
+    _completeCancelled(cancelAll: _disposed);
     if (_queue.isNotEmpty && !_disposed) {
       final job = _queue.removeLast(); //LIFO
       try {
-        if (_disposed) {
-          throw 'disposed';
-        }
-        if (job.request.isCancelled) {
+        if (_disposed || job.request.isCancelled) {
           throw CancellationException();
         }
         final result = await job.apply();
