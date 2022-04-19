@@ -95,6 +95,19 @@ FlutterMap(
   ]);
 ```
 
+## Themes and Tile Providers
+
+Themes and tile providers must be matched to have a working configuration, since themes reference layers and properties in the vector tile.
+
+The following themes have been tested with this library and tiles from [Maptiler](https://maptiler.com) or [Stadia Maps](https://stadiamaps.com/)
+
+* [OSM Liberty](https://maputnik.github.io/osm-liberty/style.json)
+* [OSM Bright](https://cdn.jsdelivr.net/gh/openmaptiles/osm-bright-gl-style@v1.9/style.json)
+* [Klokantech Basic](https://cdn.jsdelivr.net/gh/openmaptiles/klokantech-basic-gl-style@v1.9/style.json)
+* [Dark Matter](https://cdn.jsdelivr.net/gh/openmaptiles/dark-matter-gl-style@v1.8/style.json)
+
+Other combinations of theme/provider may work too.
+
 ## Adding Hillshade
 
 A vector tile hillshade layer can be added to your maps by following these steps:
