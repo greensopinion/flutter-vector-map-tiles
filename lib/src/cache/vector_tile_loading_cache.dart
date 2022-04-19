@@ -64,7 +64,7 @@ class VectorTileLoadingCache {
     try {
       bytes = await future;
     } on ProviderException catch (error) {
-      if (error.statusCode == 404) {
+      if (error.statusCode == 404 || error.statusCode == 204) {
         return TileFactory(_theme, Logger.noop())
             .create(VectorTile(layers: []));
       }
