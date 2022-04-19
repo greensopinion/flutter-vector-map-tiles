@@ -1,3 +1,8 @@
+## 1.4.4
+
+* added support for more theme expressions: math, coalesce, step
+* theme background color and text anchor can now use expressions
+
 ## 1.4.3
 
 * improved error handling to reduce uncaught exceptions
