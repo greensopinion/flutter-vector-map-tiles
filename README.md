@@ -95,18 +95,7 @@ FlutterMap(
   ]);
 ```
 
-## Themes and Tile Providers
 
-Themes and tile providers must be matched to have a working configuration, since themes reference layers and properties in the vector tile.
-
-The following themes have been tested with this library and tiles from [Maptiler](https://maptiler.com) or [Stadia Maps](https://stadiamaps.com/)
-
-* [OSM Liberty](https://maputnik.github.io/osm-liberty/style.json)
-* [OSM Bright](https://cdn.jsdelivr.net/gh/openmaptiles/osm-bright-gl-style@v1.9/style.json)
-* [Klokantech Basic](https://cdn.jsdelivr.net/gh/openmaptiles/klokantech-basic-gl-style@v1.9/style.json)
-* [Dark Matter](https://cdn.jsdelivr.net/gh/openmaptiles/dark-matter-gl-style@v1.8/style.json)
-
-Other combinations of theme/provider may work too.
 
 ## Adding Hillshade
 
@@ -217,6 +206,25 @@ A vector tile hillshade layer can be added to your maps by following these steps
       'https://api.mapbox.com/v4/mapbox.mapbox-terrain-v2/{z}/{x}/{y}.mvt?access_token=$mapboxApiKey';    
 ```
 
+
+## Themes and Tile Providers
+
+Themes and tile providers must be matched to have a working configuration, since themes reference layers and properties in the vector tile.
+
+While we don't test with all configurations, the following themes have been tested with this library:
+
+Tiles from [Maptiler](https://maptiler.com) or [Stadia Maps](https://stadiamaps.com/)
+
+* [OSM Liberty](https://maputnik.github.io/osm-liberty/style.json)
+* [OSM Bright](https://cdn.jsdelivr.net/gh/openmaptiles/osm-bright-gl-style@v1.9/style.json)
+* [Klokantech Basic](https://cdn.jsdelivr.net/gh/openmaptiles/klokantech-basic-gl-style@v1.9/style.json)
+* [Dark Matter](https://cdn.jsdelivr.net/gh/openmaptiles/dark-matter-gl-style@v1.8/style.json)
+
+Tiles from [mapbox](https://www.mapbox.com/)
+
+* [Mapbox Outdoors](https://www.mapbox.com/maps/outdoors) (partial support)
+
+Other combinations of theme/provider may work too.
 ## Attribution
 
 Examples provided in `vector_map_tiles` make use of Mapbox and Stadia Maps, both of which require attribution.
