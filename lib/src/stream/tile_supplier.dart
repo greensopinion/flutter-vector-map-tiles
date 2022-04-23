@@ -27,11 +27,13 @@ abstract class CancellableTileRequest {
 class TileRequest extends CancellableTileRequest {
   final TileFormat primaryFormat;
   final TileFormat? secondaryFormat;
+  final double zoom;
 
   TileRequest(
       {required TileIdentity tileId,
       required this.primaryFormat,
       this.secondaryFormat,
+      required this.zoom,
       required CancellationCallback cancelled})
       : super(tileId, cancelled);
 }
@@ -53,12 +55,12 @@ abstract class TileSupplier {
 
 class TileProviderRequest extends CancellableTileRequest {
   final TileFormat format;
-  final double? zoom;
+  final double zoom;
 
   TileProviderRequest(
       {required TileIdentity tileId,
       required this.format,
-      this.zoom,
+      required this.zoom,
       required CancellationCallback cancelled})
       : super(tileId, cancelled);
 }

@@ -28,6 +28,7 @@ class ProviderTileSupplier extends TileSupplier {
       _provider.provide(TileProviderRequest(
           tileId: tileId,
           format: request.primaryFormat,
+          zoom: request.zoom,
           cancelled: request.cancelled))
     ];
     final secondaryFormat = request.secondaryFormat;

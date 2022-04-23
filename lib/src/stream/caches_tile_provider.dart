@@ -29,12 +29,12 @@ class CachesTileProvider extends TileProvider {
         request.testCancelled();
         tileBySource[entry.key] = await entry.value;
       }
-      final tileset = await _preprocessor.preprocess(
-          request.tileId, Tileset(tileBySource), request.cancelled);
+      final tileset = await _preprocessor.preprocess(request.tileId,
+          Tileset(tileBySource), request.zoom.truncate(), request.cancelled);
       return TileResponse(
           identity: request.tileId, format: request.format, tileset: tileset);
     } else {
-      final effectiveZoom = request.zoom?.ceil() ?? request.tileId.z;
+      final effectiveZoom = request.zoom.ceil();
       final imageKey = ImageKey(request.tileId, effectiveZoom);
       final image = _caches.memoryImageCache.get(imageKey);
       if (image != null) {
