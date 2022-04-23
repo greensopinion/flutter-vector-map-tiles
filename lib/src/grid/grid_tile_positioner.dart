@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_map/plugin_api.dart';
 
 import '../tile_identity.dart';
+import 'constants.dart';
 import 'slippy_map_translator.dart';
 
 class GridTilePositioner {
@@ -54,11 +55,11 @@ class GridTileSizer {
       effectiveScale = effectiveScale * translation.fraction.toDouble();
     }
     if (renderImage) {
-      effectiveScale = effectiveScale * (_tileSize / image!.height.toDouble());
+      effectiveScale = effectiveScale * (tileSize.x / image!.height.toDouble());
     }
     if (effectiveScale != 1.0) {
       final referenceDimension =
-          (renderImage ? image!.height.toDouble() : _tileSize) /
+          (renderImage ? image!.height.toDouble() : tileSize.x) /
               translation.fraction;
       final scaledSize = effectiveScale * referenceDimension;
       final maxDimension = max(size.width, size.height);
@@ -98,9 +99,6 @@ class TilePositioningState {
     translate = origin.multiplyBy(zoomScale) - pixelOrigin;
   }
 }
-
-final _tileSize = 256.0;
-final tileSize = CustomPoint(_tileSize, _tileSize);
 
 double _roundSize(double dimension) {
   double factor = 1000;

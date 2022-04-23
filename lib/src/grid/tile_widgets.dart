@@ -18,6 +18,7 @@ class TileWidgets extends ChangeNotifier {
   List<VectorTileModel> _substitutionModels = [];
   final ZoomScaleFunction _zoomScaleFunction;
   final ZoomFunction _zoomFunction;
+  final ZoomFunction _zoomDetailFunction;
   final Theme _theme;
   final Theme? _symbolTheme;
   final TileSupplier _tileSupplier;
@@ -29,6 +30,7 @@ class TileWidgets extends ChangeNotifier {
   TileWidgets(
       this._zoomScaleFunction,
       this._zoomFunction,
+      this._zoomDetailFunction,
       this._theme,
       this._symbolTheme,
       this._tileSupplier,
@@ -79,6 +81,7 @@ class TileWidgets extends ChangeNotifier {
             tile,
             _zoomScaleFunction,
             _zoomFunction,
+            _zoomDetailFunction,
             paintBackground,
             showTileDebugInfo);
         model.addListener(_modelChanged);

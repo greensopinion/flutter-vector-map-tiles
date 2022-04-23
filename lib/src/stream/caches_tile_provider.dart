@@ -35,6 +35,7 @@ class CachesTileProvider extends TileProvider {
           identity: request.tileId, format: request.format, tileset: tileset);
     } else {
       final effectiveZoom = request.zoom.ceil();
+      final zoomDetail = request.zoomDetail.ceil();
       final imageKey = ImageKey(request.tileId, effectiveZoom);
       final image = _caches.memoryImageCache.get(imageKey);
       if (image != null) {
@@ -48,11 +49,14 @@ class CachesTileProvider extends TileProvider {
           tileId: request.tileId,
           format: TileFormat.vector,
           zoom: request.zoom,
+          zoomDetail: request.zoomDetail,
           cancelled: request.cancelled));
       request.testCancelled();
       final loaded = await _caches.imageTileCache.retrieve(
           tile.identity, tile.tileset!,
-          zoom: effectiveZoom, cancelled: request.cancelled);
+          zoom: effectiveZoom,
+          zoomDetail: zoomDetail,
+          cancelled: request.cancelled);
       _caches.memoryImageCache.put(imageKey, loaded);
       return TileResponse(
           identity: tile.identity,

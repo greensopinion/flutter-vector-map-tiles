@@ -15,6 +15,7 @@ import '../stream/tile_supplier.dart';
 import '../stream/tileset_executor_preprocessor.dart';
 import '../tile_identity.dart';
 import '../tile_viewport.dart';
+import 'constants.dart';
 import 'debounce.dart';
 import 'disposable_state.dart';
 import 'grid_tile_positioner.dart';
@@ -107,7 +108,9 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
               paintBackground: backgroundTheme == null,
               substituteTilesWhileLoading: true,
               paintNoDataTiles: false,
-              mapZoom: () => widget.mapState.zoom),
+              tileOffset: widget.options.tileOffset,
+              mapZoom: () =>
+                  widget.mapState.zoom + widget.options.tileOffset.zoomOffset),
           widget.mapState,
           widget.stream,
           _tileSupplier)
@@ -120,6 +123,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
               paintBackground: true,
               substituteTilesWhileLoading: false,
               paintNoDataTiles: true,
+              tileOffset: widget.options.tileOffset,
               mapZoom: _backgroundZoom),
           widget.mapState,
           widget.stream,
@@ -153,7 +157,10 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
   }
 
   double _backgroundZoom() {
-    return max(1, (widget.mapState.zoom - 1).floorToDouble());
+    return max(
+        1,
+        (widget.mapState.zoom - 1 + widget.options.tileOffset.zoomOffset)
+            .floorToDouble());
   }
 }
 
@@ -165,6 +172,7 @@ class _LayerOptions {
   final bool paintBackground;
   final bool substituteTilesWhileLoading;
   final bool paintNoDataTiles;
+  final TileOffset tileOffset;
   final double Function() mapZoom;
 
   _LayerOptions(this.theme, this.renderMode,
@@ -173,6 +181,7 @@ class _LayerOptions {
       required this.paintBackground,
       required this.paintNoDataTiles,
       required this.substituteTilesWhileLoading,
+      required this.tileOffset,
       required this.mapZoom});
 }
 
@@ -200,6 +209,8 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
   MapState get _mapState => widget.mapState;
 
   double get _zoom => widget.options.mapZoom();
+  double get _detailZoom =>
+      widget.options.mapZoom() - widget.options.tileOffset.zoomOffset;
   double get _clampedZoom => max(1.0, _zoom.floorToDouble());
 
   @override
@@ -235,6 +246,7 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
     _tileWidgets = TileWidgets(
         (tileZoom) => _zoomScaler.zoomScale(tileZoom),
         () => _zoom,
+        () => _detailZoom,
         widget.options.theme,
         widget.options.symbolTheme,
         widget.tileSupplier,

@@ -29,6 +29,7 @@ class ProviderTileSupplier extends TileSupplier {
           tileId: tileId,
           format: request.primaryFormat,
           zoom: request.zoom,
+          zoomDetail: request.zoomDetail,
           cancelled: request.cancelled))
     ];
     final secondaryFormat = request.secondaryFormat;
@@ -37,7 +38,8 @@ class ProviderTileSupplier extends TileSupplier {
           tileId: tileId,
           format: secondaryFormat,
           cancelled: request.cancelled,
-          zoom: request.tileId.z.toDouble())));
+          zoom: request.tileId.z.toDouble(),
+          zoomDetail: request.zoomDetail)));
     }
     return futures;
   }

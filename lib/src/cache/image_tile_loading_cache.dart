@@ -18,12 +18,14 @@ class ImageTileLoadingCache with CacheStats {
   double get scale => _pipeline.scale;
 
   Future<Image> retrieve(TileIdentity identity, Tileset tileset,
-      {required int zoom, required CancellationCallback cancelled}) async {
-    final key = _key(identity, zoom: zoom);
+      {required int zoom,
+      required int zoomDetail,
+      required CancellationCallback cancelled}) async {
+    final key = _key(identity, zoom: zoom, zoomDetail: zoomDetail);
     var future = _futuresByKey[key];
     if (future == null) {
-      future = _ReferenceCountedImage(
-          _load(identity, tileset, zoom: zoom, cancelled: cancelled));
+      future = _ReferenceCountedImage(_load(identity, tileset,
+          zoom: zoom, zoomDetail: zoomDetail, cancelled: cancelled));
       _futuresByKey[key] = future;
     } else {
       future.reference();
@@ -41,12 +43,15 @@ class ImageTileLoadingCache with CacheStats {
   }
 
   Future<Image> _load(TileIdentity identity, Tileset tileset,
-      {required int zoom, required CancellationCallback cancelled}) async {
+      {required int zoom,
+      required int zoomDetail,
+      required CancellationCallback cancelled}) async {
     final modifier = _toModifier(zoom);
     final image = await delegate.retrieve(identity, modifier);
     if (image == null) {
       cacheMiss();
-      final rendered = await _pipeline.renderImage(identity, tileset, zoom,
+      final rendered = await _pipeline.renderImage(
+          identity, tileset, zoom, zoomDetail,
           cancelled: cancelled);
       await delegate.put(identity, rendered, modifier);
       return rendered;
@@ -56,8 +61,9 @@ class ImageTileLoadingCache with CacheStats {
     return image;
   }
 
-  String _key(TileIdentity identity, {required int zoom}) {
-    return '${identity.z}_${identity.x}_${identity.y}_$zoom';
+  String _key(TileIdentity identity,
+      {required int zoom, required int zoomDetail}) {
+    return '${identity.z}_${identity.x}_${identity.y}_${zoom}_$zoomDetail';
   }
 
   String _toModifier(int zoom) {
