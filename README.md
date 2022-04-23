@@ -222,7 +222,7 @@ Tiles from [Maptiler](https://maptiler.com) or [Stadia Maps](https://stadiamaps.
 
 Tiles from [mapbox](https://www.mapbox.com/)
 
-* [Mapbox Outdoors](https://www.mapbox.com/maps/outdoors) (partial support)
+* [Mapbox Outdoors](https://www.mapbox.com/maps/outdoors)
 
 Other combinations of theme/provider may work too.
 ## Attribution
