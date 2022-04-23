@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
-import '../executor/executor.dart';
 
 import '../../vector_map_tiles.dart';
+import '../executor/executor.dart';
 import '../grid/renderer_pipeline.dart';
 import 'byte_storage.dart';
 import 'image_tile_loading_cache.dart';
