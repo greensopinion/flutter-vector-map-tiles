@@ -225,6 +225,8 @@ Tiles from [mapbox](https://www.mapbox.com/)
 * [Mapbox Outdoors](https://www.mapbox.com/maps/outdoors)
 
 Other combinations of theme/provider may work too.
+
+Some tile providers offer tiles with more detail that are intended to be drawn at a higher zoom level. For example, Mapbox provdies tiles tiles that render at 512px instead of the default 256px ([Mapbox docs](https://docs.mapbox.com/help/glossary/zoom-level/#tile-size)). Set `VectorTileLayerOptions.tileOffset` with these providers. 
 ## Attribution
 
 Examples provided in `vector_map_tiles` make use of Mapbox and Stadia Maps, both of which require attribution.
