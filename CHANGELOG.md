@@ -1,3 +1,13 @@
+## 1.4.6
+
+* text halo color can now use expressions
+* add support for text-justify and text-max-width
+* bug fix to theme filters that reference zoom level
+* improve support for color expressions
+* add support for case expressions
+* support let and var expressions
+* add support for cubic-bezier interpolation
+
 ## 1.4.4
 
 * added support for more theme expressions: math, coalesce, step

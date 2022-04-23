@@ -69,6 +69,7 @@ class VectorTileModel extends ChangeNotifier {
             : TileFormat.vector,
         secondaryFormat:
             renderMode == RenderMode.mixed ? TileFormat.raster : null,
+        zoom: zoomFunction(),
         cancelled: () => _disposed);
     final futures = tileSupplier.stream(request);
     for (final future in futures) {

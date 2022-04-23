@@ -26,14 +26,14 @@ class TilesetExecutorPreprocessor {
     _readyCompleter.complete(true);
   }
 
-  Future<Tileset> preprocess(TileIdentity identity, Tileset tileset,
+  Future<Tileset> preprocess(TileIdentity identity, Tileset tileset, int zoom,
       CancellationCallback cancelled) async {
     if (!_ready) {
       await _readyCompleter.future;
     }
     final deduplicationKey = 'preprocess: $identity';
     final preprocessed = await _executor.submit(Job(
-        deduplicationKey, _preprocessTile, tileset,
+        deduplicationKey, _preprocessTile, _TilesetAndZoom(tileset, zoom),
         cancelled: cancelled, deduplicationKey: deduplicationKey));
     return preprocessed;
   }
@@ -41,8 +41,16 @@ class TilesetExecutorPreprocessor {
 
 TilesetPreprocessor? _preprocessor;
 
+class _TilesetAndZoom {
+  final Tileset tileset;
+  final int zoom;
+
+  _TilesetAndZoom(this.tileset, this.zoom);
+}
+
 Future<void> _setupPreprocessor(TilesetPreprocessor preprocessor) async {
   _preprocessor = preprocessor;
 }
 
-Tileset _preprocessTile(Tileset tileset) => _preprocessor!.preprocess(tileset);
+Tileset _preprocessTile(_TilesetAndZoom it) =>
+    _preprocessor!.preprocess(it.tileset, zoom: it.zoom.toDouble());
