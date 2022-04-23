@@ -62,7 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   theme: _mapTheme(),
                   backgroundTheme: _backgroundTheme(),
                   renderMode: RenderMode.vector,
-                  showTileDebugInfo: true,
+                  // tileOffset: TileOffset.mapbox, enable with mapbox
                   tileProviders: TileProviders(
                       // Name must match name under "sources" in theme
                       {'openmaptiles': _cachingTileProvider(_urlTemplate())})),
