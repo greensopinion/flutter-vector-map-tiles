@@ -5,6 +5,7 @@ import '../executor/executor.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../tile_identity.dart';
+import 'constants.dart';
 
 class RendererPipeline {
   final Theme theme;
@@ -15,9 +16,10 @@ class RendererPipeline {
     _renderer = ImageRenderer(theme: theme, scale: scale);
   }
 
-  Future<Image> renderImage(TileIdentity id, Tileset tileset, int zoom,
+  Future<Image> renderImage(
+      TileIdentity id, Tileset tileset, int zoom, int zoomDetail,
       {required CancellationCallback cancelled}) async {
-    final job = _RenderingJob(id, tileset, zoom, cancelled);
+    final job = _RenderingJob(id, tileset, zoom, zoomDetail, cancelled);
     queue.add(job);
     if (queue.length == 1) {
       _scheduleOne();
@@ -36,7 +38,8 @@ class RendererPipeline {
       }
       int zoomDifference = job.zoom.toInt() - job.id.z.toInt();
       final image = await _renderer.render(job.tileset,
-          zoomScaleFactor: scale * zoomDifference, zoom: job.zoom.toDouble());
+          zoomScaleFactor: scale * zoomDifference,
+          zoom: job.zoomDetail.toDouble());
       job.completer.complete(image);
     } catch (error, stack) {
       print(error);
@@ -60,7 +63,9 @@ class _RenderingJob {
   final TileIdentity id;
   final Tileset tileset;
   final int zoom;
+  final int zoomDetail;
   final CancellationCallback cancelled;
 
-  _RenderingJob(this.id, this.tileset, this.zoom, this.cancelled);
+  _RenderingJob(
+      this.id, this.tileset, this.zoom, this.zoomDetail, this.cancelled);
 }

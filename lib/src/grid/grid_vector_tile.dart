@@ -4,6 +4,7 @@ import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../options.dart';
 import '../tile_identity.dart';
+import 'constants.dart';
 import 'debounce.dart';
 import 'disposable_state.dart';
 import 'grid_tile_positioner.dart';
@@ -232,13 +233,13 @@ class _VectorTilePainter extends CustomPainter {
       Renderer(theme: options.theme).render(canvas, model.tileset!,
           clip: tileClip,
           zoomScaleFactor: tileSizer.effectiveScale,
-          zoom: model.lastRenderedZoom);
+          zoom: model.lastRenderedZoomDetail);
       _lastPainted = _PaintMode.vector;
       _lastPaintedId = translation.translated;
     }
     canvas.restore();
     _paintTileDebugInfo(canvas, size, renderImage, tileSizer.effectiveScale,
-        tileSizer, model.lastRenderedZoom);
+        tileSizer, model.lastRenderedZoom, model.lastRenderedZoomDetail);
     model.rendered();
   }
 
@@ -258,11 +259,11 @@ class _VectorTilePainter extends CustomPainter {
     _lastPaintedId = null;
     canvas.restore();
     _paintTileDebugInfo(canvas, size, false, tileSizer.effectiveScale,
-        tileSizer, model.lastRenderedZoom);
+        tileSizer, model.lastRenderedZoom, model.lastRenderedZoomDetail);
   }
 
   void _paintTileDebugInfo(Canvas canvas, Size size, bool renderedImage,
-      double scale, GridTileSizer tileSizer, double zoom) {
+      double scale, GridTileSizer tileSizer, double zoom, double zoomDetail) {
     if (options.showTileDebugInfo) {
       ++_paintCount;
       final paint = Paint()
@@ -281,7 +282,7 @@ class _VectorTilePainter extends CustomPainter {
           text: TextSpan(
               style: textStyle,
               text:
-                  '${options.model.tile} zoom=$zoom\nscale=$roundedScale\npaintCount=$_paintCount'),
+                  '${options.model.tile} zoom=$zoom zoomDetail=$zoomDetail\nscale=$roundedScale\npaintCount=$_paintCount'),
           textAlign: TextAlign.start,
           textDirection: TextDirection.ltr)
         ..layout();

@@ -27,7 +27,9 @@ class VectorTileModel extends ChangeNotifier {
   final bool showTileDebugInfo;
   final ZoomScaleFunction zoomScaleFunction;
   final ZoomFunction zoomFunction;
+  final ZoomFunction zoomDetailFunction;
   double lastRenderedZoom = double.negativeInfinity;
+  double lastRenderedZoomDetail = double.negativeInfinity;
   double lastRenderedZoomScale = double.negativeInfinity;
   late final TileTranslation defaultTranslation;
   TileTranslation? translation;
@@ -45,6 +47,7 @@ class VectorTileModel extends ChangeNotifier {
       this.tile,
       this.zoomScaleFunction,
       this.zoomFunction,
+      this.zoomDetailFunction,
       this.paintBackground,
       this.showTileDebugInfo) {
     defaultTranslation =
@@ -70,6 +73,7 @@ class VectorTileModel extends ChangeNotifier {
         secondaryFormat:
             renderMode == RenderMode.mixed ? TileFormat.raster : null,
         zoom: zoomFunction(),
+        zoomDetail: zoomDetailFunction(),
         cancelled: () => _disposed);
     final futures = tileSupplier.stream(request);
     for (final future in futures) {
@@ -120,6 +124,7 @@ class VectorTileModel extends ChangeNotifier {
     final changed = hasChanged();
     if (changed) {
       lastRenderedZoom = zoomFunction();
+      lastRenderedZoomDetail = zoomDetailFunction();
       lastRenderedZoomScale = zoomScaleFunction(tile.z);
     }
     return changed;
@@ -127,9 +132,11 @@ class VectorTileModel extends ChangeNotifier {
 
   bool hasChanged() {
     final lastRenderedZoom = zoomFunction();
+    final lastRenderedZoomDetail = zoomDetailFunction();
     final lastRenderedZoomScale = zoomScaleFunction(tile.z);
     return lastRenderedZoomScale != this.lastRenderedZoomScale ||
-        lastRenderedZoom != this.lastRenderedZoom;
+        lastRenderedZoom != this.lastRenderedZoom ||
+        lastRenderedZoomDetail != this.lastRenderedZoomDetail;
   }
 
   void requestRepaint() {
