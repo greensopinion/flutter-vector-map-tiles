@@ -1,6 +1,6 @@
 import 'dart:developer';
 
-import 'package:vector_map_tiles/vector_map_tiles.dart';
+import '../vector_map_tiles.dart';
 
 /// Filter key for [TimelineTask]s that this library records.
 ///

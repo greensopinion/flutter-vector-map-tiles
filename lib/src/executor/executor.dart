@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:vector_map_tiles/src/executor/pool_executor.dart';
+import 'pool_executor.dart';
 
 import 'queue_executor.dart';
 

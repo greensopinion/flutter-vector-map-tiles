@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:vector_map_tiles/src/executor/executor.dart';
+import 'executor.dart';
 
 class QueueExecutor extends Executor {
   bool _disposed = false;
