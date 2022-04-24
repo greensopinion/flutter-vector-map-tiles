@@ -33,8 +33,8 @@
             <img src="theme-mapbox-outdoors.png" alt="example screenshot" width="292" />
         </td>
         <td>
-            <h5>Mapbox Light</h5>
-            <img src="theme-mapbox-light.png" alt="example screenshot" width="292" />
+            <h5>Mapbox Streets</h5>
+            <img src="theme-mapbox-streets.png" alt="example screenshot" width="292" />
         </td>
         <td>
         </td>
