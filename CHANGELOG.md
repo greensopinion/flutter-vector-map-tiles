@@ -1,7 +1,8 @@
-## 1.4.7
+## 1.4.8
 
 * support tile providers with different zoom offsets, for details see `VectorTileLayerOptions.tileOffset` 
 * support line-cap and line-join layout
+
 ## 1.4.6
 
 * text halo color can now use expressions
