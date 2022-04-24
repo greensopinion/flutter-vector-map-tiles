@@ -99,6 +99,9 @@ class _DelayedPainter extends material.StatefulWidget {
   }
 }
 
+final _paintQueue = <_DelayedPainterState>[];
+var _scheduled = false;
+
 class _DelayedPainterState extends DisposableState<_DelayedPainter> {
   late final ScheduledDebounce debounce;
   final _VectorTilePainter painter;
@@ -109,7 +112,7 @@ class _DelayedPainterState extends DisposableState<_DelayedPainter> {
   _DelayedPainterState(this.painter) {
     debounce = ScheduledDebounce(_notifyUpdate,
         delay: Duration(milliseconds: 500),
-        jitter: Duration(milliseconds: 100),
+        jitter: Duration(milliseconds: 50),
         maxAge: Duration(seconds: 10));
     painter.options.model.addListener(() {
       debounce.update();
@@ -119,6 +122,7 @@ class _DelayedPainterState extends DisposableState<_DelayedPainter> {
   void painted() {
     if (_render) {
       _render = false;
+      _scheduleOne();
     } else {
       debounce.update();
     }
@@ -134,9 +138,30 @@ class _DelayedPainterState extends DisposableState<_DelayedPainter> {
 
   void _notifyUpdate() {
     if (!disposed) {
+      if (!_paintQueue.contains(this)) {
+        _paintQueue.add(this);
+      }
+      _scheduleOne();
+    }
+  }
+
+  void _schedulePaint() {
+    if (!disposed) {
       setState(() {
         _render = true;
       });
+    }
+  }
+
+  void _scheduleOne() async {
+    if (!_scheduled && _paintQueue.isNotEmpty) {
+      _scheduled = true;
+      await Future.delayed(Duration(milliseconds: 10));
+      _scheduled = false;
+      if (_paintQueue.isNotEmpty) {
+        _paintQueue.removeLast()._schedulePaint();
+        _scheduleOne();
+      }
     }
   }
 }
