@@ -1,3 +1,6 @@
+## 1.4.9
+
+* performance improvement
 ## 1.4.8
 
 * support tile providers with different zoom offsets, for details see `VectorTileLayerOptions.tileOffset` 
