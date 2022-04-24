@@ -31,8 +31,6 @@
     </tr>
     <tr>
         <td>
-        </td>
-        <td>
             <h5>Mapbox Streets</h5>
             <img src="theme-mapbox-streets.png" alt="example screenshot" width="292" />
         </td>
