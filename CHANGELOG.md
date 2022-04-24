@@ -1,3 +1,6 @@
+## 1.4.7
+
+* support tile providers with different zoom offsets, for details see `VectorTileLayerOptions.tileOffset` 
 ## 1.4.6
 
 * text halo color can now use expressions
