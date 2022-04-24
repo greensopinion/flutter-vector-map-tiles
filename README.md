@@ -8,6 +8,8 @@ Tile rendering can be vector, mixed, or raster. Mixed mode is default, since tha
 
 <img src="https://raw.githubusercontent.com/greensopinion/flutter-vector-map-tiles/main/vector_map_tiles-example.png" alt="example screenshot" width="292"/> <img src="https://raw.githubusercontent.com/greensopinion/flutter-vector-map-tiles/main/vector_map_tiles-example-hillshade.png" alt="example screenshot" width="292"/>
 
+See the [gallery](gallery/gallery.md) for more examples.
+
 ## Installing
 
 Details on https://pub.dev/packages/vector_map_tiles
@@ -223,6 +225,9 @@ Tiles from [Maptiler](https://maptiler.com) or [Stadia Maps](https://stadiamaps.
 Tiles from [mapbox](https://www.mapbox.com/)
 
 * [Mapbox Outdoors](https://www.mapbox.com/maps/outdoors)
+* [Mapbox Streets](https://www.mapbox.com/maps/streets)
+* [Mapbox Light](https://www.mapbox.com/maps/light)
+* [Mapbox Dark](https://www.mapbox.com/maps/dark)
 
 Other combinations of theme/provider may work too.
 
