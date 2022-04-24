@@ -17,20 +17,6 @@
     </tr>
     <tr>
         <td>
-            <h5>Dark Matter</h5>
-            <img src="theme-dark-matter.png" alt="example screenshot" width="292" />
-        </td>
-        <td>
-            <h5>Hillshade</h5>
-            <img src="../vector_map_tiles-example-hillshade.png" alt="example screenshot" width="292" />
-        </td>
-        <td>
-            <h5>Mapbox Outdoors</h5>
-            <img src="theme-mapbox-outdoors.png" alt="example screenshot" width="292" />
-        </td>
-    </tr>
-    <tr>
-        <td>
             <h5>Mapbox Streets</h5>
             <img src="theme-mapbox-streets.png" alt="example screenshot" width="292" />
         </td>
@@ -43,6 +29,20 @@
             <img src="theme-mapbox-dark.png" alt="example screenshot" width="292" />
         </td>
         <td>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <h5>Mapbox Outdoors</h5>
+            <img src="theme-mapbox-outdoors.png" alt="example screenshot" width="292" />
+        </td>
+        <td>
+            <h5>Hillshade</h5>
+            <img src="../vector_map_tiles-example-hillshade.png" alt="example screenshot" width="292" />
+        </td>
+        <td>
+            <h5>Dark Matter</h5>
+            <img src="theme-dark-matter.png" alt="example screenshot" width="292" />
         </td>
     </tr>
 </table>
