@@ -4,7 +4,6 @@ import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../options.dart';
 import '../tile_identity.dart';
-import 'constants.dart';
 import 'debounce.dart';
 import 'disposable_state.dart';
 import 'grid_tile_positioner.dart';

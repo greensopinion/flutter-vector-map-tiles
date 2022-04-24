@@ -5,7 +5,6 @@ import '../executor/executor.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../tile_identity.dart';
-import 'constants.dart';
 
 class RendererPipeline {
   final Theme theme;
