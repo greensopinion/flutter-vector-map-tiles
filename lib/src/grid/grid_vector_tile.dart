@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart' as material;
 import 'package:flutter/widgets.dart';
 import 'package:vector_map_tiles/src/cache/text_cache.dart';
@@ -23,7 +25,7 @@ class GridVectorTile extends material.StatelessWidget {
   @override
   material.Widget build(material.BuildContext context) {
     return GridVectorTileBody(
-        key: Key('tileBody${model.tile.z}_${model.tile.x}_${model.tile.y}'),
+        key: Key('tileBody${model.tile.key()}'),
         model: model,
         textCache: textCache);
   }
@@ -82,16 +84,14 @@ class _GridVectorTileBodyState extends DisposableState<GridVectorTileBody> {
   @override
   Widget build(BuildContext context) {
     final tile = RepaintBoundary(
-        key: Key(
-            'tileBodyBoundary${widget.model.tile.z}_${widget.model.tile.x}_${widget.model.tile.y}'),
+        key: Key('tileBodyBoundary${widget.model.tile.key()}'),
         child: CustomPaint(painter: _painter));
     final symbolPainter = _symbolPainter;
     if (symbolPainter != null) {
       return Stack(fit: StackFit.expand, children: [
         tile,
         _DelayedPainter(
-            key: Key(
-                'delayedSymbols${widget.model.tile.z}_${widget.model.tile.x}_${widget.model.tile.y}'),
+            key: Key('delayedSymbols${widget.model.tile.key()}'),
             painter: symbolPainter)
       ]);
     }
@@ -129,6 +129,8 @@ class _DelayedPainterState extends DisposableState<_DelayedPainter> {
     painter.options.model.addListener(() {
       debounce.update();
     });
+    painter.options.model.symbolState
+        .addListener(() => scheduleMicrotask(_labelsReady));
     painter.labelsReadyCallback = _labelsReady;
   }
 
@@ -153,10 +155,19 @@ class _DelayedPainterState extends DisposableState<_DelayedPainter> {
 
   @override
   material.Widget build(material.BuildContext context) {
-    return RepaintBoundary(
-        key: Key(
-            'tileBodyBoundarySymbols${painter.options.model.tile.z}_${painter.options.model.tile.x}_${painter.options.model.tile.y}'),
+    final tileKey = painter.options.model.tile.key();
+    final opacity = painter.options.model.symbolState.symbolsReady &&
+            painter.options.model.showLabels
+        ? 1.0
+        : 0.0;
+    final child = RepaintBoundary(
+        key: Key('tileBodyBoundarySymbols$tileKey'),
         child: CustomPaint(painter: _DelayedCustomPainter(this, painter)));
+    return AnimatedOpacity(
+        key: Key('tileBodySymbolsOpacity$tileKey'),
+        opacity: opacity,
+        duration: Duration(milliseconds: 500),
+        child: child);
   }
 
   void _notifyUpdate() {
@@ -359,9 +370,14 @@ class _VectorTilePainter extends CustomPainter {
   }
 
   void _maybeUpdateLabels() {
-    if (_lastPainted == _PaintMode.vector &&
-        _painterProvider.symbolsWithoutPainter().isNotEmpty) {
-      _labelUpdateExecutor.submit(_UpdateTileLabelsJob(this).toExecutorJob());
+    if (_lastPainted == _PaintMode.vector) {
+      bool hasUnpaintedSymbols =
+          _painterProvider.symbolsWithoutPainter().isNotEmpty;
+      if (hasUnpaintedSymbols) {
+        _labelUpdateExecutor.submit(_UpdateTileLabelsJob(this).toExecutorJob());
+      } else {
+        options.model.symbolState.symbolsReady = true;
+      }
     }
   }
 
