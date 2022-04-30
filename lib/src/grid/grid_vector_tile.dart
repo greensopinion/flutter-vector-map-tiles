@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart' as material;
 import 'package:flutter/widgets.dart';
-import 'package:vector_map_tiles/src/cache/text_cache.dart';
+import '../cache/text_cache.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../executor/executor.dart';
