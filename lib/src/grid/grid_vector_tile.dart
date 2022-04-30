@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' as material;
 import 'package:flutter/widgets.dart';
+import 'package:vector_map_tiles/src/cache/text_cache.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../executor/executor.dart';
@@ -13,35 +14,41 @@ import 'tile_model.dart';
 
 class GridVectorTile extends material.StatelessWidget {
   final VectorTileModel model;
+  final TextCache textCache;
 
-  const GridVectorTile({required Key key, required this.model})
+  const GridVectorTile(
+      {required Key key, required this.model, required this.textCache})
       : super(key: key);
 
   @override
   material.Widget build(material.BuildContext context) {
     return GridVectorTileBody(
         key: Key('tileBody${model.tile.z}_${model.tile.x}_${model.tile.y}'),
-        model: model);
+        model: model,
+        textCache: textCache);
   }
 }
 
 class GridVectorTileBody extends StatefulWidget {
   final VectorTileModel model;
+  final TextCache textCache;
 
-  const GridVectorTileBody({required Key key, required this.model})
+  const GridVectorTileBody(
+      {required Key key, required this.model, required this.textCache})
       : super(key: key);
   @override
   material.State<material.StatefulWidget> createState() {
-    return _GridVectorTileBodyState(model);
+    return _GridVectorTileBodyState(model, textCache);
   }
 }
 
 class _GridVectorTileBodyState extends DisposableState<GridVectorTileBody> {
   final VectorTileModel model;
+  final TextCache textCache;
   late final _VectorTilePainter _painter;
   _VectorTilePainter? _symbolPainter;
 
-  _GridVectorTileBodyState(this.model);
+  _GridVectorTileBodyState(this.model, this.textCache);
 
   @override
   void initState() {
@@ -49,11 +56,13 @@ class _GridVectorTileBodyState extends DisposableState<GridVectorTileBody> {
     final symbolTheme = model.symbolTheme;
     _painter = _VectorTilePainter(_TileLayerOptions(model, model.theme,
         renderMode: symbolTheme != null ? RenderMode.vector : model.renderMode,
+        textCache: textCache,
         paintBackground: model.paintBackground,
         showTileDebugInfo: model.showTileDebugInfo));
     if (symbolTheme != null) {
       _symbolPainter = _VectorTilePainter(_TileLayerOptions(model, symbolTheme,
           renderMode: RenderMode.vector,
+          textCache: textCache,
           paintBackground: false,
           showTileDebugInfo: false));
     }
@@ -202,6 +211,7 @@ class _DelayedCustomPainter extends material.CustomPainter {
 
 class _TileLayerOptions {
   final VectorTileModel model;
+  final TextCache textCache;
   final RenderMode renderMode;
   final Theme theme;
   final bool paintBackground;
@@ -210,6 +220,7 @@ class _TileLayerOptions {
   _TileLayerOptions(this.model, this.theme,
       {required this.renderMode,
       required this.paintBackground,
+      required this.textCache,
       required this.showTileDebugInfo});
 }
 
@@ -225,10 +236,13 @@ class _VectorTilePainter extends CustomPainter {
   late final ScheduledDebounce debounce;
   final CreatedTextPainterProvider _painterProvider =
       CreatedTextPainterProvider();
+  late final CachingTextPainterProvider _cachingPainterProvider;
 
   void Function()? labelsReadyCallback;
 
   _VectorTilePainter(this.options) : super(repaint: options.model) {
+    _cachingPainterProvider =
+        CachingTextPainterProvider(options.textCache, _painterProvider);
     debounce = ScheduledDebounce(_notifyIfNeeded,
         delay: Duration(milliseconds: 100),
         jitter: Duration(milliseconds: 100),
@@ -274,11 +288,11 @@ class _VectorTilePainter extends CustomPainter {
       }
     } else {
       final tileClip = tileSizer.tileClip(size, tileSizer.effectiveScale);
-      Renderer(theme: options.theme, painterProvider: _painterProvider).render(
-          canvas, model.tileset!,
-          clip: tileClip,
-          zoomScaleFactor: tileSizer.effectiveScale,
-          zoom: model.lastRenderedZoomDetail);
+      Renderer(theme: options.theme, painterProvider: _cachingPainterProvider)
+          .render(canvas, model.tileset!,
+              clip: tileClip,
+              zoomScaleFactor: tileSizer.effectiveScale,
+              zoom: model.lastRenderedZoomDetail);
       _lastPainted = _PaintMode.vector;
       _lastPaintedId = translation.translated;
     }
@@ -382,7 +396,9 @@ class _UpdateTileLabelsJob {
       if (remainingSymbols.isEmpty) {
         _painter.labelsReadyCallback?.call();
       } else {
-        _painter._painterProvider.create(remainingSymbols.first);
+        final symbol = remainingSymbols.first;
+        final painter = _painter._painterProvider.create(symbol);
+        _painter.options.textCache.put(symbol, painter);
         Future.delayed(Duration(milliseconds: 2))
             .then((value) => _labelUpdateExecutor.submit(toExecutorJob()));
       }

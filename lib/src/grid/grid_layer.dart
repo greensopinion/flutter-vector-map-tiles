@@ -103,6 +103,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
       VectorTileLayer(
           Key("${options.theme.id}_VectorTileLayer"),
           _LayerOptions(theme, options.renderMode,
+              caches: _caches,
               symbolTheme: symbolTheme,
               showTileDebugInfo: options.showTileDebugInfo,
               paintBackground: backgroundTheme == null,
@@ -119,6 +120,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
       final background = VectorTileLayer(
           Key("${backgroundTheme.id}_background_VectorTileLayer"),
           _LayerOptions(backgroundTheme, RenderMode.vector,
+              caches: _caches,
               showTileDebugInfo: options.showTileDebugInfo,
               paintBackground: true,
               substituteTilesWhileLoading: false,
@@ -142,7 +144,8 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
         ttl: widget.options.fileCacheTtl,
         memoryTileCacheMaxSize: widget.options.memoryTileCacheMaxSize,
         maxImagesInMemory: widget.options.maxImagesInMemory,
-        maxSizeInBytes: widget.options.fileCacheMaximumSizeInBytes);
+        maxSizeInBytes: widget.options.fileCacheMaximumSizeInBytes,
+        maxTextCacheSize: widget.options.textCacheMaxSize);
     _tileSupplier = ProviderTileSupplier(DelayProvider(
             CachesTileProvider(
                 _caches,
@@ -174,9 +177,10 @@ class _LayerOptions {
   final bool paintNoDataTiles;
   final TileOffset tileOffset;
   final double Function() mapZoom;
-
+  final Caches caches;
   _LayerOptions(this.theme, this.renderMode,
       {this.symbolTheme,
+      required this.caches,
       required this.showTileDebugInfo,
       required this.paintBackground,
       required this.paintNoDataTiles,
@@ -251,6 +255,7 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
         widget.options.symbolTheme,
         widget.tileSupplier,
         widget.options.renderMode,
+        widget.options.caches.textCache,
         widget.options.substituteTilesWhileLoading,
         widget.options.paintBackground,
         widget.options.showTileDebugInfo);

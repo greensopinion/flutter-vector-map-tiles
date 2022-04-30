@@ -44,6 +44,8 @@ class VectorTileLayerOptions extends LayerOptions {
   /// consider the terms of your tile provider service
   /// and the desired freshness of map data when setting this value
   final Duration fileCacheTtl;
+
+  /// the default [fileCacheTtl]
   static const DEFAULT_CACHE_TTL = Duration(days: 30);
 
   /// the maximum size of the file-based cache in bytes.
@@ -51,6 +53,8 @@ class VectorTileLayerOptions extends LayerOptions {
   /// within the specified limit, however the size can exceed the
   /// specified limit from time to time.
   final fileCacheMaximumSizeInBytes;
+
+  /// the default [fileCacheMaximumSizeInBytes]
   static const DEFAULT_CACHE_MAX_SIZE = 50 * 1024 * 1024;
 
   /// The maximum number of images retained in the memory
@@ -63,11 +67,21 @@ class VectorTileLayerOptions extends LayerOptions {
   /// size, resulting in the OS terminating the app (i.e. crashes).
   /// Only applicable for [renderMode] of `mixed` or `raster`.
   final int maxImagesInMemory;
+
+  /// the default [maxImagesInMemory]
   static const DEFAULT_CACHE_MAX_IMAGES_IN_MEMORY = 0;
 
   /// The maximum size in bytes of the memory vector tile cache.
   final int memoryTileCacheMaxSize;
+
+  /// the default [memoryTileCacheMaxSize]
   static const DEFAULT_TILE_CACHE_MAX_SIZE = 1024 * 1024 * 10;
+
+  /// The maximum size of the text cache.
+  final int textCacheMaxSize;
+
+  /// the default [textCacheMaxSize]
+  static const DEFAULT_TEXT_CACHE_MAX_SIZE = 100;
 
   /// Indicates whether debug information should be shown for tiles
   final bool showTileDebugInfo;
@@ -104,6 +118,7 @@ class VectorTileLayerOptions extends LayerOptions {
       this.memoryTileCacheMaxSize = DEFAULT_TILE_CACHE_MAX_SIZE,
       this.maxImagesInMemory = DEFAULT_CACHE_MAX_IMAGES_IN_MEMORY,
       this.fileCacheMaximumSizeInBytes = DEFAULT_CACHE_MAX_SIZE,
+      this.textCacheMaxSize = DEFAULT_TEXT_CACHE_MAX_SIZE,
       this.concurrency = DEFAULT_CONCURRENCY,
       this.tileOffset = TileOffset.DEFAULT,
       this.backgroundTheme,

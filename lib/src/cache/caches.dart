@@ -10,6 +10,7 @@ import 'image_tile_loading_cache.dart';
 import 'memory_cache.dart';
 import 'memory_image_cache.dart';
 import 'storage_cache.dart';
+import 'text_cache.dart';
 import 'tile_image_cache.dart';
 import 'vector_tile_loading_cache.dart';
 
@@ -23,6 +24,7 @@ class Caches {
   late final MemoryCache memoryVectorTileCache;
   late final ImageTileLoadingCache imageTileCache;
   late final MemoryImageCache memoryImageCache;
+  late final TextCache textCache;
   late final List<String> providerSources;
 
   Caches(
@@ -32,7 +34,8 @@ class Caches {
       required Duration ttl,
       required int memoryTileCacheMaxSize,
       required int maxImagesInMemory,
-      required int maxSizeInBytes}) {
+      required int maxSizeInBytes,
+      required int maxTextCacheSize}) {
     providerSources = providers.tileProviderBySource.keys.toList();
     _cache = StorageCache(_storage, ttl, maxSizeInBytes);
     memoryVectorTileCache = MemoryCache(maxSizeBytes: memoryTileCacheMaxSize);
@@ -40,6 +43,7 @@ class Caches {
         _cache, memoryVectorTileCache, providers, executor, pipeline.theme);
     imageTileCache = ImageTileLoadingCache(TileImageCache(_cache), pipeline);
     memoryImageCache = MemoryImageCache(maxImagesInMemory);
+    textCache = TextCache(maxSize: maxTextCacheSize);
   }
 
   Future<void> applyConstraints() => _cache.applyConstraints();
@@ -64,6 +68,8 @@ class Caches {
         'Image tile cache hit ratio:        ${imageTileCache.hitRatio.asPct()}%');
     cacheStats.add(
         'Image cache hit ratio:             ${memoryImageCache.hitRatio.asPct()}% size: ${memoryImageCache.size}');
+    cacheStats.add(
+        'Text cache hit ratio:              ${textCache.hitRatio.asPct()}% size: ${textCache.size}');
     return cacheStats.join('\n');
   }
 }

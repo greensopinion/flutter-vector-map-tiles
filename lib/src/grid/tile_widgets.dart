@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/widgets.dart';
+import 'package:vector_map_tiles/src/cache/text_cache.dart';
 import 'slippy_map_translator.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
@@ -23,6 +24,7 @@ class TileWidgets extends ChangeNotifier {
   final Theme? _symbolTheme;
   final TileSupplier _tileSupplier;
   final RenderMode _renderMode;
+  final TextCache _textCache;
   final bool paintBackground;
   final bool showTileDebugInfo;
   final bool substituteTilesWhileLoading;
@@ -35,6 +37,7 @@ class TileWidgets extends ChangeNotifier {
       this._symbolTheme,
       this._tileSupplier,
       this._renderMode,
+      this._textCache,
       this.substituteTilesWhileLoading,
       this.paintBackground,
       this.showTileDebugInfo);
@@ -172,7 +175,8 @@ class TileWidgets extends ChangeNotifier {
     final tile = model.tile;
     return GridVectorTile(
         key: Key('GridTile_${tile.z}_${tile.x}_${tile.y}_${_theme.id}'),
-        model: model);
+        model: model,
+        textCache: _textCache);
   }
 
   Set<TileIdentity> _reduce(List<TileIdentity> tiles) {
