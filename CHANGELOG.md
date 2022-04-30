@@ -1,6 +1,7 @@
 ## 1.5.0
 
 * improved frame rate during animations
+* text labels fade in to create improved transitions
 ## 1.4.10
 
 * performance improvement
