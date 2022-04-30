@@ -157,7 +157,8 @@ class _DelayedPainterState extends DisposableState<_DelayedPainter> {
   material.Widget build(material.BuildContext context) {
     final tileKey = painter.options.model.tile.key();
     final opacity = painter.options.model.symbolState.symbolsReady &&
-            painter.options.model.showLabels
+            painter.options.model.showLabels &&
+            _render
         ? 1.0
         : 0.0;
     final child = RepaintBoundary(
@@ -166,7 +167,7 @@ class _DelayedPainterState extends DisposableState<_DelayedPainter> {
     return AnimatedOpacity(
         key: Key('tileBodySymbolsOpacity$tileKey'),
         opacity: opacity,
-        duration: Duration(milliseconds: 500),
+        duration: Duration(milliseconds: _render ? 500 : 0),
         child: child);
   }
 
