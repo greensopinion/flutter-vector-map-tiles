@@ -10,11 +10,11 @@ class TextCache extends Cache<StyledSymbol, TextPainter> {
 
 class CachingTextPainterProvider extends TextPainterProvider {
   final TextCache _cache;
-  final TextPainterProvider _delegate;
+  final CreatedTextPainterProvider _delegate;
 
   CachingTextPainterProvider(this._cache, this._delegate);
 
   @override
   TextPainter? provide(StyledSymbol symbol) =>
-      _cache.get(symbol) ?? _delegate.provide(symbol);
+      _delegate.provide(symbol) ?? _cache.get(symbol);
 }

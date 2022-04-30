@@ -39,6 +39,7 @@ class VectorTileModel extends ChangeNotifier {
   late final TimelineTask _firstRenderedTask;
   bool _firstRendered = false;
   bool showLabels = true;
+  final symbolState = VectorTileSymbolState();
 
   VectorTileModel(
       this.renderMode,
@@ -170,6 +171,32 @@ class VectorTileModel extends ChangeNotifier {
   void removeListener(ui.VoidCallback listener) {
     if (!_disposed) {
       super.removeListener(listener);
+    }
+  }
+}
+
+class VectorTileSymbolState extends ChangeNotifier {
+  bool _disposed = false;
+  bool _symbolsReady = false;
+  bool get symbolsReady => _symbolsReady;
+
+  set symbolsReady(bool ready) {
+    if (ready != _symbolsReady) {
+      _symbolsReady = ready;
+      notifyListeners();
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _disposed = true;
+  }
+
+  @override
+  void notifyListeners() {
+    if (!_disposed) {
+      super.notifyListeners();
     }
   }
 }
