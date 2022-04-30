@@ -38,6 +38,7 @@ class VectorTileModel extends ChangeNotifier {
   ui.Image? image;
   late final TimelineTask _firstRenderedTask;
   bool _firstRendered = false;
+  bool showLabels = true;
 
   VectorTileModel(
       this.renderMode,

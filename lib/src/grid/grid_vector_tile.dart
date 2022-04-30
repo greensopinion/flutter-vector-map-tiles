@@ -2,6 +2,8 @@ import 'package:flutter/material.dart' as material;
 import 'package:flutter/widgets.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
+import '../executor/executor.dart';
+import '../executor/queue_executor.dart';
 import '../options.dart';
 import '../tile_identity.dart';
 import 'debounce.dart';
@@ -106,8 +108,9 @@ class _DelayedPainterState extends DisposableState<_DelayedPainter> {
   late final ScheduledDebounce debounce;
   final _VectorTilePainter painter;
   var _render = false;
+  var _nextPaintNoDelay = false;
 
-  bool get shouldPaint => _render;
+  bool get shouldPaint => _render && painter.options.model.showLabels;
 
   _DelayedPainterState(this.painter) {
     debounce = ScheduledDebounce(_notifyUpdate,
@@ -117,11 +120,22 @@ class _DelayedPainterState extends DisposableState<_DelayedPainter> {
     painter.options.model.addListener(() {
       debounce.update();
     });
+    painter.labelsReadyCallback = _labelsReady;
+  }
+
+  void _labelsReady() {
+    _nextPaintNoDelay = true;
+    _render = true;
+    _schedulePaint();
   }
 
   void painted() {
     if (_render) {
-      _render = false;
+      if (_nextPaintNoDelay) {
+        _nextPaintNoDelay = false;
+      } else {
+        _render = false;
+      }
       _scheduleOne();
     } else {
       debounce.update();
@@ -201,12 +215,18 @@ class _TileLayerOptions {
 
 enum _PaintMode { vector, raster, background, none }
 
+final _labelUpdateExecutor = QueueExecutor();
+
 class _VectorTilePainter extends CustomPainter {
   final _TileLayerOptions options;
   TileIdentity? _lastPaintedId;
   var _lastPainted = _PaintMode.none;
   var _paintCount = 0;
   late final ScheduledDebounce debounce;
+  final CreatedTextPainterProvider _painterProvider =
+      CreatedTextPainterProvider();
+
+  void Function()? labelsReadyCallback;
 
   _VectorTilePainter(this.options) : super(repaint: options.model) {
     debounce = ScheduledDebounce(_notifyIfNeeded,
@@ -254,7 +274,8 @@ class _VectorTilePainter extends CustomPainter {
       }
     } else {
       final tileClip = tileSizer.tileClip(size, tileSizer.effectiveScale);
-      Renderer(theme: options.theme).render(canvas, model.tileset!,
+      Renderer(theme: options.theme, painterProvider: _painterProvider).render(
+          canvas, model.tileset!,
           clip: tileClip,
           zoomScaleFactor: tileSizer.effectiveScale,
           zoom: model.lastRenderedZoomDetail);
@@ -265,6 +286,7 @@ class _VectorTilePainter extends CustomPainter {
     _paintTileDebugInfo(canvas, size, renderImage, tileSizer.effectiveScale,
         tileSizer, model.lastRenderedZoom, model.lastRenderedZoomDetail);
     model.rendered();
+    _maybeUpdateLabels();
   }
 
   void _paintBackground(Canvas canvas, Size size) {
@@ -322,6 +344,13 @@ class _VectorTilePainter extends CustomPainter {
     });
   }
 
+  void _maybeUpdateLabels() {
+    if (_lastPainted == _PaintMode.vector &&
+        _painterProvider.symbolsWithoutPainter().isNotEmpty) {
+      _labelUpdateExecutor.submit(_UpdateTileLabelsJob(this).toExecutorJob());
+    }
+  }
+
   @override
   bool shouldRepaint(covariant _VectorTilePainter oldDelegate) =>
       options.model.hasChanged() ||
@@ -333,6 +362,37 @@ class _VectorTilePainter extends CustomPainter {
           oldDelegate._lastPaintedId !=
               options.model.translation?.translated) ||
       (oldDelegate._lastPainted == _PaintMode.background);
+}
+
+class _UpdateTileLabelsJob {
+  final _VectorTilePainter _painter;
+
+  _UpdateTileLabelsJob(this._painter);
+
+  Job toExecutorJob() {
+    return Job('labels ${_painter.options.model.tile}', _updateLabels, this,
+        deduplicationKey: null,
+        cancelled: () => _painter.options.model.disposed);
+  }
+
+  void updateLabels() {
+    if (!_painter.options.model.disposed) {
+      final remainingSymbols =
+          _painter._painterProvider.symbolsWithoutPainter();
+      if (remainingSymbols.isEmpty) {
+        _painter.labelsReadyCallback?.call();
+      } else {
+        _painter._painterProvider.create(remainingSymbols.first);
+        Future.delayed(Duration(milliseconds: 2))
+            .then((value) => _labelUpdateExecutor.submit(toExecutorJob()));
+      }
+    }
+  }
+}
+
+bool _updateLabels(job) {
+  (job as _UpdateTileLabelsJob).updateLabels();
+  return true;
 }
 
 extension RectDebugExtension on Rect {

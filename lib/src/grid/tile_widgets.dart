@@ -95,9 +95,13 @@ class TileWidgets extends ChangeNotifier {
     if (substituteTilesWhileLoading) {
       _substitutionModels =
           _substitutionTiles(previousIdToModel, _loadingModels);
+      for (final model in _idToModel.values) {
+        model.showLabels = true;
+      }
       for (final substitution in _substitutionModels) {
         previousIdToModel.remove(substitution.tile);
         _idToModel[substitution.tile] = substitution;
+        substitution.showLabels = false;
       }
     }
     previousIdToModel.values.forEach((it) {
