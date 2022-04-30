@@ -1,3 +1,6 @@
+## 1.5.0
+
+* improved frame rate during animations
 ## 1.4.10
 
 * performance improvement
