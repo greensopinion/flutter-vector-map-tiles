@@ -236,10 +236,6 @@ Some tile providers offer tiles with more detail that are intended to be drawn a
 
 Examples provided in `vector_map_tiles` make use of Mapbox and Stadia Maps, both of which require attribution.
 Be sure to read the terms of service of your tile data provider to ensure that you understand their attribution requirements.
-## Status
-
-This plugin is fairly new and has not yet been broadly used. It's feature complete enough to be a v1, but does
-have performance issues on larger screens such as on a tablet or very old devices.
 
 ## Development
 
