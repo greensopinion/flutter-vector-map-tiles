@@ -36,3 +36,16 @@ class CancellationException implements Exception {
 
 Executor newExecutor({required int concurrency}) =>
     kDebugMode ? QueueExecutor() : PoolExecutor(concurrency: concurrency);
+
+extension CancellationFuture<T> on Future<T> {
+  Future<T?> swallowCancellation() async {
+    try {
+      return await this;
+    } catch (error) {
+      if (error is CancellationException) {
+        return null;
+      }
+      rethrow;
+    }
+  }
+}

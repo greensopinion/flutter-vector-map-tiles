@@ -375,7 +375,9 @@ class _VectorTilePainter extends CustomPainter {
       bool hasUnpaintedSymbols =
           _painterProvider.symbolsWithoutPainter().isNotEmpty;
       if (hasUnpaintedSymbols) {
-        _labelUpdateExecutor.submit(_UpdateTileLabelsJob(this).toExecutorJob());
+        _labelUpdateExecutor
+            .submit(_UpdateTileLabelsJob(this).toExecutorJob())
+            .swallowCancellation();
       } else {
         options.model.symbolState.symbolsReady = true;
       }
@@ -416,8 +418,8 @@ class _UpdateTileLabelsJob {
         final symbol = remainingSymbols.first;
         final painter = _painter._painterProvider.create(symbol);
         _painter.options.textCache.put(symbol, painter);
-        Future.delayed(Duration(milliseconds: 2))
-            .then((value) => _labelUpdateExecutor.submit(toExecutorJob()));
+        Future.delayed(Duration(milliseconds: 2)).then((value) =>
+            _labelUpdateExecutor.submit(toExecutorJob()).swallowCancellation());
       }
     }
   }
