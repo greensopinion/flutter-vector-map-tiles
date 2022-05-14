@@ -1,3 +1,6 @@
+## 2.0.0
+
+* removed mixed-mode and raster-mode rendering
 ## 1.5.1
 
 * reduce occurrences of unhandled cancellation exception
