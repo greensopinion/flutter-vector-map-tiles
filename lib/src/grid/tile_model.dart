@@ -2,10 +2,9 @@ import 'dart:developer';
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
+import 'package:vector_map_tiles/src/executor/executor.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
-import '../executor/executor.dart';
-import '../options.dart';
 import '../profiler.dart';
 import '../stream/tile_supplier.dart';
 import '../tile_identity.dart';
@@ -18,9 +17,8 @@ class VectorTileModel extends ChangeNotifier {
   bool _disposed = false;
   bool get disposed => _disposed;
 
-  final RenderMode renderMode;
   final TileIdentity tile;
-  final TileSupplier tileSupplier;
+  final TileProvider tileProvider;
   final Theme theme;
   final Theme? symbolTheme;
   bool paintBackground;
@@ -33,17 +31,14 @@ class VectorTileModel extends ChangeNotifier {
   double lastRenderedZoomScale = double.negativeInfinity;
   late final TileTranslation defaultTranslation;
   TileTranslation? translation;
-  TileTranslation? imageTranslation;
   Tileset? tileset;
-  ui.Image? image;
   late final TimelineTask _firstRenderedTask;
   bool _firstRendered = false;
   bool showLabels = true;
   final symbolState = VectorTileSymbolState();
 
   VectorTileModel(
-      this.renderMode,
-      this.tileSupplier,
+      this.tileProvider,
       this.theme,
       this.symbolTheme,
       this.tile,
@@ -53,11 +48,11 @@ class VectorTileModel extends ChangeNotifier {
       this.paintBackground,
       this.showTileDebugInfo) {
     defaultTranslation =
-        SlippyMapTranslator(tileSupplier.maximumZoom).translate(tile);
+        SlippyMapTranslator(tileProvider.maximumZoom).translate(tile);
     _firstRenderedTask = tileRenderingTask(tile);
   }
 
-  bool get hasData => image != null || tileset != null;
+  bool get hasData => tileset != null;
 
   void rendered() {
     if (!_firstRendered) {
@@ -69,46 +64,18 @@ class VectorTileModel extends ChangeNotifier {
   void startLoading() async {
     final request = TileRequest(
         tileId: tile.normalize(),
-        primaryFormat: renderMode == RenderMode.raster
-            ? TileFormat.raster
-            : TileFormat.vector,
-        secondaryFormat:
-            renderMode == RenderMode.mixed ? TileFormat.raster : null,
         zoom: zoomFunction(),
         zoomDetail: zoomDetailFunction(),
         cancelled: () => _disposed);
-    final futures = tileSupplier.stream(request);
-    for (final future in futures) {
-      future.swallowCancellation().maybeThen(_receiveTile);
-    }
+    tileProvider.provide(request).swallowCancellation().maybeThen(_receiveTile);
   }
 
   void _receiveTile(TileResponse received) {
-    final newTranslation = SlippyMapTranslator(tileSupplier.maximumZoom)
+    final newTranslation = SlippyMapTranslator(tileProvider.maximumZoom)
         .specificZoomTranslation(tile, zoom: received.identity.z);
-    if (received.format == TileFormat.raster) {
-      if (_disposed) {
-        received.image?.dispose();
-      } else {
-        var hadImage = image != null;
-        image?.dispose();
-        image = received.image;
-        imageTranslation = newTranslation;
-        if (hadImage && renderMode != RenderMode.raster) {
-          Future.delayed(Duration(milliseconds: 300)).then((value) {
-            if (tileset == null && imageTranslation == newTranslation) {
-              notifyListeners();
-            }
-          });
-        } else if (tileset == null) {
-          notifyListeners();
-        }
-      }
-    } else {
-      tileset = received.tileset;
-      translation = newTranslation;
-      notifyListeners();
-    }
+    tileset = received.tileset;
+    translation = newTranslation;
+    notifyListeners();
   }
 
   bool updateRendering() {
@@ -145,8 +112,6 @@ class VectorTileModel extends ChangeNotifier {
   void dispose() {
     if (!_disposed) {
       super.dispose();
-      image?.dispose();
-      image = null;
       _disposed = true;
 
       if (!_firstRendered) {

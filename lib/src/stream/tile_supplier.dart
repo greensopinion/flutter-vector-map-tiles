@@ -1,12 +1,9 @@
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../vector_map_tiles.dart';
 import '../executor/executor.dart';
-
-enum TileFormat { vector, raster }
 
 abstract class CancellableTileRequest {
   final TileIdentity tileId;
@@ -25,15 +22,11 @@ abstract class CancellableTileRequest {
 }
 
 class TileRequest extends CancellableTileRequest {
-  final TileFormat primaryFormat;
-  final TileFormat? secondaryFormat;
   final double zoom;
   final double zoomDetail;
 
   TileRequest(
       {required TileIdentity tileId,
-      required this.primaryFormat,
-      this.secondaryFormat,
       required this.zoom,
       required this.zoomDetail,
       required CancellationCallback cancelled})
@@ -42,34 +35,12 @@ class TileRequest extends CancellableTileRequest {
 
 class TileResponse {
   final TileIdentity identity;
-  final TileFormat format;
   final Tileset? tileset;
-  final Image? image;
 
-  TileResponse(
-      {required this.identity, required this.format, this.tileset, this.image});
-}
-
-abstract class TileSupplier {
-  int get maximumZoom;
-  List<Future<TileResponse>> stream(TileRequest request);
-}
-
-class TileProviderRequest extends CancellableTileRequest {
-  final TileFormat format;
-  final double zoom;
-  final double zoomDetail;
-
-  TileProviderRequest(
-      {required TileIdentity tileId,
-      required this.format,
-      required this.zoom,
-      required this.zoomDetail,
-      required CancellationCallback cancelled})
-      : super(tileId, cancelled);
+  TileResponse({required this.identity, this.tileset});
 }
 
 abstract class TileProvider {
   int get maximumZoom;
-  Future<TileResponse> provide(TileProviderRequest request);
+  Future<TileResponse> provide(TileRequest request);
 }

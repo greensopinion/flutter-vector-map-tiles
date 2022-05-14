@@ -10,16 +10,14 @@ import '../executor/executor.dart';
 import '../options.dart';
 import '../stream/caches_tile_provider.dart';
 import '../stream/delay_provider.dart';
-import '../stream/provider_supplier.dart';
-import '../stream/tile_supplier.dart';
 import '../stream/tileset_executor_preprocessor.dart';
+import '../stream/translating_tile_provider.dart';
 import '../tile_identity.dart';
 import '../tile_viewport.dart';
 import 'constants.dart';
 import 'debounce.dart';
 import 'disposable_state.dart';
 import 'grid_tile_positioner.dart';
-import 'renderer_pipeline.dart';
 import 'tile_widgets.dart';
 
 class VectorTileCompositeLayer extends StatefulWidget {
@@ -39,7 +37,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
     with WidgetsBindingObserver {
   late Executor _executor;
   late Caches _caches;
-  late TileSupplier _tileSupplier;
+  late TranslatingTileProvider _tileSupplier;
   late final _cacheStats = ScheduledDebounce(_printCacheStats,
       delay: Duration(seconds: 1),
       jitter: Duration(milliseconds: 0),
@@ -89,20 +87,16 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
   Widget build(BuildContext context) {
     final options = widget.options;
     final backgroundTheme = options.backgroundTheme;
-    var theme = options.theme;
-    Theme? symbolTheme;
-    if (options.renderMode == RenderMode.vector) {
-      symbolTheme = theme.copyWith(types: {ThemeLayerType.symbol});
-      theme = theme.copyWith(types: {
-        ThemeLayerType.background,
-        ThemeLayerType.fill,
-        ThemeLayerType.line
-      });
-    }
+    final symbolTheme = options.theme.copyWith(types: {ThemeLayerType.symbol});
+    final theme = options.theme.copyWith(types: {
+      ThemeLayerType.background,
+      ThemeLayerType.fill,
+      ThemeLayerType.line
+    });
     final layers = <Widget>[
       VectorTileLayer(
-          Key("${options.theme.id}_VectorTileLayer"),
-          _LayerOptions(theme, options.renderMode,
+          Key("${theme.id}_VectorTileLayer"),
+          _LayerOptions(theme,
               caches: _caches,
               symbolTheme: symbolTheme,
               showTileDebugInfo: options.showTileDebugInfo,
@@ -119,7 +113,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
     if (backgroundTheme != null) {
       final background = VectorTileLayer(
           Key("${backgroundTheme.id}_background_VectorTileLayer"),
-          _LayerOptions(backgroundTheme, RenderMode.vector,
+          _LayerOptions(backgroundTheme,
               caches: _caches,
               showTileDebugInfo: options.showTileDebugInfo,
               paintBackground: true,
@@ -139,14 +133,12 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
     _caches = Caches(
         executor: _executor,
         providers: widget.options.tileProviders,
-        pipeline: RendererPipeline(widget.options.theme,
-            scale: widget.options.rasterImageScale),
+        theme: widget.options.theme,
         ttl: widget.options.fileCacheTtl,
         memoryTileCacheMaxSize: widget.options.memoryTileCacheMaxSize,
-        maxImagesInMemory: widget.options.maxImagesInMemory,
         maxSizeInBytes: widget.options.fileCacheMaximumSizeInBytes,
         maxTextCacheSize: widget.options.textCacheMaxSize);
-    _tileSupplier = ProviderTileSupplier(DelayProvider(
+    _tileSupplier = TranslatingTileProvider(DelayProvider(
             CachesTileProvider(
                 _caches,
                 TilesetExecutorPreprocessor(
@@ -170,7 +162,6 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
 class _LayerOptions {
   final Theme theme;
   final Theme? symbolTheme;
-  final RenderMode renderMode;
   final bool showTileDebugInfo;
   final bool paintBackground;
   final bool substituteTilesWhileLoading;
@@ -178,7 +169,7 @@ class _LayerOptions {
   final TileOffset tileOffset;
   final double Function() mapZoom;
   final Caches caches;
-  _LayerOptions(this.theme, this.renderMode,
+  _LayerOptions(this.theme,
       {this.symbolTheme,
       required this.caches,
       required this.showTileDebugInfo,
@@ -193,10 +184,10 @@ class VectorTileLayer extends StatefulWidget {
   final _LayerOptions options;
   final MapState mapState;
   final Stream<Null> stream;
-  final TileSupplier tileSupplier;
+  final TranslatingTileProvider tileProvider;
 
   const VectorTileLayer(
-      Key key, this.options, this.mapState, this.stream, this.tileSupplier)
+      Key key, this.options, this.mapState, this.stream, this.tileProvider)
       : super(key: key);
 
   @override
@@ -253,8 +244,7 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
         () => _detailZoom,
         widget.options.theme,
         widget.options.symbolTheme,
-        widget.tileSupplier,
-        widget.options.renderMode,
+        widget.tileProvider,
         widget.options.caches.textCache,
         widget.options.substituteTilesWhileLoading,
         widget.options.paintBackground,

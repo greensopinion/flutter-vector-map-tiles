@@ -7,7 +7,6 @@ import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../executor/executor.dart';
 import '../executor/queue_executor.dart';
-import '../options.dart';
 import '../tile_identity.dart';
 import 'debounce.dart';
 import 'disposable_state.dart';
@@ -57,13 +56,11 @@ class _GridVectorTileBodyState extends DisposableState<GridVectorTileBody> {
     super.initState();
     final symbolTheme = model.symbolTheme;
     _painter = _VectorTilePainter(_TileLayerOptions(model, model.theme,
-        renderMode: symbolTheme != null ? RenderMode.vector : model.renderMode,
         textCache: textCache,
         paintBackground: model.paintBackground,
         showTileDebugInfo: model.showTileDebugInfo));
     if (symbolTheme != null) {
       _symbolPainter = _VectorTilePainter(_TileLayerOptions(model, symbolTheme,
-          renderMode: RenderMode.vector,
           textCache: textCache,
           paintBackground: false,
           showTileDebugInfo: false));
@@ -224,19 +221,17 @@ class _DelayedCustomPainter extends material.CustomPainter {
 class _TileLayerOptions {
   final VectorTileModel model;
   final TextCache textCache;
-  final RenderMode renderMode;
   final Theme theme;
   final bool paintBackground;
   final bool showTileDebugInfo;
 
   _TileLayerOptions(this.model, this.theme,
-      {required this.renderMode,
-      required this.paintBackground,
+      {required this.paintBackground,
       required this.textCache,
       required this.showTileDebugInfo});
 }
 
-enum _PaintMode { vector, raster, background, none }
+enum _PaintMode { vector, background, none }
 
 final _labelUpdateExecutor = QueueExecutor();
 
@@ -268,57 +263,42 @@ class _VectorTilePainter extends CustomPainter {
       return;
     }
     bool changed = model.updateRendering();
-    if (model.tileset == null && model.image == null) {
+    if (model.tileset == null) {
       if (options.paintBackground) {
         _paintBackground(canvas, size);
       }
       return;
     }
-    final image = model.image;
-    final renderImage = image != null &&
-        (changed ||
-            model.tileset == null ||
-            (options.renderMode == RenderMode.mixed &&
-                (_lastPainted == _PaintMode.background ||
-                    _lastPainted == _PaintMode.none)));
-    final translation =
-        renderImage ? model.imageTranslation : model.translation;
+    final translation = model.translation;
     if (translation == null) {
       return;
     }
-    final tileSizer = GridTileSizer(translation,
-        model.zoomScaleFunction(model.tile.z), size, renderImage, image);
+    final tileSizer =
+        GridTileSizer(translation, model.zoomScaleFunction(model.tile.z), size);
     canvas.save();
     canvas.clipRect(Offset.zero & size);
     tileSizer.apply(canvas);
-    if (renderImage) {
-      canvas.drawImage(image!, Offset.zero, Paint());
-      _lastPainted = _PaintMode.raster;
-      _lastPaintedId = translation.translated;
-      if (options.renderMode == RenderMode.mixed) {
-        debounce.update();
-      }
-    } else {
-      final tileClip = tileSizer.tileClip(size, tileSizer.effectiveScale);
-      Renderer(theme: options.theme, painterProvider: _cachingPainterProvider)
-          .render(canvas, model.tileset!,
-              clip: tileClip,
-              zoomScaleFactor: tileSizer.effectiveScale,
-              zoom: model.lastRenderedZoomDetail);
-      _lastPainted = _PaintMode.vector;
-      _lastPaintedId = translation.translated;
-    }
+
+    final tileClip = tileSizer.tileClip(size, tileSizer.effectiveScale);
+    Renderer(theme: options.theme, painterProvider: _cachingPainterProvider)
+        .render(canvas, model.tileset!,
+            clip: tileClip,
+            zoomScaleFactor: tileSizer.effectiveScale,
+            zoom: model.lastRenderedZoomDetail);
+    _lastPainted = _PaintMode.vector;
+    _lastPaintedId = translation.translated;
+
     canvas.restore();
-    _paintTileDebugInfo(canvas, size, renderImage, tileSizer.effectiveScale,
-        tileSizer, model.lastRenderedZoom, model.lastRenderedZoomDetail);
+    _paintTileDebugInfo(canvas, size, tileSizer.effectiveScale, tileSizer,
+        model.lastRenderedZoom, model.lastRenderedZoomDetail);
     model.rendered();
     _maybeUpdateLabels();
   }
 
   void _paintBackground(Canvas canvas, Size size) {
     final model = options.model;
-    final tileSizer = GridTileSizer(model.defaultTranslation,
-        model.zoomScaleFunction(model.tile.z), size, false, null);
+    final tileSizer = GridTileSizer(
+        model.defaultTranslation, model.zoomScaleFunction(model.tile.z), size);
     canvas.save();
     canvas.clipRect(Offset.zero & size);
     tileSizer.apply(canvas);
@@ -330,20 +310,18 @@ class _VectorTilePainter extends CustomPainter {
     _lastPainted = _PaintMode.background;
     _lastPaintedId = null;
     canvas.restore();
-    _paintTileDebugInfo(canvas, size, false, tileSizer.effectiveScale,
-        tileSizer, model.lastRenderedZoom, model.lastRenderedZoomDetail);
+    _paintTileDebugInfo(canvas, size, tileSizer.effectiveScale, tileSizer,
+        model.lastRenderedZoom, model.lastRenderedZoomDetail);
   }
 
-  void _paintTileDebugInfo(Canvas canvas, Size size, bool renderedImage,
-      double scale, GridTileSizer tileSizer, double zoom, double zoomDetail) {
+  void _paintTileDebugInfo(Canvas canvas, Size size, double scale,
+      GridTileSizer tileSizer, double zoom, double zoomDetail) {
     if (options.showTileDebugInfo) {
       ++_paintCount;
       final paint = Paint()
         ..strokeWidth = 2.0
         ..style = material.PaintingStyle.stroke
-        ..color = renderedImage
-            ? Color.fromARGB(0xff, 0xff, 0, 0)
-            : Color.fromARGB(0xff, 0, 0xff, 0);
+        ..color = Color.fromARGB(0xff, 0, 0xff, 0);
       canvas.drawLine(Offset.zero, material.Offset(0, size.height), paint);
       canvas.drawLine(Offset.zero, material.Offset(size.width, 0), paint);
       final textStyle = TextStyle(
@@ -387,10 +365,6 @@ class _VectorTilePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _VectorTilePainter oldDelegate) =>
       options.model.hasChanged() ||
-      (oldDelegate._lastPainted == _PaintMode.raster &&
-          (oldDelegate._lastPaintedId !=
-                  options.model.imageTranslation?.translated ||
-              options.model.translation != null)) ||
       (oldDelegate._lastPainted == _PaintMode.vector &&
           oldDelegate._lastPaintedId !=
               options.model.translation?.translated) ||
