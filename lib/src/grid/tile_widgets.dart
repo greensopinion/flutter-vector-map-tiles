@@ -22,8 +22,7 @@ class TileWidgets extends ChangeNotifier {
   final ZoomFunction _zoomDetailFunction;
   final Theme _theme;
   final Theme? _symbolTheme;
-  final TileSupplier _tileSupplier;
-  final RenderMode _renderMode;
+  final TileProvider _tileProvider;
   final TextCache _textCache;
   final bool paintBackground;
   final bool showTileDebugInfo;
@@ -35,8 +34,7 @@ class TileWidgets extends ChangeNotifier {
       this._zoomDetailFunction,
       this._theme,
       this._symbolTheme,
-      this._tileSupplier,
-      this._renderMode,
+      this._tileProvider,
       this._textCache,
       this.substituteTilesWhileLoading,
       this.paintBackground,
@@ -77,8 +75,7 @@ class TileWidgets extends ChangeNotifier {
       }
       if (model == null) {
         model = VectorTileModel(
-            _renderMode,
-            _tileSupplier,
+            _tileProvider,
             _theme,
             _symbolTheme,
             tile,
@@ -180,11 +177,11 @@ class TileWidgets extends ChangeNotifier {
   }
 
   Set<TileIdentity> _reduce(List<TileIdentity> tiles) {
-    final translator = SlippyMapTranslator(_tileSupplier.maximumZoom);
+    final translator = SlippyMapTranslator(_tileProvider.maximumZoom);
     final reduced = <TileIdentity>{};
     for (final tile in tiles) {
       final translation = translator.specificZoomTranslation(tile,
-          zoom: min(_tileSupplier.maximumZoom, tile.z));
+          zoom: min(_tileProvider.maximumZoom, tile.z));
       reduced.add(translation.translated);
     }
     return reduced;

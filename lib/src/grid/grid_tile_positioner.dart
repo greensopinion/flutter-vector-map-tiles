@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_map/plugin_api.dart';
@@ -44,8 +43,11 @@ class GridTileSizer {
   late final double effectiveScale;
   late final Offset translationDelta;
 
-  GridTileSizer(TileTranslation translation, double scale, Size size,
-      bool renderImage, ui.Image? image) {
+  GridTileSizer(
+    TileTranslation translation,
+    double scale,
+    Size size,
+  ) {
     var translationDelta = Offset.zero;
     var effectiveScale = scale;
     if (translation.isTranslated) {
@@ -54,13 +56,8 @@ class GridTileSizer {
       translationDelta = Offset(dx, dy);
       effectiveScale = effectiveScale * translation.fraction.toDouble();
     }
-    if (renderImage) {
-      effectiveScale = effectiveScale * (tileSize.x / image!.height.toDouble());
-    }
     if (effectiveScale != 1.0) {
-      final referenceDimension =
-          (renderImage ? image!.height.toDouble() : tileSize.x) /
-              translation.fraction;
+      final referenceDimension = tileSize.x / translation.fraction;
       final scaledSize = effectiveScale * referenceDimension;
       final maxDimension = max(size.width, size.height);
       if (scaledSize < maxDimension) {

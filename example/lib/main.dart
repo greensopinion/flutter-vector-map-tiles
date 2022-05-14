@@ -61,7 +61,6 @@ class _MyHomePageState extends State<MyHomePage> {
               VectorTileLayerOptions(
                   theme: _mapTheme(),
                   backgroundTheme: _backgroundTheme(),
-                  renderMode: RenderMode.vector,
                   // tileOffset: TileOffset.mapbox, enable with mapbox
                   tileProviders: TileProviders(
                       // Name must match name under "sources" in theme
