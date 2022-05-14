@@ -196,7 +196,6 @@ A vector tile hillshade layer can be added to your maps by following these steps
   VectorTileLayerOptions(
     theme: _mapTheme(),
     backgroundTheme: _backgroundTheme(),
-    renderMode: RenderMode.vector,
     tileProviders: TileProviders({
       'openmaptiles': _cachingTileProvider(_urlTemplate()),
       'hillshade': _cachingTileProvider(_hillshadeUrlTemplate())
