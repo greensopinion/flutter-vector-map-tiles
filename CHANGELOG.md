@@ -1,3 +1,6 @@
+## 1.5.1
+
+* reduce occurrences of unhandled cancellation exception
 ## 1.5.0
 
 * improved frame rate during animations
