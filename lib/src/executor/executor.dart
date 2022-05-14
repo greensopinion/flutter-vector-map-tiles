@@ -38,6 +38,7 @@ Executor newExecutor({required int concurrency}) =>
     kDebugMode ? QueueExecutor() : PoolExecutor(concurrency: concurrency);
 
 extension CancellationFuture<T> on Future<T> {
+  /// `future.swallowCancellation().maybeThen(doSomething)`
   Future<T?> swallowCancellation() async {
     try {
       return await this;
@@ -46,6 +47,15 @@ extension CancellationFuture<T> on Future<T> {
         return null;
       }
       rethrow;
+    }
+  }
+}
+
+extension OptionalFuture<T> on Future<T?> {
+  void maybeThen(void onValue(T value)) async {
+    final result = await this;
+    if (result != null) {
+      onValue(result);
     }
   }
 }
