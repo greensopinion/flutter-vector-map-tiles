@@ -262,7 +262,7 @@ class _VectorTilePainter extends CustomPainter {
     if (model.disposed) {
       return;
     }
-    bool changed = model.updateRendering();
+    model.updateRendering();
     if (model.tileset == null) {
       if (options.paintBackground) {
         _paintBackground(canvas, size);
