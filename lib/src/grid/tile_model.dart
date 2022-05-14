@@ -2,7 +2,7 @@ import 'dart:developer';
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
-import 'package:vector_map_tiles/src/executor/executor.dart';
+import '../executor/executor.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../profiler.dart';
