@@ -2,9 +2,9 @@ import 'dart:developer';
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
-import '../executor/executor.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
+import '../executor/executor.dart';
 import '../profiler.dart';
 import '../stream/tile_supplier.dart';
 import '../tile_identity.dart';
