@@ -1,3 +1,6 @@
+## 2.0.1
+
+* added minimal support for fill-extrusion polygons
 ## 2.0.0
 
 * removed mixed-mode and raster-mode rendering
