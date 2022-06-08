@@ -9,7 +9,7 @@ import 'options.dart';
 class VectorMapTilesPlugin extends MapPlugin {
   @override
   Widget createLayer(
-      LayerOptions options, MapState mapState, Stream<Null> stream) {
+      LayerOptions options, MapState mapState, Stream<void> stream) {
     if (options is VectorTileLayerOptions) {
       _checkZoomDifference(mapState, options);
       return VectorTileCompositeLayer(options, mapState, stream);
