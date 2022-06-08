@@ -1,3 +1,6 @@
+## 2.1.0
+
+* update to flutter_map 1.0
 ## 2.0.1
 
 * added minimal support for fill-extrusion polygons
