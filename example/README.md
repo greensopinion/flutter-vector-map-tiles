@@ -7,5 +7,5 @@ An example of `flutter_map` using vector tiles provided by the `vector_map_tiles
 1. Get an API key from [Stadia Maps](https://stadiamaps.com)
 2. Create a file `lib/api_key.dart` as follows:
     ```dart
-    final apiKey = '<your_api_key>';
+    final stadiaMapsApiKey = '<your_api_key>';
     ```
