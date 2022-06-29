@@ -1,5 +1,8 @@
 ## 2.1.0
 
+* update to flutter_map 1.1.0
+## 2.1.0
+
 * update to flutter_map 1.0.0
 
 ## 2.0.1
