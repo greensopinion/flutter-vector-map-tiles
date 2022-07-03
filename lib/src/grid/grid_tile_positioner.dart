@@ -78,8 +78,8 @@ class GridTileSizer {
   }
 
   Rect tileClip(Size size, double scale) => Rect.fromLTWH(
-      -translationDelta.dx / scale,
-      -translationDelta.dy / scale,
+      (-translationDelta.dx / scale).abs(),
+      (-translationDelta.dy / scale).abs(),
       size.width / scale,
       size.height / scale);
 }
