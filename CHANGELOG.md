@@ -1,3 +1,7 @@
+## 2.1.2
+
+* performance improvements
+
 ## 2.1.1
 
 * update to flutter_map 1.1.0

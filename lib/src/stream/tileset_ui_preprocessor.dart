@@ -1,0 +1,33 @@
+import 'dart:async';
+
+import 'package:vector_map_tiles/src/executor/queue_executor.dart';
+import 'package:vector_tile_renderer/vector_tile_renderer.dart';
+
+import '../../vector_map_tiles.dart';
+import '../executor/executor.dart';
+
+class TilesetUiPreprocessor {
+  final TilesetPreprocessor _preprocessor;
+  final Executor _executor;
+
+  TilesetUiPreprocessor(this._preprocessor) : _executor = QueueExecutor();
+
+  Future<Tileset> preprocess(TileIdentity identity, Tileset tileset, int zoom,
+      CancellationCallback cancelled) async {
+    final deduplicationKey = 'preprocess: $identity';
+    return await _executor.submit(Job(
+        deduplicationKey, _preprocessTile, _TilesetAndZoom(tileset, zoom),
+        cancelled: cancelled, deduplicationKey: deduplicationKey));
+  }
+
+  Tileset _preprocessTile(_TilesetAndZoom job) {
+    return _preprocessor.preprocess(job.tileset, zoom: job.zoom.toDouble());
+  }
+}
+
+class _TilesetAndZoom {
+  final Tileset tileset;
+  final int zoom;
+
+  _TilesetAndZoom(this.tileset, this.zoom);
+}
