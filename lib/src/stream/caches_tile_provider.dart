@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:vector_map_tiles/src/stream/tileset_ui_preprocessor.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../cache/caches.dart';
@@ -9,8 +10,9 @@ import 'tileset_executor_preprocessor.dart';
 class CachesTileProvider extends TileProvider {
   final Caches _caches;
   final TilesetExecutorPreprocessor _preprocessor;
+  final TilesetUiPreprocessor _uiPreprocessor;
 
-  CachesTileProvider(this._caches, this._preprocessor);
+  CachesTileProvider(this._caches, this._preprocessor, this._uiPreprocessor);
 
   @override
   int get maximumZoom => _caches.vectorTileCache.maximumZoom;
@@ -27,8 +29,10 @@ class CachesTileProvider extends TileProvider {
       request.testCancelled();
       tileBySource[entry.key] = await entry.value;
     }
-    final tileset = await _preprocessor.preprocess(request.tileId,
+    var tileset = await _preprocessor.preprocess(request.tileId,
         Tileset(tileBySource), request.zoom.truncate(), request.cancelled);
+    tileset = await _uiPreprocessor.preprocess(
+        request.tileId, tileset, request.zoom.truncate(), request.cancelled);
     return TileResponse(identity: request.tileId, tileset: tileset);
   }
 }
