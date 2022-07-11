@@ -177,14 +177,14 @@ class TileWidgets extends ChangeNotifier {
   }
 
   Set<TileIdentity> _reduce(List<TileIdentity> tiles) {
-    if (true) {
-      return tiles.toSet();
-    }
     final translator = SlippyMapTranslator(_tileProvider.maximumZoom);
     final reduced = <TileIdentity>{};
+    final overzoomStep = 1;
     for (final tile in tiles) {
-      final translation = translator.specificZoomTranslation(tile,
-          zoom: min(_tileProvider.maximumZoom, tile.z));
+      final zoomStep =
+          tile.z > _tileProvider.maximumZoom ? tile.z - overzoomStep : tile.z;
+      final translation =
+          translator.specificZoomTranslation(tile, zoom: zoomStep);
       reduced.add(translation.translated);
     }
     return reduced;

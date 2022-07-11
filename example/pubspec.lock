@@ -376,9 +376,9 @@ packages:
   vector_tile_renderer:
     dependency: transitive
     description:
-      name: vector_tile_renderer
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "../../vector_tile_renderer"
+      relative: true
+    source: path
     version: "2.5.0"
   win32:
     dependency: transitive
@@ -402,5 +402,5 @@ packages:
     source: hosted
     version: "0.2.0+1"
 sdks:
-  dart: ">=2.17.0-0 <3.0.0"
+  dart: ">=2.17.0 <3.0.0"
   flutter: ">=2.5.0"

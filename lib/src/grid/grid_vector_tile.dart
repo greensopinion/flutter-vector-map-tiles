@@ -289,7 +289,7 @@ class _VectorTilePainter extends CustomPainter {
     _lastPaintedId = translation.translated;
 
     canvas.restore();
-    _paintTileDebugInfo(canvas, size, tileSizer.effectiveScale, tileSizer,
+    _paintTileDebugInfo(canvas, size, tileSizer.effectiveScale, tileClip,
         model.lastRenderedZoom, model.lastRenderedZoomDetail);
     model.rendered();
     _maybeUpdateLabels();
@@ -310,12 +310,12 @@ class _VectorTilePainter extends CustomPainter {
     _lastPainted = _PaintMode.background;
     _lastPaintedId = null;
     canvas.restore();
-    _paintTileDebugInfo(canvas, size, tileSizer.effectiveScale, tileSizer,
+    _paintTileDebugInfo(canvas, size, tileSizer.effectiveScale, tileClip,
         model.lastRenderedZoom, model.lastRenderedZoomDetail);
   }
 
-  void _paintTileDebugInfo(Canvas canvas, Size size, double scale,
-      GridTileSizer tileSizer, double zoom, double zoomDetail) {
+  void _paintTileDebugInfo(Canvas canvas, Size size, double scale, Rect clip,
+      double zoom, double zoomDetail) {
     if (options.showTileDebugInfo) {
       ++_paintCount;
       final paint = Paint()
@@ -332,7 +332,7 @@ class _VectorTilePainter extends CustomPainter {
           text: TextSpan(
               style: textStyle,
               text:
-                  '${options.model.tile} zoom=$zoom zoomDetail=$zoomDetail\nscale=$roundedScale\npaintCount=$_paintCount'),
+                  '${options.model.tile} zoom=$zoom zoomDetail=$zoomDetail\nscale=$roundedScale clipXY=${clip.topLeft} clipSize=${clip.width} \npaintCount=$_paintCount'),
           textAlign: TextAlign.start,
           textDirection: TextDirection.ltr)
         ..layout();
