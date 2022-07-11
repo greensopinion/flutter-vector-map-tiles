@@ -29,7 +29,7 @@ class VectorTileLoadingCache {
       .map((e) => e.maximumZoom)
       .reduce(min);
 
-  Future<Tile> retrieve(String source, TileIdentity tile,
+  Future<TileData> retrieve(String source, TileIdentity tile,
       {required CancellationCallback cancelled}) async {
     if (!_ready) {
       await _readyCompleter.future;
@@ -51,7 +51,7 @@ class VectorTileLoadingCache {
   String _toKey(String source, TileIdentity id) =>
       '${id.z}_${id.x}_${id.y}_$source.pbf';
 
-  Future<Tile> _loadTile(String source, String key, TileIdentity tile,
+  Future<TileData> _loadTile(String source, String key, TileIdentity tile,
       CancellationCallback cancelled) async {
     var future = _byteFuturesByKey[key];
     var loaded = false;
@@ -66,7 +66,7 @@ class VectorTileLoadingCache {
     } on ProviderException catch (error) {
       if (error.statusCode == 404 || error.statusCode == 204) {
         return TileFactory(_theme, Logger.noop())
-            .create(VectorTile(layers: []));
+            .createTileData(VectorTile(layers: []));
       }
       rethrow;
     } finally {
@@ -96,5 +96,5 @@ Future<void> _setupTheme(Theme theme) async {
   _theme = theme;
 }
 
-Tile _createTile(Uint8List bytes) =>
-    TileFactory(_theme!, Logger.noop()).create(VectorTileReader().read(bytes));
+TileData _createTile(Uint8List bytes) => TileFactory(_theme!, Logger.noop())
+    .createTileData(VectorTileReader().read(bytes));

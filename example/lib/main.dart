@@ -48,7 +48,7 @@ class _MyHomePageState extends State<MyHomePage> {
             options: MapOptions(
                 center: LatLng(49.246292, -123.116226),
                 zoom: 10,
-                maxZoom: 16,
+                maxZoom: 18,
                 interactiveFlags: InteractiveFlag.drag |
                     InteractiveFlag.flingAnimation |
                     InteractiveFlag.pinchMove |
@@ -61,7 +61,9 @@ class _MyHomePageState extends State<MyHomePage> {
               VectorTileLayerOptions(
                   theme: _mapTheme(),
                   backgroundTheme: _backgroundTheme(),
+                  maximumZoomDifference: 9,
                   // tileOffset: TileOffset.mapbox, enable with mapbox
+                  showTileDebugInfo: true,
                   tileProviders: TileProviders(
                       // Name must match name under "sources" in theme
                       {'openmaptiles': _cachingTileProvider(_urlTemplate())})),
