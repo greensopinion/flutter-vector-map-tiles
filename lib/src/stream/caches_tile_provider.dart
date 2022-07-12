@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:vector_map_tiles/src/stream/tile_processor.dart';
-import 'package:vector_map_tiles/src/stream/tileset_ui_preprocessor.dart';
+import 'tile_processor.dart';
+import 'tileset_ui_preprocessor.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../cache/caches.dart';

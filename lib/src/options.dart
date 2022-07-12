@@ -69,16 +69,6 @@ class VectorTileLayerOptions extends LayerOptions {
   /// See [TileOffset.mapbox]
   final TileOffset tileOffset;
 
-  /// The maximum zoom difference between map [MapOptions.maxZoom] and
-  /// [VectorTileProvider.maximumZoom]. This setting provides a guard
-  /// against inadvertent misconfiguration, since a difference between
-  /// tile size and map zoom can result in high memory usage.
-  /// More details at https://github.com/greensopinion/flutter-vector-map-tiles/issues/24
-  final int maximumZoomDifference;
-
-  /// the default [maximumZoomDifference]
-  static const DEFAULT_MAXIMUM_ZOOM_DIFFERENCE = 2;
-
   VectorTileLayerOptions(
       {required this.tileProviders,
       required this.theme,
@@ -91,10 +81,8 @@ class VectorTileLayerOptions extends LayerOptions {
       this.backgroundTheme,
       this.showTileDebugInfo = false,
       this.logCacheStats = false,
-      this.maximumZoomDifference = DEFAULT_MAXIMUM_ZOOM_DIFFERENCE,
       this.tileDelay = const Duration(milliseconds: 0)}) {
     assert(concurrency >= 0 && concurrency <= 100);
-    assert(maximumZoomDifference >= 0);
   }
 }
 

@@ -3,8 +3,8 @@ import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_map/plugin_api.dart';
-import 'package:vector_map_tiles/src/stream/tile_processor.dart';
-import 'package:vector_map_tiles/src/stream/tileset_ui_preprocessor.dart';
+import '../stream/tile_processor.dart';
+import '../stream/tileset_ui_preprocessor.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../cache/caches.dart';

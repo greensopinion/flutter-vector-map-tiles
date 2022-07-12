@@ -61,9 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
               VectorTileLayerOptions(
                   theme: _mapTheme(),
                   backgroundTheme: _backgroundTheme(),
-                  maximumZoomDifference: 9,
                   // tileOffset: TileOffset.mapbox, enable with mapbox
-                  showTileDebugInfo: true,
                   tileProviders: TileProviders(
                       // Name must match name under "sources" in theme
                       {'openmaptiles': _cachingTileProvider(_urlTemplate())})),

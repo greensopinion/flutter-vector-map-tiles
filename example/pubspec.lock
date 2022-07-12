@@ -379,7 +379,7 @@ packages:
       path: "../../vector_tile_renderer"
       relative: true
     source: path
-    version: "2.5.0"
+    version: "2.5.1"
   win32:
     dependency: transitive
     description:

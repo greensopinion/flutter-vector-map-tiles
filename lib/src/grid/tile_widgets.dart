@@ -1,14 +1,12 @@
-import 'dart:math';
-
 import 'package:flutter/widgets.dart';
-import '../cache/text_cache.dart';
-import 'slippy_map_translator.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../vector_map_tiles.dart';
+import '../cache/text_cache.dart';
 import '../stream/tile_supplier.dart';
 import '../tile_viewport.dart';
 import 'grid_vector_tile.dart';
+import 'slippy_map_translator.dart';
 import 'tile_model.dart';
 
 class TileWidgets extends ChangeNotifier {
