@@ -1,14 +1,12 @@
-import 'dart:math';
-
 import 'package:flutter/widgets.dart';
-import '../cache/text_cache.dart';
-import 'slippy_map_translator.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../vector_map_tiles.dart';
+import '../cache/text_cache.dart';
 import '../stream/tile_supplier.dart';
 import '../tile_viewport.dart';
 import 'grid_vector_tile.dart';
+import 'slippy_map_translator.dart';
 import 'tile_model.dart';
 
 class TileWidgets extends ChangeNotifier {
@@ -179,9 +177,12 @@ class TileWidgets extends ChangeNotifier {
   Set<TileIdentity> _reduce(List<TileIdentity> tiles) {
     final translator = SlippyMapTranslator(_tileProvider.maximumZoom);
     final reduced = <TileIdentity>{};
+    final overzoomStep = 1;
     for (final tile in tiles) {
-      final translation = translator.specificZoomTranslation(tile,
-          zoom: min(_tileProvider.maximumZoom, tile.z));
+      final zoomStep =
+          tile.z > _tileProvider.maximumZoom ? tile.z - overzoomStep : tile.z;
+      final translation =
+          translator.specificZoomTranslation(tile, zoom: zoomStep);
       reduced.add(translation.translated);
     }
     return reduced;

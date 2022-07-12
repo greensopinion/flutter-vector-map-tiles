@@ -1,15 +1,27 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../vector_map_tiles.dart';
 import '../executor/executor.dart';
 
-abstract class CancellableTileRequest {
+abstract class CancellableTileRequest {}
+
+class TileRequest extends CancellableTileRequest {
   final TileIdentity tileId;
   final CancellationCallback _cancelled;
+  final double zoom;
+  final double zoomDetail;
+  final Rectangle<double>? clip;
 
-  CancellableTileRequest(this.tileId, this._cancelled);
+  TileRequest(
+      {required this.tileId,
+      required this.zoom,
+      required this.zoomDetail,
+      this.clip,
+      required CancellationCallback cancelled})
+      : _cancelled = cancelled;
 
   bool get isCancelled => _cancelled();
   CancellationCallback get cancelled => _cancelled;
@@ -19,18 +31,6 @@ abstract class CancellableTileRequest {
       throw CancellationException();
     }
   }
-}
-
-class TileRequest extends CancellableTileRequest {
-  final double zoom;
-  final double zoomDetail;
-
-  TileRequest(
-      {required TileIdentity tileId,
-      required this.zoom,
-      required this.zoomDetail,
-      required CancellationCallback cancelled})
-      : super(tileId, cancelled);
 }
 
 class TileResponse {
