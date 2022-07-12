@@ -1,3 +1,7 @@
+## 2.2.0
+
+* improve support for overzoom
+
 ## 2.1.2
 
 * performance improvements
