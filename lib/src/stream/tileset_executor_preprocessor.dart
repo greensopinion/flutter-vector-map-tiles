@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
@@ -26,12 +27,12 @@ class TilesetExecutorPreprocessor {
     _readyCompleter.complete(true);
   }
 
-  Future<Tileset> preprocess(TileIdentity identity, Tileset tileset, int zoom,
-      CancellationCallback cancelled) async {
+  Future<Tileset> preprocess(TileIdentity identity, Tileset tileset,
+      Rectangle<double>? clip, int zoom, CancellationCallback cancelled) async {
     if (!_ready) {
       await _readyCompleter.future;
     }
-    final deduplicationKey = 'preprocess: $identity';
+    final deduplicationKey = 'preprocess: $identity clip=$clip zoom=$zoom';
     final preprocessed = await _executor.submit(Job(
         deduplicationKey, _preprocessTile, _TilesetAndZoom(tileset, zoom),
         cancelled: cancelled, deduplicationKey: deduplicationKey));

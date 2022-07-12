@@ -25,10 +25,14 @@ class CachesTileProvider extends TileProvider {
     Map<String, TileData> tileDataBySource = await _retrieve(request);
     Map<String, Tile> tileBySource =
         await _createTiles(request, tileDataBySource);
-    var tileset = await _preprocessor.preprocess(request.tileId,
-        Tileset(tileBySource), request.zoom.truncate(), request.cancelled);
-    tileset = await _uiPreprocessor.preprocess(
-        request.tileId, tileset, request.zoom.truncate(), request.cancelled);
+    var tileset = await _preprocessor.preprocess(
+        request.tileId,
+        Tileset(tileBySource),
+        request.clip,
+        request.zoom.truncate(),
+        request.cancelled);
+    tileset = await _uiPreprocessor.preprocess(request.tileId, tileset,
+        request.clip, request.zoom.truncate(), request.cancelled);
     return TileResponse(identity: request.tileId, tileset: tileset);
   }
 
