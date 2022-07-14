@@ -20,6 +20,7 @@ class NetworkVectorTileProvider extends VectorTileProvider {
   final Map<String, String>? httpHeaders;
   final int _maximumZoom;
 
+  @override
   int get maximumZoom => _maximumZoom;
 
   /// [urlTemplate] the URL template, e.g. `'https://tiles.stadiamaps.com/data/openmaptiles/{z}/{x}/{y}.pbf?api_key=$apiKey'`
@@ -79,6 +80,7 @@ class MemoryCacheVectorTileProvider extends VectorTileProvider {
   final VectorTileProvider delegate;
   late final MemoryCache _cache;
 
+  @override
   int get maximumZoom => delegate.maximumZoom;
 
   MemoryCacheVectorTileProvider(
