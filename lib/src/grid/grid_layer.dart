@@ -93,7 +93,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
     final theme = options.theme.copyWith(types: {
       ThemeLayerType.background,
       ThemeLayerType.fill,
-      ThemeLayerType.fill_extrusion,
+      ThemeLayerType.fillExtrusion,
       ThemeLayerType.line
     });
     final layers = <Widget>[
