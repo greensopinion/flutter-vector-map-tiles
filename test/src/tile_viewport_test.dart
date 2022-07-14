@@ -6,7 +6,7 @@ import 'package:vector_map_tiles/src/tile_viewport.dart';
 void main() {
   group('overlaps:', () {
     final viewport =
-        TileViewport(2, Bounds(CustomPoint(1, 1), CustomPoint(2, 2)));
+        TileViewport(2, Bounds(const CustomPoint(1, 1), const CustomPoint(2, 2)));
 
     test('when tile is at same zoom', () {
       expect(viewport.overlaps(TileIdentity(2, 0, 0)), false);
@@ -30,7 +30,7 @@ void main() {
 
     test('when tile is larger', () {
       final viewport =
-          TileViewport(3, Bounds(CustomPoint(3, 2), CustomPoint(4, 4)));
+          TileViewport(3, Bounds(const CustomPoint(3, 2), const CustomPoint(4, 4)));
 
       expect(viewport.overlaps(TileIdentity(0, 0, 0)), true);
 
@@ -54,8 +54,8 @@ void main() {
         final viewport = TileViewport(
             12,
             Bounds<int>(
-              CustomPoint(649, 1404),
-              CustomPoint(651, 1408),
+              const CustomPoint(649, 1404),
+              const CustomPoint(651, 1408),
             ));
         expect(viewport.overlaps(larger), true);
       });
@@ -63,7 +63,7 @@ void main() {
 
     test('when tile is smaller', () {
       final viewport =
-          TileViewport(2, Bounds(CustomPoint(1, 1), CustomPoint(2, 2)));
+          TileViewport(2, Bounds(const CustomPoint(1, 1), const CustomPoint(2, 2)));
       for (int x = 0; x < 2; ++x) {
         for (int y = 0; y < 8; ++y) {
           expect(viewport.overlaps(TileIdentity(3, x, y)), false,

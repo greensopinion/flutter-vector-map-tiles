@@ -31,7 +31,7 @@ class TileViewport {
     final tileZoomTopLeft = bounds.topLeft.multiplyBy(multiplier);
     if (tile.x >= tileZoomTopLeft.x && tile.y >= tileZoomTopLeft.y) {
       final tileZoomBottomRight =
-          (bounds.bottomRight + CustomPoint(1, 1)).multiplyBy(multiplier);
+          (bounds.bottomRight + const CustomPoint(1, 1)).multiplyBy(multiplier);
       return tile.x < tileZoomBottomRight.x && tile.y < tileZoomBottomRight.y;
     }
     return false;
