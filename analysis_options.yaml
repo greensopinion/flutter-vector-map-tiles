@@ -30,10 +30,7 @@ linter:
     avoid_function_literals_in_foreach_calls: false
     library_private_types_in_public_api: false
     no_logic_in_create_state: false
-    use_function_type_syntax_for_parameters: false
-    avoid_returning_null_for_void: false
     use_key_in_widget_constructors: false
-    prefer_function_declarations_over_variables: false
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options

@@ -1,5 +1,5 @@
 extension ListExtension<T> on List<T> {
-  List<T> sorted([int compare(T a, T b)?]) {
+  List<T> sorted([int Function(T a, T b)? compare]) {
     final copy = toList();
     copy.sort(compare);
     return copy;
