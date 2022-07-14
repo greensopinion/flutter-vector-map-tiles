@@ -19,7 +19,7 @@ class GridTilePositioner {
         _tileOffset(TileIdentity(tile.z, tile.x + 1, tile.y));
     final toBottomPosition =
         _tileOffset(TileIdentity(tile.z, tile.x, tile.y + 1));
-    final tileOverlap = 0.5;
+    const tileOverlap = 0.5;
     final p = Rect.fromLTRB(offset.dx, offset.dy,
         toRightPosition.dx + tileOverlap, toBottomPosition.dy + tileOverlap);
     return Positioned(

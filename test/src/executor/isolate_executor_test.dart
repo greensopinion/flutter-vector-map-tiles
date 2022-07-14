@@ -33,7 +33,7 @@ void main() {
       expect(results, equals([2, 3, 4, 5]));
     });
     test('propagates an exception', () async {
-      final message = 'intentional failure';
+      const message = 'intentional failure';
       try {
         await executor.submit(
             Job(_testJobName, _throwingTask, message, deduplicationKey: null));
@@ -80,7 +80,7 @@ void main() {
 
   group('deduplication:', () {
     test('deduplicates tasks', () async {
-      final aKey = 'a-key';
+      const aKey = 'a-key';
       final longRunningTask = executor
           .submit(Job(_testJobName, _delayTask, 1000, deduplicationKey: aKey));
       final firstShortTask =

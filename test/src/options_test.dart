@@ -4,7 +4,7 @@ import 'package:vector_map_tiles/src/options.dart';
 void main() {
   group('TileOffset', () {
     test('provides a default offset', () {
-      final offset = TileOffset.DEFAULT;
+      const offset = TileOffset.DEFAULT;
       expect(offset.zoomOffset, 0);
     });
     test('provides a relative offset', () {

@@ -7,7 +7,7 @@ class TileIdentity extends CustomPoint<int> {
   final int z;
 
   TileIdentity(int z, int x, int y)
-      : this.z = z.toInt(),
+      : z = z.toInt(),
         super(x, y);
 
   @override

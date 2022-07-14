@@ -23,9 +23,9 @@ class TranslatingTileProvider extends TileProvider {
       final translation = _translator.specificZoomTranslation(request.tileId,
           zoom: maximumZoom);
       tileId = translation.translated;
-      final tileSize = 256;
+      const tileSize = 256;
       final clipSize = tileSize / translation.fraction;
-      final buffer = 10;
+      const buffer = 10;
       final dx = (translation.xOffset * clipSize) - buffer;
       final dy = (translation.yOffset * clipSize) - buffer;
       final sizeWithBuffer = (2 * buffer) + clipSize;

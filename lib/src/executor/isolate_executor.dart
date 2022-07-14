@@ -16,7 +16,7 @@ class IsolateExecutor extends Executor {
   var _keySeed = 0;
   var _outstanding = 0;
   var _submitted = 0;
-  var _queue = <_Job>[];
+  final _queue = <_Job>[];
 
   IsolateExecutor() {
     _start();
