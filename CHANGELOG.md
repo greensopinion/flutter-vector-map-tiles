@@ -1,3 +1,6 @@
+## 2.2.1
+
+* improve label halo at high zoom levels
 ## 2.2.0
 
 * improve support for overzoom
