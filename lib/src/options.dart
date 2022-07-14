@@ -97,7 +97,7 @@ class TileOffset {
   const TileOffset({required this.zoomOffset});
 
   /// The default tile offset with size 256.0 and zoomOffset 0
-  static const DEFAULT = const TileOffset(zoomOffset: 0);
+  static const DEFAULT = TileOffset(zoomOffset: 0);
 
   /// A tile offset corresponding to that recommended by Mapbox
   /// https://docs.mapbox.com/help/glossary/zoom-level/#tile-size

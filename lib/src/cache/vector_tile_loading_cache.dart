@@ -65,7 +65,7 @@ class VectorTileLoadingCache {
       bytes = await future;
     } on ProviderException catch (error) {
       if (error.statusCode == 404 || error.statusCode == 204) {
-        return TileFactory(_theme, Logger.noop())
+        return TileFactory(_theme, const Logger.noop())
             .createTileData(VectorTile(layers: []));
       }
       rethrow;
@@ -96,5 +96,5 @@ Future<void> _setupTheme(Theme theme) async {
   _theme = theme;
 }
 
-TileData _createTile(Uint8List bytes) => TileFactory(_theme!, Logger.noop())
+TileData _createTile(Uint8List bytes) => TileFactory(_theme!, const Logger.noop())
     .createTileData(VectorTileReader().read(bytes));

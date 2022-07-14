@@ -41,9 +41,9 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
   late Caches _caches;
   late TranslatingTileProvider _tileSupplier;
   late final _cacheStats = ScheduledDebounce(_printCacheStats,
-      delay: Duration(seconds: 1),
-      jitter: Duration(milliseconds: 0),
-      maxAge: Duration(seconds: 3));
+      delay: const Duration(seconds: 1),
+      jitter: const Duration(milliseconds: 0),
+      maxAge: const Duration(seconds: 3));
   StreamSubscription<void>? _subscription;
 
   @override
@@ -51,7 +51,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
     super.initState();
     _executor = newExecutor(concurrency: widget.options.concurrency);
     _createCaches();
-    Future.delayed(Duration(seconds: 3), () {
+    Future.delayed(const Duration(seconds: 3), () {
       _caches.applyConstraints();
     });
     if (widget.options.logCacheStats) {

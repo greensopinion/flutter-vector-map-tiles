@@ -120,9 +120,9 @@ class _DelayedPainterState extends DisposableState<_DelayedPainter> {
 
   _DelayedPainterState(this.painter) {
     debounce = ScheduledDebounce(_notifyUpdate,
-        delay: Duration(milliseconds: 500),
-        jitter: Duration(milliseconds: 50),
-        maxAge: Duration(seconds: 10));
+        delay: const Duration(milliseconds: 500),
+        jitter: const Duration(milliseconds: 50),
+        maxAge: const Duration(seconds: 10));
     painter.options.model.addListener(() {
       debounce.update();
     });
@@ -188,7 +188,7 @@ class _DelayedPainterState extends DisposableState<_DelayedPainter> {
   void _scheduleOne() async {
     if (!_scheduled && _paintQueue.isNotEmpty) {
       _scheduled = true;
-      await Future.delayed(Duration(milliseconds: 10));
+      await Future.delayed(const Duration(milliseconds: 10));
       _scheduled = false;
       if (_paintQueue.isNotEmpty) {
         _paintQueue.removeLast()._schedulePaint();
@@ -251,9 +251,9 @@ class _VectorTilePainter extends CustomPainter {
     _cachingPainterProvider =
         CachingTextPainterProvider(options.textCache, _painterProvider);
     debounce = ScheduledDebounce(_notifyIfNeeded,
-        delay: Duration(milliseconds: 100),
-        jitter: Duration(milliseconds: 100),
-        maxAge: Duration(seconds: 10));
+        delay: const Duration(milliseconds: 100),
+        jitter: const Duration(milliseconds: 100),
+        maxAge: const Duration(seconds: 10));
   }
 
   @override
@@ -321,11 +321,11 @@ class _VectorTilePainter extends CustomPainter {
       final paint = Paint()
         ..strokeWidth = 2.0
         ..style = material.PaintingStyle.stroke
-        ..color = Color.fromARGB(0xff, 0, 0xff, 0);
+        ..color = const Color.fromARGB(0xff, 0, 0xff, 0);
       canvas.drawLine(Offset.zero, material.Offset(0, size.height), paint);
       canvas.drawLine(Offset.zero, material.Offset(size.width, 0), paint);
       final textStyle = TextStyle(
-          foreground: Paint()..color = Color.fromARGB(0xff, 0, 0, 0),
+          foreground: Paint()..color = const Color.fromARGB(0xff, 0, 0, 0),
           fontSize: 15);
       final roundedScale = (scale * 1000).roundToDouble() / 1000;
       final text = TextPainter(
@@ -336,7 +336,7 @@ class _VectorTilePainter extends CustomPainter {
           textAlign: TextAlign.start,
           textDirection: TextDirection.ltr)
         ..layout();
-      text.paint(canvas, material.Offset(10, 10));
+      text.paint(canvas, const material.Offset(10, 10));
     }
   }
 
@@ -392,7 +392,7 @@ class _UpdateTileLabelsJob {
         final symbol = remainingSymbols.first;
         final painter = _painter._painterProvider.create(symbol);
         _painter.options.textCache.put(symbol, painter);
-        Future.delayed(Duration(milliseconds: 2)).then((value) =>
+        Future.delayed(const Duration(milliseconds: 2)).then((value) =>
             _labelUpdateExecutor.submit(toExecutorJob()).swallowCancellation());
       }
     }
