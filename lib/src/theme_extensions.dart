@@ -14,7 +14,7 @@ final defaultBackgroundLayerPredicate = (Map<String, dynamic> layer) {
 extension ThemeReaderExtension on ThemeReader {
   Theme readAsBackground(Map<String, dynamic> json,
       {required bool Function(Map<String, dynamic> layer) layerPredicate}) {
-    final backgroundTheme = Map<String, dynamic>();
+    final backgroundTheme = <String, dynamic>{};
     json.entries.forEach((entry) {
       backgroundTheme[entry.key] = entry.value;
     });
