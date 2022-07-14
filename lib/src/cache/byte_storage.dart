@@ -59,6 +59,5 @@ class ByteStorage {
     if (await file.exists()) {
       await file.delete();
     }
-    return null;
   }
 }

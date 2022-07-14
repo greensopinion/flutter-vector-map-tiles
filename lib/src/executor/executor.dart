@@ -52,7 +52,7 @@ extension CancellationFuture<T> on Future<T> {
 }
 
 extension OptionalFuture<T> on Future<T?> {
-  void maybeThen(void onValue(T value)) async {
+  void maybeThen(void Function(T value) onValue) async {
     final result = await this;
     if (result != null) {
       onValue(result);
