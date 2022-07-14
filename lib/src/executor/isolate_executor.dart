@@ -22,6 +22,7 @@ class IsolateExecutor extends Executor {
     _start();
   }
 
+  @override
   void dispose() {
     if (!_disposed) {
       _disposed = true;
@@ -45,6 +46,7 @@ class IsolateExecutor extends Executor {
   @override
   List<Future<R>> submitAll<Q, R>(Job<Q, R> job) => [submit(job)];
 
+  @override
   Future<R> submit<Q, R>(Job<Q, R> job) async {
     if (_disposed) {
       throw CancellationException();

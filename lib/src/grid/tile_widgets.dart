@@ -108,6 +108,7 @@ class TileWidgets extends ChangeNotifier {
     notifyListeners();
   }
 
+  @override
   void dispose() {
     if (!_disposed) {
       super.dispose();
