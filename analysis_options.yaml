@@ -26,7 +26,6 @@ linter:
     # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
 
     # temporarily disable failing rules
-    avoid_renaming_method_parameters: false
     avoid_function_literals_in_foreach_calls: false
     library_private_types_in_public_api: false
     no_logic_in_create_state: false

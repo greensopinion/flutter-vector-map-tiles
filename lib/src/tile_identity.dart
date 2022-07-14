@@ -11,7 +11,8 @@ class TileIdentity extends CustomPoint<int> {
         super(x, y);
 
   @override
-  operator ==(o) => o is TileIdentity && x == o.x && y == o.y && z == o.z;
+  operator ==(other) =>
+      other is TileIdentity && x == other.x && y == other.y && z == other.z;
 
   @override
   int get hashCode => hashValues(x, y, z);
