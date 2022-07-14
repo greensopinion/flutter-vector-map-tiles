@@ -27,7 +27,6 @@ linter:
 
     # temporarily disable failing rules
     avoid_renaming_method_parameters: false
-    constant_identifier_names: false
     avoid_function_literals_in_foreach_calls: false
     library_private_types_in_public_api: false
     no_logic_in_create_state: false

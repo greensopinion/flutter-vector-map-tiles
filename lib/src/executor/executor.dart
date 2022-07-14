@@ -9,7 +9,7 @@ typedef CancellationCallback = bool Function();
 
 class Job<Q, R> {
   final String name;
-  final deduplicationKey;
+  final String? deduplicationKey;
   final ComputeCallback<Q, R> computeFunction;
   final Q value;
   final CancellationCallback? cancelled;
