@@ -125,7 +125,9 @@ class IsolateExecutor extends Executor {
         final work = _jobByKey.remove(result.key);
         work?.completer.completeError(result.error, result.stack);
       } else {
+        // ignore: avoid_print
         print(result.error);
+        // ignore: avoid_print
         print(result.stack);
       }
     } else if (result is _JobOutput) {
@@ -136,6 +138,7 @@ class IsolateExecutor extends Executor {
         _completeWithDeduplication(work, result.message);
       }
     } else {
+      // ignore: avoid_print
       print('unexpected message: $result');
     }
     _submitOne();

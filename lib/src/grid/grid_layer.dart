@@ -154,6 +154,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
   }
 
   void _printCacheStats() {
+    // ignore: avoid_print
     print('Cache stats:\n${_caches.stats()}');
   }
 
