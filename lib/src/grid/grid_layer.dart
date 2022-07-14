@@ -27,7 +27,8 @@ class VectorTileCompositeLayer extends StatefulWidget {
   final MapState mapState;
   final Stream<void> stream;
 
-  const VectorTileCompositeLayer(this.options, this.mapState, this.stream);
+  VectorTileCompositeLayer(this.options, this.mapState, this.stream)
+      : super(key: options.key);
 
   @override
   State<StatefulWidget> createState() {
