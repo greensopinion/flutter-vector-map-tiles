@@ -1,6 +1,6 @@
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
-final defaultBackgroundLayerPredicate = (Map<String, dynamic> layer) {
+bool defaultBackgroundLayerPredicate(Map<String, dynamic> layer) {
   final type = layer['type'];
   if (type == 'background') {
     return true;
@@ -9,7 +9,7 @@ final defaultBackgroundLayerPredicate = (Map<String, dynamic> layer) {
     return (sourceLayer == 'landcover' || sourceLayer == 'water');
   }
   return false;
-};
+}
 
 extension ThemeReaderExtension on ThemeReader {
   Theme readAsBackground(Map<String, dynamic> json,

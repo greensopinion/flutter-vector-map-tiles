@@ -9,7 +9,8 @@ class TileKey {
   TileKey(this.id, this.source);
 
   @override
-  operator ==(o) => o is TileKey && o.id == id && o.source == source;
+  operator ==(other) =>
+      other is TileKey && other.id == id && other.source == source;
 
   @override
   int get hashCode => id.hashCode ^ source.hashCode;
