@@ -39,21 +39,21 @@ class GridVectorTileBody extends StatefulWidget {
       : super(key: key);
   @override
   material.State<material.StatefulWidget> createState() {
-    return _GridVectorTileBodyState(model, textCache);
+    return _GridVectorTileBodyState();
   }
 }
 
 class _GridVectorTileBodyState extends DisposableState<GridVectorTileBody> {
-  final VectorTileModel model;
-  final TextCache textCache;
   late final _VectorTilePainter _painter;
   _VectorTilePainter? _symbolPainter;
 
-  _GridVectorTileBodyState(this.model, this.textCache);
+  _GridVectorTileBodyState();
 
   @override
   void initState() {
     super.initState();
+    final model = widget.model;
+    final textCache = widget.textCache;
     final symbolTheme = model.symbolTheme;
     _painter = _VectorTilePainter(_TileLayerOptions(model, model.theme,
         textCache: textCache,
@@ -75,7 +75,7 @@ class _GridVectorTileBodyState extends DisposableState<GridVectorTileBody> {
   @override
   void dispose() {
     super.dispose();
-    model.dispose();
+    widget.model.dispose();
   }
 
   @override
@@ -103,7 +103,7 @@ class _DelayedPainter extends material.StatefulWidget {
       : super(key: key);
   @override
   material.State<material.StatefulWidget> createState() {
-    return _DelayedPainterState(painter);
+    return _DelayedPainterState();
   }
 }
 
@@ -112,17 +112,25 @@ var _scheduled = false;
 
 class _DelayedPainterState extends DisposableState<_DelayedPainter> {
   late final ScheduledDebounce debounce;
-  final _VectorTilePainter painter;
+  _VectorTilePainter? painter;
   var _render = false;
   var _nextPaintNoDelay = false;
 
-  bool get shouldPaint => _render && painter.options.model.showLabels;
+  bool get shouldPaint =>
+      _render && (painter?.options.model.showLabels ?? false);
 
-  _DelayedPainterState(this.painter) {
+  _DelayedPainterState() {
     debounce = ScheduledDebounce(_notifyUpdate,
         delay: const Duration(milliseconds: 500),
         jitter: const Duration(milliseconds: 50),
         maxAge: const Duration(seconds: 10));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    final painter = widget.painter;
+    this.painter = painter;
     painter.options.model.addListener(() {
       debounce.update();
     });
@@ -152,6 +160,10 @@ class _DelayedPainterState extends DisposableState<_DelayedPainter> {
 
   @override
   material.Widget build(material.BuildContext context) {
+    final painter = this.painter;
+    if (painter == null) {
+      return material.Container();
+    }
     final tileKey = painter.options.model.tile.key();
     final opacity = painter.options.model.symbolState.symbolsReady &&
             painter.options.model.showLabels &&
