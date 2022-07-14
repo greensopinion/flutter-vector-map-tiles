@@ -177,7 +177,7 @@ class TileWidgets extends ChangeNotifier {
   Set<TileIdentity> _reduce(List<TileIdentity> tiles) {
     final translator = SlippyMapTranslator(_tileProvider.maximumZoom);
     final reduced = <TileIdentity>{};
-    final overzoomStep = 1;
+    const overzoomStep = 1;
     for (final tile in tiles) {
       final zoomStep =
           tile.z > _tileProvider.maximumZoom ? tile.z - overzoomStep : tile.z;
