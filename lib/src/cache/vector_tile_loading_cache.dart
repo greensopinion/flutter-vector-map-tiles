@@ -96,5 +96,6 @@ Future<void> _setupTheme(Theme theme) async {
   _theme = theme;
 }
 
-TileData _createTile(Uint8List bytes) => TileFactory(_theme!, const Logger.noop())
-    .createTileData(VectorTileReader().read(bytes));
+TileData _createTile(Uint8List bytes) =>
+    TileFactory(_theme!, const Logger.noop())
+        .createTileData(VectorTileReader().read(bytes));
