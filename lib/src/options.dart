@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 import 'package:flutter_map/plugin_api.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
@@ -26,7 +28,7 @@ class VectorTileLayerOptions extends LayerOptions {
   /// the cache does a good-enough effort to keep the cache size
   /// within the specified limit, however the size can exceed the
   /// specified limit from time to time.
-  final fileCacheMaximumSizeInBytes;
+  final int fileCacheMaximumSizeInBytes;
 
   /// the default [fileCacheMaximumSizeInBytes]
   static const DEFAULT_CACHE_MAX_SIZE = 50 * 1024 * 1024;

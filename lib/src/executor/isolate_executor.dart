@@ -190,15 +190,15 @@ class _JobInput<Q, R> {
 
 class _JobOutput {
   final String key;
-  final message;
+  final dynamic message;
 
   _JobOutput(this.key, this.message);
 }
 
 class _Error {
   final String? key;
-  final error;
-  final stack;
+  final dynamic error;
+  final dynamic stack;
 
   _Error(this.key, this.error, this.stack);
 }
