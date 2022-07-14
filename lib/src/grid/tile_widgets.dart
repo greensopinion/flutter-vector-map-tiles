@@ -64,7 +64,7 @@ class TileWidgets extends ChangeNotifier {
         _removeAndDispose(obsolete);
       }
     }
-    effectiveTiles.forEach((tile) {
+    for (final tile in effectiveTiles) {
       var model = previousIdToModel[tile];
       if (model != null && model.disposed) {
         _removeAndDispose(model);
@@ -89,7 +89,7 @@ class TileWidgets extends ChangeNotifier {
         previousIdToModel.remove(tile);
       }
       _idToModel[tile] = model;
-    });
+    }
     if (substituteTilesWhileLoading) {
       _substitutionModels =
           _substitutionTiles(previousIdToModel, _loadingModels);
@@ -102,9 +102,9 @@ class TileWidgets extends ChangeNotifier {
         substitution.showLabels = false;
       }
     }
-    previousIdToModel.values.forEach((it) {
+    for (final it in previousIdToModel.values) {
       _removeAndDispose(it);
-    });
+    }
     notifyListeners();
   }
 
