@@ -98,7 +98,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
       ThemeLayerType.line
     });
     final layers = <Widget>[
-      VectorTileLayer(
+      _VectorTileLayer(
           Key("${theme.id}_VectorTileLayer"),
           _LayerOptions(theme,
               caches: _caches,
@@ -115,7 +115,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
           _tileSupplier)
     ];
     if (backgroundTheme != null) {
-      final background = VectorTileLayer(
+      final background = _VectorTileLayer(
           Key("${backgroundTheme.id}_background_VectorTileLayer"),
           _LayerOptions(backgroundTheme,
               caches: _caches,
@@ -188,13 +188,13 @@ class _LayerOptions {
       required this.mapZoom});
 }
 
-class VectorTileLayer extends StatefulWidget {
+class _VectorTileLayer extends StatefulWidget {
   final _LayerOptions options;
   final MapState mapState;
   final Stream<void> stream;
   final TranslatingTileProvider tileProvider;
 
-  const VectorTileLayer(
+  const _VectorTileLayer(
       Key key, this.options, this.mapState, this.stream, this.tileProvider)
       : super(key: key);
 
@@ -204,7 +204,7 @@ class VectorTileLayer extends StatefulWidget {
   }
 }
 
-class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
+class _VectorTileLayerState extends DisposableState<_VectorTileLayer> {
   StreamSubscription<void>? _subscription;
   late TileWidgets _tileWidgets;
   late final _ZoomScaler _zoomScaler;
@@ -235,7 +235,7 @@ class _VectorTileLayerState extends DisposableState<VectorTileLayer> {
   }
 
   @override
-  void didUpdateWidget(covariant VectorTileLayer oldWidget) {
+  void didUpdateWidget(covariant _VectorTileLayer oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.options.theme.id != widget.options.theme.id) {
       setState(() {
