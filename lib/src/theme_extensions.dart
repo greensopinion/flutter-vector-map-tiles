@@ -15,9 +15,9 @@ extension ThemeReaderExtension on ThemeReader {
   Theme readAsBackground(Map<String, dynamic> json,
       {required bool Function(Map<String, dynamic> layer) layerPredicate}) {
     final backgroundTheme = <String, dynamic>{};
-    json.entries.forEach((entry) {
+    for (final entry in json.entries) {
       backgroundTheme[entry.key] = entry.value;
-    });
+    }
     final layers = json['layers'] as List<dynamic>?;
     final newLayers = [];
     layers?.forEach((layer) {
