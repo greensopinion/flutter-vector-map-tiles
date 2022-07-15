@@ -1,3 +1,8 @@
+
+## 2.2.2
+
+* provide support for dashed paths with `line-dasharray` theme style
+
 ## 2.2.1
 
 * improve label halo at high zoom levels
