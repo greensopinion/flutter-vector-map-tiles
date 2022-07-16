@@ -14,7 +14,7 @@ class MapModel extends ChangeNotifier {
     try {
       loading = true;
       final response = await client.get(Uri.parse(
-          "https://api.mapbox.com/styles/v1/greensopinion/cl5oh4q3t000216o0tc9cngxh?access_token=$mapboxApiKey"));
+          "https://api.mapbox.com/styles/v1/mapbox/streets-v11/?access_token=$mapboxApiKey"));
       if (response.statusCode == 200) {
         final style = jsonDecode(response.body);
         theme = vt.ThemeReader().read(style);
