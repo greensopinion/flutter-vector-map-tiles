@@ -35,6 +35,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final MapController _controller = MapController();
+
   @override
   Widget build(BuildContext context) {
     return material.Scaffold(
@@ -45,6 +47,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Column(children: [
           Flexible(
               child: FlutterMap(
+            mapController: _controller,
             options: MapOptions(
                 center: LatLng(49.246292, -123.116226),
                 zoom: 10,
@@ -66,7 +69,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       // Name must match name under "sources" in theme
                       {'openmaptiles': _cachingTileProvider(_urlTemplate())})),
             ],
-          ))
+          )),
+          Row(
+              mainAxisAlignment: material.MainAxisAlignment.center,
+              children: [_statusText()])
         ])));
   }
 
@@ -103,4 +109,13 @@ class _MyHomePageState extends State<MyHomePage> {
     // Mapbox source https://docs.mapbox.com/api/maps/vector-tiles/#example-request-retrieve-vector-tiles
     // return 'https://api.mapbox.com/v4/mapbox.mapbox-streets-v8/{z}/{x}/{y}.mvt?access_token=$mapboxApiKey',
   }
+
+  Widget _statusText() => material.Padding(
+      padding: const material.EdgeInsets.only(top: 8, bottom: 8),
+      child: material.StreamBuilder(
+          stream: _controller.mapEventStream,
+          builder: (context, snapshot) {
+            return Text(
+                'Zoom: ${_controller.zoom.toStringAsFixed(2)} Center: ${_controller.center.latitude.toStringAsFixed(4)},${_controller.center.longitude.toStringAsFixed(4)}');
+          }));
 }
