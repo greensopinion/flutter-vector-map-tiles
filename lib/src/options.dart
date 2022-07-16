@@ -4,6 +4,7 @@ import 'package:flutter_map/plugin_api.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../vector_map_tiles.dart';
+import './extensions.dart';
 
 /// a [FlutterMap] layer options, to be used with [VectorMapTilesPlugin].
 /// See the readme for details.
@@ -85,6 +86,18 @@ class VectorTileLayerOptions extends LayerOptions {
       this.logCacheStats = false,
       this.tileDelay = const Duration(milliseconds: 0)}) {
     assert(concurrency >= 0 && concurrency <= 100);
+    final providers = theme.tileSources
+        .map((source) => tileProviders.tileProviderBySource[source])
+        .whereType<VectorTileProvider>();
+    assert(
+        providers.isNotEmpty,
+        '''
+tileProviders must provide at least one provider that matches the given theme. 
+Usually this is an indication that TileProviders in the code doesn't match the sources
+required by the theme. 
+The theme uses the following sources: ${theme.tileSources.toList().sorted().join(', ')}.
+'''
+            .trim());
   }
 }
 
