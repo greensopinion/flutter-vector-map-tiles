@@ -9,8 +9,10 @@ import '../executor/executor.dart';
 import '../executor/queue_executor.dart';
 import '../tile_identity.dart';
 import 'debounce.dart';
-import 'disposable_state.dart';
+import 'tile/delay_painter.dart';
+import 'tile/disposable_state.dart';
 import 'grid_tile_positioner.dart';
+import 'tile/symbols.dart';
 import 'tile_model.dart';
 
 class GridVectorTile extends material.StatelessWidget {
@@ -46,6 +48,7 @@ class GridVectorTileBody extends StatefulWidget {
 class _GridVectorTileBodyState extends DisposableState<GridVectorTileBody> {
   late final _VectorTilePainter _painter;
   _VectorTilePainter? _symbolPainter;
+  SymbolsDelayPainterModel? _symbolsDelayModel;
 
   _GridVectorTileBodyState();
 
@@ -55,15 +58,18 @@ class _GridVectorTileBodyState extends DisposableState<GridVectorTileBody> {
     final model = widget.model;
     final textCache = widget.textCache;
     final symbolTheme = model.symbolTheme;
-    _painter = _VectorTilePainter(_TileLayerOptions(model, model.theme,
+    _painter = _VectorTilePainter(TileLayerOptions(model, model.theme,
         textCache: textCache,
         paintBackground: model.paintBackground,
-        showTileDebugInfo: model.showTileDebugInfo));
+        showTileDebugInfo: model.showTileDebugInfo,
+        symbolsDelayPainterModel: null));
     if (symbolTheme != null) {
-      _symbolPainter = _VectorTilePainter(_TileLayerOptions(model, symbolTheme,
+      _symbolsDelayModel = SymbolsDelayPainterModel(model);
+      _symbolPainter = _VectorTilePainter(TileLayerOptions(model, symbolTheme,
           textCache: textCache,
           paintBackground: false,
-          showTileDebugInfo: false));
+          showTileDebugInfo: false,
+          symbolsDelayPainterModel: _symbolsDelayModel));
     }
     model.addListener(() {
       if (!disposed) {
@@ -76,6 +82,7 @@ class _GridVectorTileBodyState extends DisposableState<GridVectorTileBody> {
   void dispose() {
     super.dispose();
     widget.model.dispose();
+    _symbolsDelayModel?.dispose();
   }
 
   @override
@@ -87,168 +94,35 @@ class _GridVectorTileBodyState extends DisposableState<GridVectorTileBody> {
     if (symbolPainter != null) {
       return Stack(fit: StackFit.expand, children: [
         tile,
-        _DelayedPainter(
+        DelayPainter(
             key: Key('delayedSymbols${widget.model.tile.key()}'),
-            painter: symbolPainter)
+            model: _symbolsDelayModel!,
+            delegate: symbolPainter)
       ]);
     }
     return tile;
   }
 }
 
-class _DelayedPainter extends material.StatefulWidget {
-  final _VectorTilePainter painter;
-
-  const _DelayedPainter({material.Key? key, required this.painter})
-      : super(key: key);
-  @override
-  material.State<material.StatefulWidget> createState() {
-    return _DelayedPainterState();
-  }
-}
-
-final _paintQueue = <_DelayedPainterState>[];
-var _scheduled = false;
-
-class _DelayedPainterState extends DisposableState<_DelayedPainter> {
-  late final ScheduledDebounce debounce;
-  _VectorTilePainter? painter;
-  var _render = false;
-  var _nextPaintNoDelay = false;
-
-  bool get shouldPaint =>
-      _render && (painter?.options.model.showLabels ?? false);
-
-  _DelayedPainterState() {
-    debounce = ScheduledDebounce(_notifyUpdate,
-        delay: const Duration(milliseconds: 500),
-        jitter: const Duration(milliseconds: 50),
-        maxAge: const Duration(seconds: 10));
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    final painter = widget.painter;
-    this.painter = painter;
-    painter.options.model.addListener(() {
-      debounce.update();
-    });
-    painter.options.model.symbolState
-        .addListener(() => scheduleMicrotask(_labelsReady));
-    painter.labelsReadyCallback = _labelsReady;
-  }
-
-  void _labelsReady() {
-    _nextPaintNoDelay = true;
-    _render = true;
-    _schedulePaint();
-  }
-
-  void painted() {
-    if (_render) {
-      if (_nextPaintNoDelay) {
-        _nextPaintNoDelay = false;
-      } else {
-        _render = false;
-      }
-      _scheduleOne();
-    } else {
-      debounce.update();
-    }
-  }
-
-  @override
-  material.Widget build(material.BuildContext context) {
-    final painter = this.painter;
-    if (painter == null) {
-      return material.Container();
-    }
-    final tileKey = painter.options.model.tile.key();
-    final opacity = painter.options.model.symbolState.symbolsReady &&
-            painter.options.model.showLabels &&
-            _render
-        ? 1.0
-        : 0.0;
-    final child = RepaintBoundary(
-        key: Key('tileBodyBoundarySymbols$tileKey'),
-        child: CustomPaint(painter: _DelayedCustomPainter(this, painter)));
-    return AnimatedOpacity(
-        key: Key('tileBodySymbolsOpacity$tileKey'),
-        opacity: opacity,
-        duration: Duration(milliseconds: _render ? 500 : 0),
-        child: child);
-  }
-
-  void _notifyUpdate() {
-    if (!disposed) {
-      if (!_paintQueue.contains(this)) {
-        _paintQueue.add(this);
-      }
-      _scheduleOne();
-    }
-  }
-
-  void _schedulePaint() {
-    if (!disposed) {
-      setState(() {
-        _render = true;
-      });
-    }
-  }
-
-  void _scheduleOne() async {
-    if (!_scheduled && _paintQueue.isNotEmpty) {
-      _scheduled = true;
-      await Future.delayed(const Duration(milliseconds: 10));
-      _scheduled = false;
-      if (_paintQueue.isNotEmpty) {
-        _paintQueue.removeLast()._schedulePaint();
-        _scheduleOne();
-      }
-    }
-  }
-}
-
-class _DelayedCustomPainter extends material.CustomPainter {
-  final _DelayedPainterState _state;
-  final material.CustomPainter _delegate;
-
-  _DelayedCustomPainter(this._state, this._delegate);
-
-  @override
-  void paint(material.Canvas canvas, material.Size size) {
-    if (_state.shouldPaint) {
-      _delegate.paint(canvas, size);
-    }
-    _state.painted();
-  }
-
-  @override
-  bool shouldRepaint(covariant material.CustomPainter oldDelegate) {
-    return true;
-  }
-}
-
-class _TileLayerOptions {
+class TileLayerOptions {
   final VectorTileModel model;
   final TextCache textCache;
   final Theme theme;
   final bool paintBackground;
   final bool showTileDebugInfo;
+  final SymbolsDelayPainterModel? symbolsDelayPainterModel;
 
-  _TileLayerOptions(this.model, this.theme,
+  TileLayerOptions(this.model, this.theme,
       {required this.paintBackground,
       required this.textCache,
-      required this.showTileDebugInfo});
+      required this.showTileDebugInfo,
+      required this.symbolsDelayPainterModel});
 }
 
 enum _PaintMode { vector, background, none }
 
-final _labelUpdateExecutor = QueueExecutor();
-
 class _VectorTilePainter extends CustomPainter {
-  final _TileLayerOptions options;
+  final TileLayerOptions options;
   TileIdentity? _lastPaintedId;
   var _lastPainted = _PaintMode.none;
   var _paintCount = 0;
@@ -256,8 +130,6 @@ class _VectorTilePainter extends CustomPainter {
   final CreatedTextPainterProvider _painterProvider =
       CreatedTextPainterProvider();
   late final CachingTextPainterProvider _cachingPainterProvider;
-
-  void Function()? labelsReadyCallback;
 
   _VectorTilePainter(this.options) : super(repaint: options.model) {
     _cachingPainterProvider =
@@ -365,8 +237,9 @@ class _VectorTilePainter extends CustomPainter {
       bool hasUnpaintedSymbols =
           _painterProvider.symbolsWithoutPainter().isNotEmpty;
       if (hasUnpaintedSymbols) {
-        _labelUpdateExecutor
-            .submit(_UpdateTileLabelsJob(this).toExecutorJob())
+        labelUpdateExecutor
+            .submit(
+                UpdateTileLabelsJob(options, _painterProvider).toExecutorJob())
             .swallowCancellation();
       } else {
         options.model.symbolState.symbolsReady = true;
@@ -381,39 +254,6 @@ class _VectorTilePainter extends CustomPainter {
           oldDelegate._lastPaintedId !=
               options.model.translation?.translated) ||
       (oldDelegate._lastPainted == _PaintMode.background);
-}
-
-class _UpdateTileLabelsJob {
-  final _VectorTilePainter _painter;
-
-  _UpdateTileLabelsJob(this._painter);
-
-  Job toExecutorJob() {
-    return Job('labels ${_painter.options.model.tile}', _updateLabels, this,
-        deduplicationKey: null,
-        cancelled: () => _painter.options.model.disposed);
-  }
-
-  void updateLabels() {
-    if (!_painter.options.model.disposed) {
-      final remainingSymbols =
-          _painter._painterProvider.symbolsWithoutPainter();
-      if (remainingSymbols.isEmpty) {
-        _painter.labelsReadyCallback?.call();
-      } else {
-        final symbol = remainingSymbols.first;
-        final painter = _painter._painterProvider.create(symbol);
-        _painter.options.textCache.put(symbol, painter);
-        Future.delayed(const Duration(milliseconds: 2)).then((value) =>
-            _labelUpdateExecutor.submit(toExecutorJob()).swallowCancellation());
-      }
-    }
-  }
-}
-
-bool _updateLabels(job) {
-  (job as _UpdateTileLabelsJob).updateLabels();
-  return true;
 }
 
 extension RectDebugExtension on Rect {
