@@ -18,7 +18,7 @@ import '../tile_identity.dart';
 import '../tile_viewport.dart';
 import 'constants.dart';
 import 'debounce.dart';
-import 'disposable_state.dart';
+import 'tile/disposable_state.dart';
 import 'grid_tile_positioner.dart';
 import 'tile_widgets.dart';
 

@@ -90,7 +90,7 @@ class TileWidgets extends ChangeNotifier {
       }
       _idToModel[tile] = model;
     }
-    if (substituteTilesWhileLoading) {
+    if (substituteTilesWhileLoading && _loadingModels.isNotEmpty) {
       _substitutionModels =
           _substitutionTiles(previousIdToModel, _loadingModels);
       for (final model in _idToModel.values) {
@@ -211,4 +211,4 @@ class TileWidgets extends ChangeNotifier {
   }
 }
 
-const _maxSubstitutionDifference = 1;
+const _maxSubstitutionDifference = 2;
