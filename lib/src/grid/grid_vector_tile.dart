@@ -1,12 +1,9 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart' as material;
 import 'package:flutter/widgets.dart';
 import '../cache/text_cache.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../tile_identity.dart';
-import 'debounce.dart';
 import 'tile/delay_painter.dart';
 import 'tile/disposable_state.dart';
 import 'grid_tile_positioner.dart';
@@ -99,7 +96,6 @@ class _VectorTilePainter extends CustomPainter {
   final VectorTileOptions options;
   TileIdentity? _lastPaintedId;
   var _lastPainted = _PaintMode.none;
-  late final ScheduledDebounce debounce;
   final CreatedTextPainterProvider _painterProvider =
       CreatedTextPainterProvider();
   late final CachingTextPainterProvider _cachingPainterProvider;
@@ -107,10 +103,6 @@ class _VectorTilePainter extends CustomPainter {
   _VectorTilePainter(this.options) : super(repaint: options.model) {
     _cachingPainterProvider =
         CachingTextPainterProvider(options.textCache, _painterProvider);
-    debounce = ScheduledDebounce(_notifyIfNeeded,
-        delay: const Duration(milliseconds: 100),
-        jitter: const Duration(milliseconds: 100),
-        maxAge: const Duration(seconds: 10));
   }
 
   @override
@@ -166,14 +158,6 @@ class _VectorTilePainter extends CustomPainter {
     _lastPainted = _PaintMode.background;
     _lastPaintedId = null;
     canvas.restore();
-  }
-
-  void _notifyIfNeeded() {
-    Future.microtask(() {
-      if (_lastPainted != _PaintMode.vector) {
-        options.model.requestRepaint();
-      }
-    });
   }
 
   void _maybeUpdateLabels() {
