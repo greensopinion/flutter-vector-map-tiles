@@ -2,9 +2,9 @@ import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../executor/executor.dart';
 import '../../executor/queue_executor.dart';
-import '../grid_vector_tile.dart';
 import '../tile_model.dart';
 import 'delay_painter.dart';
+import 'tile_options.dart';
 
 class SymbolsDelayPainterModel extends DelayPainterModel {
   SymbolsDelayPainterModel(VectorTileModel model)
@@ -15,7 +15,7 @@ class SymbolsDelayPainterModel extends DelayPainterModel {
 }
 
 class UpdateTileLabelsJob {
-  final TileLayerOptions _options;
+  final VectorTileOptions _options;
   final CreatedTextPainterProvider _painterProvider;
 
   UpdateTileLabelsJob(this._options, this._painterProvider);
@@ -47,4 +47,9 @@ bool _updateLabels(job) {
 }
 
 final _labelUpdateExecutor = QueueExecutor();
-final labelUpdateExecutor = _labelUpdateExecutor;
+
+void sheduleLabelsUpdate(VectorTileOptions options,
+        CreatedTextPainterProvider painterProvider) =>
+    _labelUpdateExecutor
+        .submit(UpdateTileLabelsJob(options, painterProvider).toExecutorJob())
+        .swallowCancellation();

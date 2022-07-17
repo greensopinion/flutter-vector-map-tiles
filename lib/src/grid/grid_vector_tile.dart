@@ -5,17 +5,17 @@ import 'package:flutter/widgets.dart';
 import '../cache/text_cache.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
-import '../executor/executor.dart';
-import '../executor/queue_executor.dart';
 import '../tile_identity.dart';
 import 'debounce.dart';
 import 'tile/delay_painter.dart';
 import 'tile/disposable_state.dart';
 import 'grid_tile_positioner.dart';
 import 'tile/symbols.dart';
+import 'tile/tile_layer_debug.dart';
+import 'tile/tile_options.dart';
 import 'tile_model.dart';
 
-class GridVectorTile extends material.StatelessWidget {
+class GridVectorTile extends material.StatefulWidget {
   final VectorTileModel model;
   final TextCache textCache;
 
@@ -24,33 +24,17 @@ class GridVectorTile extends material.StatelessWidget {
       : super(key: key);
 
   @override
-  material.Widget build(material.BuildContext context) {
-    return GridVectorTileBody(
-        key: Key('tileBody${model.tile.key()}'),
-        model: model,
-        textCache: textCache);
-  }
+  material.State<material.StatefulWidget> createState() =>
+      _GridVectorTileState();
 }
 
-class GridVectorTileBody extends StatefulWidget {
-  final VectorTileModel model;
-  final TextCache textCache;
-
-  const GridVectorTileBody(
-      {required Key key, required this.model, required this.textCache})
-      : super(key: key);
-  @override
-  material.State<material.StatefulWidget> createState() {
-    return _GridVectorTileBodyState();
-  }
-}
-
-class _GridVectorTileBodyState extends DisposableState<GridVectorTileBody> {
+class _GridVectorTileState extends DisposableState<GridVectorTile> {
   late final _VectorTilePainter _painter;
+  late final VectorTileOptions options;
   _VectorTilePainter? _symbolPainter;
   SymbolsDelayPainterModel? _symbolsDelayModel;
 
-  _GridVectorTileBodyState();
+  _GridVectorTileState();
 
   @override
   void initState() {
@@ -58,17 +42,16 @@ class _GridVectorTileBodyState extends DisposableState<GridVectorTileBody> {
     final model = widget.model;
     final textCache = widget.textCache;
     final symbolTheme = model.symbolTheme;
-    _painter = _VectorTilePainter(TileLayerOptions(model, model.theme,
+    options = VectorTileOptions(model, model.theme,
         textCache: textCache,
         paintBackground: model.paintBackground,
-        showTileDebugInfo: model.showTileDebugInfo,
-        symbolsDelayPainterModel: null));
+        symbolsDelayPainterModel: null);
+    _painter = _VectorTilePainter(options);
     if (symbolTheme != null) {
       _symbolsDelayModel = SymbolsDelayPainterModel(model);
-      _symbolPainter = _VectorTilePainter(TileLayerOptions(model, symbolTheme,
+      _symbolPainter = _VectorTilePainter(VectorTileOptions(model, symbolTheme,
           textCache: textCache,
           paintBackground: false,
-          showTileDebugInfo: false,
           symbolsDelayPainterModel: _symbolsDelayModel));
     }
     model.addListener(() {
@@ -87,45 +70,35 @@ class _GridVectorTileBodyState extends DisposableState<GridVectorTileBody> {
 
   @override
   Widget build(BuildContext context) {
+    final tileKey = widget.model.tile.key();
     final tile = RepaintBoundary(
-        key: Key('tileBodyBoundary${widget.model.tile.key()}'),
+        key: Key('tileBodyBoundary$tileKey'),
         child: CustomPaint(painter: _painter));
     final symbolPainter = _symbolPainter;
+    final children = <Widget>[tile];
     if (symbolPainter != null) {
-      return Stack(fit: StackFit.expand, children: [
-        tile,
-        DelayPainter(
-            key: Key('delayedSymbols${widget.model.tile.key()}'),
-            model: _symbolsDelayModel!,
-            delegate: symbolPainter)
-      ]);
+      children.add(DelayPainter(
+          key: Key('delayedSymbols${widget.model.tile.key()}'),
+          model: _symbolsDelayModel!,
+          delegate: symbolPainter));
+    }
+    if (widget.model.showTileDebugInfo) {
+      children
+          .add(TileDebugLayer(key: Key('tileDebug$tileKey'), options: options));
+    }
+    if (children.length > 1) {
+      return Stack(fit: StackFit.expand, children: children);
     }
     return tile;
   }
 }
 
-class TileLayerOptions {
-  final VectorTileModel model;
-  final TextCache textCache;
-  final Theme theme;
-  final bool paintBackground;
-  final bool showTileDebugInfo;
-  final SymbolsDelayPainterModel? symbolsDelayPainterModel;
-
-  TileLayerOptions(this.model, this.theme,
-      {required this.paintBackground,
-      required this.textCache,
-      required this.showTileDebugInfo,
-      required this.symbolsDelayPainterModel});
-}
-
 enum _PaintMode { vector, background, none }
 
 class _VectorTilePainter extends CustomPainter {
-  final TileLayerOptions options;
+  final VectorTileOptions options;
   TileIdentity? _lastPaintedId;
   var _lastPainted = _PaintMode.none;
-  var _paintCount = 0;
   late final ScheduledDebounce debounce;
   final CreatedTextPainterProvider _painterProvider =
       CreatedTextPainterProvider();
@@ -157,6 +130,7 @@ class _VectorTilePainter extends CustomPainter {
     if (translation == null) {
       return;
     }
+    ++options.paintCount;
     final tileSizer =
         GridTileSizer(translation, model.zoomScaleFunction(model.tile.z), size);
     canvas.save();
@@ -173,8 +147,6 @@ class _VectorTilePainter extends CustomPainter {
     _lastPaintedId = translation.translated;
 
     canvas.restore();
-    _paintTileDebugInfo(canvas, size, tileSizer.effectiveScale, tileClip,
-        model.lastRenderedZoom, model.lastRenderedZoomDetail);
     model.rendered();
     _maybeUpdateLabels();
   }
@@ -194,34 +166,6 @@ class _VectorTilePainter extends CustomPainter {
     _lastPainted = _PaintMode.background;
     _lastPaintedId = null;
     canvas.restore();
-    _paintTileDebugInfo(canvas, size, tileSizer.effectiveScale, tileClip,
-        model.lastRenderedZoom, model.lastRenderedZoomDetail);
-  }
-
-  void _paintTileDebugInfo(Canvas canvas, Size size, double scale, Rect clip,
-      double zoom, double zoomDetail) {
-    if (options.showTileDebugInfo) {
-      ++_paintCount;
-      final paint = Paint()
-        ..strokeWidth = 2.0
-        ..style = material.PaintingStyle.stroke
-        ..color = const Color.fromARGB(0xff, 0, 0xff, 0);
-      canvas.drawLine(Offset.zero, material.Offset(0, size.height), paint);
-      canvas.drawLine(Offset.zero, material.Offset(size.width, 0), paint);
-      final textStyle = TextStyle(
-          foreground: Paint()..color = const Color.fromARGB(0xff, 0, 0, 0),
-          fontSize: 15);
-      final roundedScale = (scale * 1000).roundToDouble() / 1000;
-      final text = TextPainter(
-          text: TextSpan(
-              style: textStyle,
-              text:
-                  '${options.model.tile} zoom=$zoom zoomDetail=$zoomDetail\nscale=$roundedScale clipXY=${clip.topLeft} clipSize=${clip.width} \npaintCount=$_paintCount'),
-          textAlign: TextAlign.start,
-          textDirection: TextDirection.ltr)
-        ..layout();
-      text.paint(canvas, const material.Offset(10, 10));
-    }
   }
 
   void _notifyIfNeeded() {
@@ -237,10 +181,7 @@ class _VectorTilePainter extends CustomPainter {
       bool hasUnpaintedSymbols =
           _painterProvider.symbolsWithoutPainter().isNotEmpty;
       if (hasUnpaintedSymbols) {
-        labelUpdateExecutor
-            .submit(
-                UpdateTileLabelsJob(options, _painterProvider).toExecutorJob())
-            .swallowCancellation();
+        sheduleLabelsUpdate(options, _painterProvider);
       } else {
         options.model.symbolState.symbolsReady = true;
       }
@@ -254,8 +195,4 @@ class _VectorTilePainter extends CustomPainter {
           oldDelegate._lastPaintedId !=
               options.model.translation?.translated) ||
       (oldDelegate._lastPainted == _PaintMode.background);
-}
-
-extension RectDebugExtension on Rect {
-  String debugString() => '[$left,$top,$width,$height]';
 }
