@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:math';
 
-import '../executor/queue_executor.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../vector_map_tiles.dart';
 import '../executor/executor.dart';
+import '../executor/queue_executor.dart';
 
 class TilesetUiPreprocessor {
   final TilesetPreprocessor _preprocessor;

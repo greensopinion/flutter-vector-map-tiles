@@ -28,7 +28,7 @@ class ByteStorage {
     return path;
   }
 
-  Future<File> fileOf(String path) async {
+  Future<File> _fileOf(String path) async {
     final root = await _storagePath;
     return File("$root/$path");
   }
@@ -39,7 +39,7 @@ class ByteStorage {
   }
 
   Future<void> write(String path, Uint8List bytes) async {
-    final file = await fileOf(path);
+    final file = await _fileOf(path);
     if (!await file.parent.exists()) {
       await file.parent.create(recursive: true);
     }
@@ -47,7 +47,7 @@ class ByteStorage {
   }
 
   Future<Uint8List?> read(String path) async {
-    final file = await fileOf(path);
+    final file = await _fileOf(path);
     if (await file.exists()) {
       return file.readAsBytes();
     }
@@ -55,9 +55,32 @@ class ByteStorage {
   }
 
   Future<void> delete(String path) async {
-    final file = await fileOf(path);
+    final file = await _fileOf(path);
     if (await file.exists()) {
       await file.delete();
+    }
+  }
+
+  Future<bool> exists(String path) async {
+    final file = await _fileOf(path);
+    return await file.exists();
+  }
+
+  Future<void> clear() async {
+    final directory = await storageDirectory();
+    if (await directory.exists()) {
+      final entries = await directory
+          .list()
+          .asyncMap((f) async => MapEntry(f, await f.stat()))
+          .where((e) => e.value.type == FileSystemEntityType.file)
+          .toList();
+      for (final file in entries) {
+        try {
+          await file.key.delete();
+        } catch (e) {
+          // ignore
+        }
+      }
     }
   }
 }

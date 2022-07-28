@@ -1,7 +1,7 @@
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../tile_identity.dart';
-import 'cache.dart';
+import 'memory_cache.dart';
 
 class TileKey {
   final TileIdentity id;
@@ -19,7 +19,7 @@ class TileKey {
   String toString() => 'TileKey(id=$id,source=$source)';
 }
 
-class VectorTileMemoryCache extends Cache<TileKey, VectorTile> {
+class VectorTileMemoryCache extends MemoryCache<TileKey, VectorTile> {
   VectorTileMemoryCache(int maxSize)
       : super(maxSize: maxSize, sizer: Sizer(), copier: Copier());
 }

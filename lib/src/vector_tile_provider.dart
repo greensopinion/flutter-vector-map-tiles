@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:http/http.dart';
 import 'package:http/retry.dart';
 
-import 'cache/memory_cache.dart';
+import 'cache/bytes_cache.dart';
 import 'provider_exception.dart';
 import 'tile_identity.dart';
 
@@ -78,14 +78,14 @@ class NetworkVectorTileProvider extends VectorTileProvider {
 
 class MemoryCacheVectorTileProvider extends VectorTileProvider {
   final VectorTileProvider delegate;
-  late final MemoryCache _cache;
+  late final BytesCache _cache;
 
   @override
   int get maximumZoom => delegate.maximumZoom;
 
   MemoryCacheVectorTileProvider(
       {required this.delegate, required int maxSizeBytes}) {
-    _cache = MemoryCache(maxSizeBytes: maxSizeBytes);
+    _cache = BytesCache(maxSizeBytes: maxSizeBytes);
   }
 
   @override

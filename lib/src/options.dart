@@ -3,8 +3,8 @@
 import 'package:flutter_map/plugin_api.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
-import '../vector_map_tiles.dart';
 import './extensions.dart';
+import '../vector_map_tiles.dart';
 
 /// a [FlutterMap] layer options, to be used with [VectorMapTilesPlugin].
 /// See the readme for details.

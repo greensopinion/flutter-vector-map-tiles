@@ -1,9 +1,9 @@
 import 'package:flutter/painting.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
-import 'cache.dart';
+import 'memory_cache.dart';
 
-class TextCache extends Cache<StyledSymbol, TextPainter> {
+class TextCache extends MemoryCache<StyledSymbol, TextPainter> {
   TextCache({required int maxSize})
       : super(maxSize: maxSize, sizer: Sizer(), copier: Copier());
 }

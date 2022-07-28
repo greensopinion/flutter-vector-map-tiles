@@ -1,24 +1,18 @@
-import 'dart:io';
-
-import 'package:path_provider/path_provider.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../vector_map_tiles.dart';
 import '../executor/executor.dart';
-import 'byte_storage.dart';
-import 'memory_cache.dart';
-import 'storage_cache.dart';
+import 'bytes_cache.dart';
+import 'cache.dart';
+import 'platform_cache_factory.dart';
 import 'text_cache.dart';
 import 'vector_tile_loading_cache.dart';
 
 class Caches {
   final Executor executor;
-  final ByteStorage _storage = ByteStorage(
-      pather: () => getTemporaryDirectory()
-          .then((value) => Directory('${value.path}/.vector_map')));
-  late final StorageCache _cache;
+  late final AsyncBytesCache _cache;
   late final VectorTileLoadingCache vectorTileCache;
-  late final MemoryCache memoryVectorTileCache;
+  late final BytesCache memoryVectorTileCache;
   late final TextCache textCache;
   late final List<String> providerSources;
 
@@ -31,8 +25,8 @@ class Caches {
       required int maxSizeInBytes,
       required int maxTextCacheSize}) {
     providerSources = providers.tileProviderBySource.keys.toList();
-    _cache = StorageCache(_storage, ttl, maxSizeInBytes);
-    memoryVectorTileCache = MemoryCache(maxSizeBytes: memoryTileCacheMaxSize);
+    _cache = createBytesCache(ttl: ttl, maxSizeInBytes: maxSizeInBytes);
+    memoryVectorTileCache = BytesCache(maxSizeBytes: memoryTileCacheMaxSize);
     vectorTileCache = VectorTileLoadingCache(
         _cache, memoryVectorTileCache, providers, executor, theme);
     textCache = TextCache(maxSize: maxTextCacheSize);

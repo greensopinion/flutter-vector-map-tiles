@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
-import '../../cache/text_cache.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
+import '../../cache/text_cache.dart';
 import '../../tile_identity.dart';
 import '../grid_tile_positioner.dart';
 import 'symbols.dart';

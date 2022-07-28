@@ -34,8 +34,9 @@ class CancellationException implements Exception {
   CancellationException();
 }
 
-Executor newExecutor({required int concurrency}) =>
-    kDebugMode ? QueueExecutor() : PoolExecutor(concurrency: concurrency);
+Executor newExecutor({required int concurrency}) => kDebugMode || kIsWeb
+    ? QueueExecutor()
+    : PoolExecutor(concurrency: concurrency);
 
 extension CancellationFuture<T> on Future<T> {
   /// `future.swallowCancellation().maybeThen(doSomething)`

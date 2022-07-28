@@ -3,9 +3,9 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'byte_storage.dart';
-import 'cache_stats.dart';
+import 'cache.dart';
 
-class StorageCache with CacheStats {
+class StorageCache extends AsyncBytesCache {
   final ByteStorage _storage;
   final Duration _ttl;
   final int _maxSizeInBytes;
@@ -13,11 +13,18 @@ class StorageCache with CacheStats {
 
   StorageCache(this._storage, this._ttl, this._maxSizeInBytes);
 
+  @override
   Future<void> remove(String key) async {
     await _storage.delete(key);
   }
 
-  Future<Uint8List?> retrieve(String key) async {
+  @override
+  Future<void> clear() async {
+    await _storage.clear();
+  }
+
+  @override
+  Future<Uint8List?> get(String key) async {
     try {
       final bytes = await _storage.read(key);
       if (bytes == null) {
@@ -32,18 +39,20 @@ class StorageCache with CacheStats {
     }
   }
 
-  Future<void> put(String key, Uint8List data) async {
+  @override
+  Future<void> put(String key, Uint8List newValue) async {
     if (++_putCount % 20 == 0) {
       await _applyMaxSize(await _storage.storageDirectory());
     }
-    await _storage.write(key, data);
+    await _storage.write(key, newValue);
   }
 
+  @override
   Future<bool> exists(String key) async {
-    final file = await _storage.fileOf(key);
-    return file.exists();
+    return await _storage.exists(key);
   }
 
+  @override
   Future<void> applyConstraints() async {
     final directory = await _storage.storageDirectory();
     if (await directory.exists()) {

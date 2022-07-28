@@ -2,18 +2,18 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'cache.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../vector_map_tiles.dart';
 import '../executor/executor.dart';
 import '../provider_exception.dart';
-import 'memory_cache.dart';
-import 'storage_cache.dart';
+import 'bytes_cache.dart';
 
 class VectorTileLoadingCache {
   final Theme _theme;
-  final MemoryCache _memoryCache;
-  final StorageCache _delegate;
+  final BytesCache _memoryCache;
+  final AsyncBytesCache _delegate;
   final TileProviders _providers;
   final Map<String, Future<Uint8List>> _byteFuturesByKey = {};
   final Executor _executor;
@@ -80,7 +80,7 @@ class VectorTileLoadingCache {
 
   Future<Uint8List> _loadBytes(
       String source, String key, TileIdentity tile) async {
-    var bytes = _memoryCache.get(key) ?? await _delegate.retrieve(key);
+    var bytes = _memoryCache.get(key) ?? await _delegate.get(key);
     if (bytes == null) {
       bytes = await _providers.get(source).provide(tile);
       _memoryCache.put(key, bytes);

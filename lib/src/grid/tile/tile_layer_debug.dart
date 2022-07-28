@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vector_map_tiles/src/grid/tile/tile_options.dart';
+import 'tile_options.dart';
 
 import '../grid_tile_positioner.dart';
 
