@@ -10,12 +10,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_map: ^1.1.0
+  flutter_map: '>=1.1.0 <3.0.0'
     #path: ../flutter_map
   http: ^0.13.3
   latlong2: ^0.8.0
   path_provider: ^2.0.2
-  vector_tile_renderer: ^2.5.5
+  vector_tile_renderer: ^2.5.8
     #path: ../vector_tile_renderer
   async: ^2.8.2
 
