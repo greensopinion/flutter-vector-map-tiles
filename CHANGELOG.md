@@ -1,4 +1,6 @@
+## 2.3.0
 
+* support flutter_map 2.1
 ## 2.2.2
 
 * provide support for dashed paths with `line-dasharray` theme style
