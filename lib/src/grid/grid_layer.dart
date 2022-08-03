@@ -25,10 +25,8 @@ import 'tile_widgets.dart';
 class VectorTileCompositeLayer extends StatefulWidget {
   final VectorTileLayerOptions options;
   final MapState mapState;
-  final Stream<void> stream;
 
-  VectorTileCompositeLayer(this.options, this.mapState, this.stream)
-      : super(key: options.key);
+  const VectorTileCompositeLayer({super.key, required this.options, required this.mapState});
 
   @override
   State<StatefulWidget> createState() {
@@ -56,7 +54,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
       _caches.applyConstraints();
     });
     if (widget.options.logCacheStats) {
-      _subscription = widget.stream.listen((event) {
+      _subscription = widget.mapState.onMoved.listen((event) {
         _cacheStats.update();
       });
     }
@@ -111,7 +109,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
               mapZoom: () =>
                   widget.mapState.zoom + widget.options.tileOffset.zoomOffset),
           widget.mapState,
-          widget.stream,
+          widget.mapState.onMoved,
           _tileSupplier)
     ];
     if (backgroundTheme != null) {
@@ -126,7 +124,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
               tileOffset: widget.options.tileOffset,
               mapZoom: _backgroundZoom),
           widget.mapState,
-          widget.stream,
+          widget.mapState.onMoved,
           _tileSupplier);
       layers.insert(0, background);
     }

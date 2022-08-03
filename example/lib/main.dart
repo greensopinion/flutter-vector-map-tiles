@@ -56,18 +56,17 @@ class _MyHomePageState extends State<MyHomePage> {
                     InteractiveFlag.flingAnimation |
                     InteractiveFlag.pinchMove |
                     InteractiveFlag.pinchZoom |
-                    InteractiveFlag.doubleTapZoom,
-                plugins: [VectorMapTilesPlugin()]),
-            layers: <LayerOptions>[
+                    InteractiveFlag.doubleTapZoom),
+            children: [
               // normally you would see TileLayerOptions which provides raster tiles
               // instead this vector tile layer replaces the standard tile layer
-              VectorTileLayerOptions(
+              VectorTileLayerWidget(options: VectorTileLayerOptions(
                   theme: _mapTheme(),
                   backgroundTheme: _backgroundTheme(),
                   // tileOffset: TileOffset.mapbox, enable with mapbox
                   tileProviders: TileProviders(
                       // Name must match name under "sources" in theme
-                      {'openmaptiles': _cachingTileProvider(_urlTemplate())})),
+                      {'openmaptiles': _cachingTileProvider(_urlTemplate())}))),
             ],
           )),
           Row(

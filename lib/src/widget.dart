@@ -11,12 +11,11 @@ import 'grid/grid_layer.dart';
 class VectorTileLayerWidget extends StatelessWidget {
   final VectorTileLayerOptions options;
 
-  const VectorTileLayerWidget({Key? key, required this.options})
-      : super(key: key);
+  const VectorTileLayerWidget({super.key, required this.options});
 
   @override
   Widget build(BuildContext context) {
     final mapState = MapState.maybeOf(context)!;
-    return VectorTileCompositeLayer(options, mapState, mapState.onMoved);
+    return VectorTileCompositeLayer(options: options, mapState: mapState);
   }
 }
