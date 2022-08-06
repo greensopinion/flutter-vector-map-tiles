@@ -19,15 +19,15 @@ class VectorTileLoadingCache {
   final Executor _executor;
   bool _ready = false;
   final _readyCompleter = Completer<bool>();
+  late final int maximumZoom;
 
   VectorTileLoadingCache(this._delegate, this._memoryCache, this._providers,
       this._executor, this._theme) {
+    maximumZoom = _providers.tileProviderBySource.values
+        .map((e) => e.maximumZoom)
+        .reduce(min);
     _initialize();
   }
-
-  int get maximumZoom => _providers.tileProviderBySource.values
-      .map((e) => e.maximumZoom)
-      .reduce(min);
 
   Future<TileData> retrieve(String source, TileIdentity tile,
       {required CancellationCallback cancelled}) async {
