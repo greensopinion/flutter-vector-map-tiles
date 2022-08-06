@@ -77,3 +77,4 @@ build/
 !**/ios/**/default.perspectivev3
 
 coverage/
+example/lib/local_*
