@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vector_map_tiles/src/grid/tile/tile_options.dart';
+import 'tile_options.dart';
 
 import '../grid_tile_positioner.dart';
 
@@ -25,8 +25,8 @@ class _TileDebugPainter extends CustomPainter {
     if (translation == null) {
       return;
     }
-    final tileSizer = GridTileSizer(translation,
-        options.model.zoomScaleFunction(options.model.tile.z), size);
+    final zoom = options.model.zoomProvider.provide();
+    final tileSizer = GridTileSizer(translation, zoom.zoomScale, size);
     final paint = Paint()
       ..strokeWidth = 2.0
       ..style = PaintingStyle.stroke
@@ -37,13 +37,11 @@ class _TileDebugPainter extends CustomPainter {
         foreground: Paint()..color = const Color.fromARGB(0xff, 0, 0, 0),
         fontSize: 15);
     final roundedScale = tileSizer.effectiveScale.toStringAsFixed(3);
-    final zoom = options.model.zoomFunction().toStringAsFixed(3);
-    final zoomDetail = options.model.zoomDetailFunction().toStringAsFixed(3);
     final text = TextPainter(
         text: TextSpan(
             style: textStyle,
             text:
-                '${options.model.tile}\nzoom=$zoom zoomDetail=$zoomDetail\nscale=$roundedScale\npaintCount=${options.paintCount}  '),
+                '${options.model.tile}\nzoom=${zoom.zoom.toStringAsFixed(3)} zoomDetail=${zoom.zoomDetail.toStringAsFixed(3)}\nscale=$roundedScale\npaintCount=${options.paintCount}'),
         textAlign: TextAlign.start,
         textDirection: TextDirection.ltr)
       ..layout();
