@@ -3,8 +3,8 @@
 import 'package:flutter_map/plugin_api.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
-import '../vector_map_tiles.dart';
 import './extensions.dart';
+import '../vector_map_tiles.dart';
 
 /// a [FlutterMap] layer options, to be used with [VectorMapTilesPlugin].
 /// See the readme for details.
@@ -66,7 +66,7 @@ class VectorTileLayerOptions extends LayerOptions {
   final int concurrency;
 
   /// The default [concurrency]
-  static const DEFAULT_CONCURRENCY = 2;
+  static const DEFAULT_CONCURRENCY = 4;
 
   /// The tile offset, defaults to [TileOffset.DEFAULT].
   /// See [TileOffset.mapbox]

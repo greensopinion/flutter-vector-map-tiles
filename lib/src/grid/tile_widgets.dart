@@ -8,6 +8,7 @@ import '../tile_viewport.dart';
 import 'grid_vector_tile.dart';
 import 'slippy_map_translator.dart';
 import 'tile_model.dart';
+import 'tile_zoom.dart';
 
 class TileWidgets extends ChangeNotifier {
   bool _disposed = false;
@@ -178,10 +179,8 @@ class TileWidgets extends ChangeNotifier {
   Set<TileIdentity> _reduce(List<TileIdentity> tiles) {
     final translator = SlippyMapTranslator(_tileProvider.maximumZoom);
     final reduced = <TileIdentity>{};
-    const overzoomStep = 1;
     for (final tile in tiles) {
-      final zoomStep =
-          tile.z > _tileProvider.maximumZoom ? tile.z - overzoomStep : tile.z;
+      final zoomStep = tile.z > _tileProvider.maximumZoom ? tile.z : tile.z;
       final translation =
           translator.specificZoomTranslation(tile, zoom: zoomStep);
       reduced.add(translation.translated);

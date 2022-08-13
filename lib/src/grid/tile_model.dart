@@ -2,6 +2,8 @@ import 'dart:developer';
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
+import 'tile_zoom.dart';
+import 'tile_layer_composer.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../executor/executor.dart';
@@ -9,9 +11,7 @@ import '../profiler.dart';
 import '../stream/tile_supplier.dart';
 import '../tile_identity.dart';
 import 'slippy_map_translator.dart';
-
-typedef ZoomScaleFunction = double Function(int tileZoom);
-typedef ZoomFunction = double Function();
+import 'tile_layer_model.dart';
 
 class VectorTileModel extends ChangeNotifier {
   bool _disposed = false;
@@ -23,12 +23,9 @@ class VectorTileModel extends ChangeNotifier {
   final Theme? symbolTheme;
   bool paintBackground;
   final bool showTileDebugInfo;
-  final ZoomScaleFunction zoomScaleFunction;
-  final ZoomFunction zoomFunction;
-  final ZoomFunction zoomDetailFunction;
-  double lastRenderedZoom = double.negativeInfinity;
-  double lastRenderedZoomDetail = double.negativeInfinity;
-  double lastRenderedZoomScale = double.negativeInfinity;
+  late final TileZoomProvider zoomProvider;
+  TileZoom lastRenderedZoom = TileZoom.undefined();
+
   late final TileTranslation defaultTranslation;
   TileTranslation? translation;
   Tileset? tileset;
@@ -36,17 +33,21 @@ class VectorTileModel extends ChangeNotifier {
   bool _firstRendered = false;
   bool showLabels = true;
   final symbolState = VectorTileSymbolState();
+  late final List<TileLayerModel> layers;
 
   VectorTileModel(
       this.tileProvider,
       this.theme,
       this.symbolTheme,
       this.tile,
-      this.zoomScaleFunction,
-      this.zoomFunction,
-      this.zoomDetailFunction,
+      ZoomScaleFunction zoomScaleFunction,
+      ZoomFunction zoomFunction,
+      ZoomFunction zoomDetailFunction,
       this.paintBackground,
       this.showTileDebugInfo) {
+    zoomProvider = TileZoomProvider(
+        tile, zoomScaleFunction, zoomFunction, zoomDetailFunction);
+    layers = TileLayerComposer().compose(this, theme);
     defaultTranslation =
         SlippyMapTranslator(tileProvider.maximumZoom).translate(tile);
     _firstRenderedTask = tileRenderingTask(tile);
@@ -62,10 +63,11 @@ class VectorTileModel extends ChangeNotifier {
   }
 
   void startLoading() async {
+    final zoom = zoomProvider.provide();
     final request = TileRequest(
         tileId: tile.normalize(),
-        zoom: zoomFunction(),
-        zoomDetail: zoomDetailFunction(),
+        zoom: zoom.zoom,
+        zoomDetail: zoom.zoomDetail,
         cancelled: () => _disposed);
     tileProvider.provide(request).swallowCancellation().maybeThen(_receiveTile);
   }
@@ -75,31 +77,26 @@ class VectorTileModel extends ChangeNotifier {
         .specificZoomTranslation(tile, zoom: received.identity.z);
     tileset = received.tileset;
     translation = newTranslation;
-    notifyListeners();
-  }
-
-  bool updateRendering() {
-    final changed = hasChanged();
-    if (changed) {
-      lastRenderedZoom = zoomFunction();
-      lastRenderedZoomDetail = zoomDetailFunction();
-      lastRenderedZoomScale = zoomScaleFunction(tile.z);
+    for (final layer in layers) {
+      layer.tileset = tileset;
+      layer.translation = translation;
     }
-    return changed;
-  }
-
-  bool hasChanged() {
-    final lastRenderedZoom = zoomFunction();
-    final lastRenderedZoomDetail = zoomDetailFunction();
-    final lastRenderedZoomScale = zoomScaleFunction(tile.z);
-    return lastRenderedZoomScale != this.lastRenderedZoomScale ||
-        lastRenderedZoom != this.lastRenderedZoom ||
-        lastRenderedZoomDetail != this.lastRenderedZoomDetail;
-  }
-
-  void requestRepaint() {
     notifyListeners();
+    _notifyLayers();
   }
+
+  TileZoom updateRendering() {
+    lastRenderedZoom = zoomProvider.provide();
+    return lastRenderedZoom;
+  }
+
+  void _notifyLayers() {
+    for (final layer in layers) {
+      layer.notifyListeners();
+    }
+  }
+
+  bool hasChanged() => lastRenderedZoom != zoomProvider.provide();
 
   @override
   void notifyListeners() {
@@ -113,6 +110,9 @@ class VectorTileModel extends ChangeNotifier {
     if (!_disposed) {
       super.dispose();
       _disposed = true;
+      for (final layer in layers) {
+        layer.dispose();
+      }
 
       if (!_firstRendered) {
         _firstRendered = true;

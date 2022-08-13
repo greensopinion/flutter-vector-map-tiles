@@ -3,8 +3,6 @@ import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_map/plugin_api.dart';
-import '../stream/tile_processor.dart';
-import '../stream/tileset_ui_preprocessor.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../cache/caches.dart';
@@ -12,14 +10,16 @@ import '../executor/executor.dart';
 import '../options.dart';
 import '../stream/caches_tile_provider.dart';
 import '../stream/delay_provider.dart';
+import '../stream/tile_processor.dart';
 import '../stream/tileset_executor_preprocessor.dart';
+import '../stream/tileset_ui_preprocessor.dart';
 import '../stream/translating_tile_provider.dart';
 import '../tile_identity.dart';
 import '../tile_viewport.dart';
 import 'constants.dart';
 import 'debounce.dart';
-import 'tile/disposable_state.dart';
 import 'grid_tile_positioner.dart';
+import 'tile/disposable_state.dart';
 import 'tile_widgets.dart';
 
 class VectorTileCompositeLayer extends StatefulWidget {
@@ -269,7 +269,7 @@ class _VectorTileLayerState extends DisposableState<_VectorTileLayer> {
     final tiles = _tileWidgets.all.entries
         .where((entry) =>
             widget.options.paintNoDataTiles || entry.value.model.hasData)
-        .toList()
+        .toList(growable: false)
       ..sort(_orderTileWidgets);
     if (tiles.isEmpty) {
       return Container();

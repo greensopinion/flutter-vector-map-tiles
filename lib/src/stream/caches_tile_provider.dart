@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'tile_processor.dart';
-import 'tileset_ui_preprocessor.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../cache/caches.dart';
+import 'tile_processor.dart';
 import 'tile_supplier.dart';
 import 'tileset_executor_preprocessor.dart';
+import 'tileset_ui_preprocessor.dart';
 
 class CachesTileProvider extends TileProvider {
   final Caches _caches;
