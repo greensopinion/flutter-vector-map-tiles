@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import '../../vector_map_tiles.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import 'debounce.dart';
@@ -19,6 +20,7 @@ class TileLayerModel extends ChangeNotifier {
   late final ScheduledDebounce debounce;
   TileZoom lastRenderedZoom = TileZoom.undefined();
   var lastRenderedVisible = true;
+  TileIdentity? lastRenderedTile = null;
   var _renderedOnce = false;
 
   TileLayerModel(
@@ -56,6 +58,7 @@ class TileLayerModel extends ChangeNotifier {
     final previousRenderedZoom = lastRenderedZoom;
     lastRenderedZoom = tileModel.zoomProvider.provide();
     lastRenderedVisible = visible;
+    lastRenderedTile = tileModel.translation?.translated;
     if (previousRenderedZoom != lastRenderedZoom &&
         nextDelay().inMilliseconds > 0) {
       visible = false;
@@ -76,5 +79,6 @@ class TileLayerModel extends ChangeNotifier {
 
   bool hasChanged() =>
       visible != lastRenderedVisible ||
-      lastRenderedZoom != tileModel.zoomProvider.provide();
+      lastRenderedZoom != tileModel.zoomProvider.provide() ||
+      lastRenderedTile != tileModel.translation?.translated;
 }

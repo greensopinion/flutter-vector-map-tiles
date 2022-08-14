@@ -73,7 +73,7 @@ class VectorTileLayerOptions extends LayerOptions {
   final int maximumTileSubstitutionDifference;
 
   /// the default [maximumTileSubstitutionDifference]
-  static const DEFAULT_MAX_TILE_SUBSTITUTION_DIFFERENCE = 2;
+  static const DEFAULT_MAX_TILE_SUBSTITUTION_DIFFERENCE = 1;
 
   /// The default [concurrency]
   static const DEFAULT_CONCURRENCY = 4;

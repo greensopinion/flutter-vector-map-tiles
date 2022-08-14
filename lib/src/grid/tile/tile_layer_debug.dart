@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'tile_options.dart';
 
 import '../grid_tile_positioner.dart';
+import 'tile_options.dart';
 
 class TileDebugLayer extends StatelessWidget {
   final VectorTileOptions options;
@@ -30,7 +30,13 @@ class _TileDebugPainter extends CustomPainter {
     final paint = Paint()
       ..strokeWidth = 2.0
       ..style = PaintingStyle.stroke
-      ..color = const Color.fromARGB(0xff, 0, 0xff, 0);
+      ..color = Colors.green;
+    if (translation.zoomDifference != 0) {
+      final maxZoom = options.model.tileProvider.maximumZoom;
+      if (translation.translated.z != maxZoom) {
+        paint.color = Colors.deepOrange;
+      }
+    }
     canvas.drawLine(Offset.zero, Offset(0, size.height), paint);
     canvas.drawLine(Offset.zero, Offset(size.width, 0), paint);
     final textStyle = TextStyle(
@@ -41,7 +47,7 @@ class _TileDebugPainter extends CustomPainter {
         text: TextSpan(
             style: textStyle,
             text:
-                '${options.model.tile}\nzoom=${zoom.zoom.toStringAsFixed(3)} zoomDetail=${zoom.zoomDetail.toStringAsFixed(3)}\nscale=$roundedScale\nsize=${size.width}\npaintCount=${options.paintCount}'),
+                '${options.model.tile}\ntranslated=${translation.zoomDifference} from ${translation.translated.z}\nzoom=${zoom.zoom.toStringAsFixed(3)} zoomDetail=${zoom.zoomDetail.toStringAsFixed(3)}\nscale=$roundedScale\nsize=${size.width}\npaintCount=${options.paintCount}'),
         textAlign: TextAlign.start,
         textDirection: TextDirection.ltr)
       ..layout();
