@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../tile_identity.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../cache/caches.dart';
@@ -21,10 +22,24 @@ class CachesTileProvider extends TileProvider {
   int get maximumZoom => _caches.vectorTileCache.maximumZoom;
 
   @override
-  Future<TileResponse> provide(TileRequest request) async {
-    Map<String, TileData> tileDataBySource = await _retrieve(request);
+  Future<TileResponse> provide(TileRequest request) =>
+      _provide(request, localOnly: false);
+
+  @override
+  Future<TileResponse> provideLocalCopy(TileRequest request) =>
+      _provide(request, localOnly: true);
+
+  Future<TileResponse> _provide(TileRequest request,
+      {required bool localOnly}) async {
+    Map<String, TileData?> tileDataBySource =
+        await _retrieve(request, localOnly: localOnly);
+    if (tileDataBySource.values.any((t) => t == null)) {
+      return TileResponse(identity: request.tileId, tileset: null);
+    }
+    Map<String, TileData> loadedDataBySource =
+        tileDataBySource.map((key, value) => MapEntry(key, value!));
     Map<String, Tile> tileBySource =
-        await _createTiles(request, tileDataBySource);
+        await _createTiles(request, loadedDataBySource);
     var tileset = await _preprocessor.preprocess(
         request.tileId,
         Tileset(tileBySource),
@@ -36,13 +51,15 @@ class CachesTileProvider extends TileProvider {
     return TileResponse(identity: request.tileId, tileset: tileset);
   }
 
-  Future<Map<String, TileData>> _retrieve(TileRequest request) async {
-    Map<String, Future<TileData>> futureBySource = {};
+  Future<Map<String, TileData?>> _retrieve(TileRequest request,
+      {required bool localOnly}) async {
+    Map<String, Future<TileData?>> futureBySource = {};
     for (final source in _caches.providerSources) {
-      futureBySource[source] = _caches.vectorTileCache
-          .retrieve(source, request.tileId, cancelled: request.cancelled);
+      futureBySource[source] = _caches.vectorTileCache.retrieve(
+          source, request.tileId,
+          cachedOnly: localOnly, cancelled: request.cancelled);
     }
-    Map<String, TileData> tileBySource = {};
+    Map<String, TileData?> tileBySource = {};
     for (final entry in futureBySource.entries) {
       request.testCancelled();
       tileBySource[entry.key] = await entry.value;

@@ -1,7 +1,10 @@
 import 'dart:developer';
+import 'dart:io';
+import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
+import '../stream/translated_tile_request.dart';
 import 'tile_zoom.dart';
 import 'tile_layer_composer.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
@@ -15,6 +18,7 @@ import 'tile_layer_model.dart';
 
 class VectorTileModel extends ChangeNotifier {
   bool _disposed = false;
+
   bool get disposed => _disposed;
 
   final TileIdentity tile;
@@ -25,6 +29,7 @@ class VectorTileModel extends ChangeNotifier {
   final bool showTileDebugInfo;
   late final TileZoomProvider zoomProvider;
   TileZoom lastRenderedZoom = TileZoom.undefined();
+  TileIdentity? lastRenderedTile;
 
   late final TileTranslation defaultTranslation;
   TileTranslation? translation;
@@ -62,14 +67,8 @@ class VectorTileModel extends ChangeNotifier {
     }
   }
 
-  void startLoading() async {
-    final zoom = zoomProvider.provide();
-    final request = TileRequest(
-        tileId: tile.normalize(),
-        zoom: zoom.zoom,
-        zoomDetail: zoom.zoomDetail,
-        cancelled: () => _disposed);
-    tileProvider.provide(request).swallowCancellation().maybeThen(_receiveTile);
+  void startLoading() {
+    _VectorTileModelLoader(this).startLoading();
   }
 
   void _receiveTile(TileResponse received) {
@@ -87,6 +86,7 @@ class VectorTileModel extends ChangeNotifier {
 
   TileZoom updateRendering() {
     lastRenderedZoom = zoomProvider.provide();
+    lastRenderedTile = translation?.translated;
     return lastRenderedZoom;
   }
 
@@ -96,7 +96,9 @@ class VectorTileModel extends ChangeNotifier {
     }
   }
 
-  bool hasChanged() => lastRenderedZoom != zoomProvider.provide();
+  bool hasChanged() =>
+      lastRenderedZoom != zoomProvider.provide() ||
+      lastRenderedTile != translation?.translated;
 
   @override
   void notifyListeners() {
@@ -152,5 +154,57 @@ class VectorTileSymbolState extends ChangeNotifier {
     if (!_disposed) {
       super.notifyListeners();
     }
+  }
+}
+
+class _VectorTileModelLoader {
+  final VectorTileModel model;
+
+  _VectorTileModelLoader(this.model);
+
+  void startLoading() async {
+    final originalTile = model.tile.normalize();
+    final maxZoom = model.tileProvider.maximumZoom;
+    var originalLoaded = false;
+    final int startZoom = min(originalTile.z, maxZoom);
+    for (int z = startZoom; z >= max(startZoom - 10, 1); --z) {
+      final request = createTranslatedRequest(_newRequest(), maximumZoom: z);
+      final localTile = await model.tileProvider
+          .provideLocalCopy(request)
+          .swallowCancellation();
+      if (model.disposed) {
+        break;
+      }
+      if (localTile != null && localTile.tileset != null) {
+        model._receiveTile(localTile);
+        originalLoaded = z == originalTile.z;
+        if (model.hasData) {
+          break;
+        }
+      }
+    }
+    if (!originalLoaded && !model.disposed) {
+      try {
+        final response = await model.tileProvider.provide(_newRequest());
+        model._receiveTile(response);
+      } catch (e) {
+        if (e is SocketException) {
+          // nothing to do
+        } else if (e is CancellationException) {
+          // nothing to do
+        } else {
+          rethrow;
+        }
+      }
+    }
+  }
+
+  TileRequest _newRequest() {
+    final zoom = model.zoomProvider.provide();
+    return TileRequest(
+        tileId: model.tile.normalize(),
+        zoom: zoom.zoom,
+        zoomDetail: zoom.zoomDetail,
+        cancelled: () => model.disposed);
   }
 }

@@ -77,4 +77,23 @@ void main() {
     expect(translation.xOffset, 0);
     expect(translation.yOffset, 1);
   });
+
+  test('provides an alternative at zoom', () {
+    final translator = SlippyMapTranslator(14);
+    final tile = TileIdentity(8, 41, 88);
+    final expected = <int, TileIdentity>{
+      8: tile,
+      7: TileIdentity(7, 20, 44),
+      6: TileIdentity(6, 10, 22),
+      5: TileIdentity(5, 5, 11),
+      4: TileIdentity(4, 2, 5),
+      3: TileIdentity(3, 1, 2),
+      2: TileIdentity(2, 0, 1),
+      1: TileIdentity(1, 0, 0)
+    };
+    for (int z = 8; z >= 1; --z) {
+      final alternative = translator.specificZoomTranslation(tile, zoom: z);
+      expect(alternative.translated, expected[z]);
+    }
+  });
 }

@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import '../tile_identity.dart';
+
 import 'tile_supplier.dart';
 
 class DelayProvider extends TileProvider {
@@ -27,4 +29,8 @@ class DelayProvider extends TileProvider {
     await Future.delayed(durationWithJitter);
     return tile;
   }
+
+  @override
+  Future<TileResponse> provideLocalCopy(TileRequest request) =>
+      _delegate.provideLocalCopy(request);
 }

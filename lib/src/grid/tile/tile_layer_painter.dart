@@ -1,8 +1,8 @@
 import 'package:flutter/widgets.dart';
-import '../tile_layer_model.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../grid_tile_positioner.dart';
+import '../tile_layer_model.dart';
 
 class TileLayerPainter extends CustomPainter {
   final TileLayerModel model;

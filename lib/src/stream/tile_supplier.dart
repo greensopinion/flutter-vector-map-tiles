@@ -43,4 +43,5 @@ class TileResponse {
 abstract class TileProvider {
   int get maximumZoom;
   Future<TileResponse> provide(TileRequest request);
+  Future<TileResponse> provideLocalCopy(TileRequest request);
 }

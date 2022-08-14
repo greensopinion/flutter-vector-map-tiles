@@ -1,42 +1,32 @@
 import 'dart:async';
-import 'dart:math';
 
-import '../grid/slippy_map_translator.dart';
 import '../tile_identity.dart';
 import 'tile_supplier.dart';
+import 'translated_tile_request.dart';
 
 class TranslatingTileProvider extends TileProvider {
   final TileProvider _provider;
-  final SlippyMapTranslator _translator;
 
-  TranslatingTileProvider(this._provider)
-      : _translator = SlippyMapTranslator(_provider.maximumZoom);
+  TranslatingTileProvider(this._provider);
 
   @override
   int get maximumZoom => _provider.maximumZoom;
 
   @override
   Future<TileResponse> provide(TileRequest request) {
-    TileIdentity tileId = request.tileId;
-    Rectangle<double>? clip;
-    if (tileId.z > maximumZoom) {
-      final translation = _translator.specificZoomTranslation(request.tileId,
-          zoom: maximumZoom);
-      tileId = translation.translated;
-      const tileSize = 256;
-      final clipSize = tileSize / translation.fraction;
-      const buffer = 10;
-      final dx = (translation.xOffset * clipSize) - buffer;
-      final dy = (translation.yOffset * clipSize) - buffer;
-      final sizeWithBuffer = (2 * buffer) + clipSize;
-      clip = Rectangle(dx, dy, sizeWithBuffer, sizeWithBuffer);
-    }
+    return _provider.provide(_createTranslatedRequest(request));
+  }
 
-    return _provider.provide(TileRequest(
-        tileId: tileId,
-        zoom: request.zoom,
-        zoomDetail: request.zoomDetail,
-        clip: clip,
-        cancelled: request.cancelled));
+  @override
+  Future<TileResponse> provideLocalCopy(TileRequest request) {
+    return _provider.provideLocalCopy(_createTranslatedRequest(request));
+  }
+
+  TileRequest _createTranslatedRequest(TileRequest request) {
+    TileIdentity tileId = request.tileId;
+    if (tileId.z > maximumZoom) {
+      return createTranslatedRequest(request, maximumZoom: maximumZoom);
+    }
+    return request;
   }
 }
