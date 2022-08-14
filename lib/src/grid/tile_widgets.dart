@@ -25,7 +25,7 @@ class TileWidgets extends ChangeNotifier {
   final TextCache _textCache;
   final bool paintBackground;
   final bool showTileDebugInfo;
-  final bool substituteTilesWhileLoading;
+  final int maxSubstitutionDifference;
 
   TileWidgets(
       this._zoomScaleFunction,
@@ -35,7 +35,7 @@ class TileWidgets extends ChangeNotifier {
       this._symbolTheme,
       this._tileProvider,
       this._textCache,
-      this.substituteTilesWhileLoading,
+      this.maxSubstitutionDifference,
       this.paintBackground,
       this.showTileDebugInfo);
 
@@ -55,11 +55,11 @@ class TileWidgets extends ChangeNotifier {
     _idToModel = {};
 
     Set<TileIdentity> effectiveTiles = _reduce(tiles);
-    if (substituteTilesWhileLoading && effectiveTiles.isNotEmpty) {
+    if (maxSubstitutionDifference > 0 && effectiveTiles.isNotEmpty) {
       final z = effectiveTiles.first.z;
       final obsoleteSubstitutions = _substitutionModels
           .where((m) =>
-              m.disposed || (m.tile.z - z).abs() > _maxSubstitutionDifference)
+              m.disposed || (m.tile.z - z).abs() > maxSubstitutionDifference)
           .toList();
       for (final obsolete in obsoleteSubstitutions) {
         _removeAndDispose(obsolete);
@@ -91,7 +91,7 @@ class TileWidgets extends ChangeNotifier {
       }
       _idToModel[tile] = model;
     }
-    if (substituteTilesWhileLoading && _loadingModels.isNotEmpty) {
+    if (maxSubstitutionDifference > 0 && _loadingModels.isNotEmpty) {
       _substitutionModels =
           _substitutionTiles(previousIdToModel, _loadingModels);
       for (final model in _idToModel.values) {
@@ -196,7 +196,7 @@ class TileWidgets extends ChangeNotifier {
           .where((candidate) => loadingModels.any((m) {
                 final zoomDiff = (m.tile.z - candidate.tile.z).abs();
                 return zoomDiff > 0 &&
-                    zoomDiff <= _maxSubstitutionDifference &&
+                    zoomDiff <= maxSubstitutionDifference &&
                     m.tile.overlaps(candidate.tile);
               }))
           .toList();
@@ -209,5 +209,3 @@ class TileWidgets extends ChangeNotifier {
     obsolete.dispose();
   }
 }
-
-const _maxSubstitutionDifference = 2;

@@ -65,6 +65,16 @@ class VectorTileLayerOptions extends LayerOptions {
   /// This setting has no effect in debug mode.
   final int concurrency;
 
+  /// The maximum zoom difference when substituting tiles while overlapping tiles
+  /// are loading. A higher zoom difference results in lower chance of a blank map
+  /// while loading tiles to display. A larger zoom difference trequires more
+  /// memory and can result in an application exceeding available memory, resulting
+  /// in a crash. To avoid substituting tiles, use a value of 0.
+  final int maximumTileSubstitutionDifference;
+
+  /// the default [maximumTileSubstitutionDifference]
+  static const DEFAULT_MAX_TILE_SUBSTITUTION_DIFFERENCE = 2;
+
   /// The default [concurrency]
   static const DEFAULT_CONCURRENCY = 4;
 
@@ -81,6 +91,8 @@ class VectorTileLayerOptions extends LayerOptions {
       this.textCacheMaxSize = DEFAULT_TEXT_CACHE_MAX_SIZE,
       this.concurrency = DEFAULT_CONCURRENCY,
       this.tileOffset = TileOffset.DEFAULT,
+      this.maximumTileSubstitutionDifference =
+          DEFAULT_MAX_TILE_SUBSTITUTION_DIFFERENCE,
       this.backgroundTheme,
       this.showTileDebugInfo = false,
       this.logCacheStats = false,
@@ -98,6 +110,10 @@ required by the theme.
 The theme uses the following sources: ${theme.tileSources.toList().sorted().join(', ')}.
 '''
             .trim());
+    assert(
+        maximumTileSubstitutionDifference >= 0 &&
+            maximumTileSubstitutionDifference <= 3,
+        'maximumTileSubstitutionDifference must be >= 0 and <= 3');
   }
 }
 
