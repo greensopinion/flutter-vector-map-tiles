@@ -41,7 +41,7 @@ class _TileDebugPainter extends CustomPainter {
         text: TextSpan(
             style: textStyle,
             text:
-                '${options.model.tile}\nzoom=${zoom.zoom.toStringAsFixed(3)} zoomDetail=${zoom.zoomDetail.toStringAsFixed(3)}\nscale=$roundedScale\npaintCount=${options.paintCount}'),
+                '${options.model.tile}\nzoom=${zoom.zoom.toStringAsFixed(3)} zoomDetail=${zoom.zoomDetail.toStringAsFixed(3)}\nscale=$roundedScale\nsize=${size.width}\npaintCount=${options.paintCount}'),
         textAlign: TextAlign.start,
         textDirection: TextDirection.ltr)
       ..layout();

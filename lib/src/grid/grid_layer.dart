@@ -105,7 +105,8 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
               symbolTheme: symbolTheme,
               showTileDebugInfo: options.showTileDebugInfo,
               paintBackground: backgroundTheme == null,
-              substituteTilesWhileLoading: true,
+              maxSubstitutionDifference:
+                  options.maximumTileSubstitutionDifference,
               paintNoDataTiles: false,
               tileOffset: widget.options.tileOffset,
               mapZoom: () =>
@@ -121,7 +122,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
               caches: _caches,
               showTileDebugInfo: options.showTileDebugInfo,
               paintBackground: true,
-              substituteTilesWhileLoading: false,
+              maxSubstitutionDifference: 0,
               paintNoDataTiles: true,
               tileOffset: widget.options.tileOffset,
               mapZoom: _backgroundZoom),
@@ -172,7 +173,7 @@ class _LayerOptions {
   final Theme? symbolTheme;
   final bool showTileDebugInfo;
   final bool paintBackground;
-  final bool substituteTilesWhileLoading;
+  final int maxSubstitutionDifference;
   final bool paintNoDataTiles;
   final TileOffset tileOffset;
   final double Function() mapZoom;
@@ -183,7 +184,7 @@ class _LayerOptions {
       required this.showTileDebugInfo,
       required this.paintBackground,
       required this.paintNoDataTiles,
-      required this.substituteTilesWhileLoading,
+      required this.maxSubstitutionDifference,
       required this.tileOffset,
       required this.mapZoom});
 }
@@ -254,7 +255,7 @@ class _VectorTileLayerState extends DisposableState<_VectorTileLayer> {
         widget.options.symbolTheme,
         widget.tileProvider,
         widget.options.caches.textCache,
-        widget.options.substituteTilesWhileLoading,
+        widget.options.maxSubstitutionDifference,
         widget.options.paintBackground,
         widget.options.showTileDebugInfo);
     _tileWidgets.addListener(() {
