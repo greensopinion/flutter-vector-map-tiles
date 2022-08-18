@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import '../tile_identity.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../cache/caches.dart';

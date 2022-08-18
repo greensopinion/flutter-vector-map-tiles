@@ -20,7 +20,7 @@ class TileLayerModel extends ChangeNotifier {
   late final ScheduledDebounce debounce;
   TileZoom lastRenderedZoom = TileZoom.undefined();
   var lastRenderedVisible = true;
-  TileIdentity? lastRenderedTile = null;
+  TileIdentity? lastRenderedTile;
   var _renderedOnce = false;
 
   TileLayerModel(
