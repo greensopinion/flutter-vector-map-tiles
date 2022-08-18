@@ -40,6 +40,15 @@ class VectorTileLayerOptions extends LayerOptions {
   /// the default [memoryTileCacheMaxSize]
   static const DEFAULT_TILE_CACHE_MAX_SIZE = 1024 * 1024 * 10;
 
+  /// The maximum size in tiles of the memory vector tile cache.
+  /// Differs from [memoryTileCacheMaxSize] in that this is the cache
+  /// of parsed vector tiles, whereas [memoryTileCacheMaxSize] is the raw
+  /// tile data.
+  final int memoryTileDataCacheMaxSize;
+
+  /// the default [memoryTileDataCacheMaxSize]
+  static const DEFAULT_TILE_DATA_CACHE_MAX_SIZE = 20;
+
   /// The maximum size of the text cache.
   final int textCacheMaxSize;
 
@@ -87,6 +96,7 @@ class VectorTileLayerOptions extends LayerOptions {
       required this.theme,
       this.fileCacheTtl = DEFAULT_CACHE_TTL,
       this.memoryTileCacheMaxSize = DEFAULT_TILE_CACHE_MAX_SIZE,
+      this.memoryTileDataCacheMaxSize = DEFAULT_TILE_DATA_CACHE_MAX_SIZE,
       this.fileCacheMaximumSizeInBytes = DEFAULT_CACHE_MAX_SIZE,
       this.textCacheMaxSize = DEFAULT_TEXT_CACHE_MAX_SIZE,
       this.concurrency = DEFAULT_CONCURRENCY,
@@ -114,6 +124,7 @@ The theme uses the following sources: ${theme.tileSources.toList().sorted().join
         maximumTileSubstitutionDifference >= 0 &&
             maximumTileSubstitutionDifference <= 3,
         'maximumTileSubstitutionDifference must be >= 0 and <= 3');
+    assert(memoryTileDataCacheMaxSize >= 0 && memoryTileDataCacheMaxSize < 100);
   }
 }
 

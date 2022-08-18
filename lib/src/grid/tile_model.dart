@@ -22,6 +22,7 @@ class VectorTileModel extends ChangeNotifier {
   bool get disposed => _disposed;
 
   final TileIdentity tile;
+  final int tileZoomSubstitutionOffset;
   final TileProvider tileProvider;
   final Theme theme;
   final Theme? symbolTheme;
@@ -45,6 +46,7 @@ class VectorTileModel extends ChangeNotifier {
       this.theme,
       this.symbolTheme,
       this.tile,
+      this.tileZoomSubstitutionOffset,
       ZoomScaleFunction zoomScaleFunction,
       ZoomFunction zoomFunction,
       ZoomFunction zoomDetailFunction,
@@ -166,7 +168,8 @@ class _VectorTileModelLoader {
     final originalTile = model.tile.normalize();
     final maxZoom = model.tileProvider.maximumZoom;
     var originalLoaded = false;
-    final int startZoom = min(originalTile.z, maxZoom);
+    final int startZoom =
+        max(1, min(originalTile.z, maxZoom) - model.tileZoomSubstitutionOffset);
     for (int z = startZoom; z >= max(startZoom - 10, 1); --z) {
       final request = createTranslatedRequest(_newRequest(), maximumZoom: z);
       final localTile = await model.tileProvider
@@ -185,7 +188,12 @@ class _VectorTileModelLoader {
     }
     if (!originalLoaded && !model.disposed) {
       try {
-        final response = await model.tileProvider.provide(_newRequest());
+        var request = _newRequest();
+        if (model.tileZoomSubstitutionOffset > 0) {
+          request = createTranslatedRequest(request,
+              maximumZoom: originalTile.z - model.tileZoomSubstitutionOffset);
+        }
+        final response = await model.tileProvider.provide(request);
         model._receiveTile(response);
       } catch (e) {
         if (e is SocketException) {

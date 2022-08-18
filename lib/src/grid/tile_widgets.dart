@@ -26,6 +26,7 @@ class TileWidgets extends ChangeNotifier {
   final bool paintBackground;
   final bool showTileDebugInfo;
   final int maxSubstitutionDifference;
+  final int tileZoomSubstitutionOffset;
 
   TileWidgets(
       this._zoomScaleFunction,
@@ -36,6 +37,7 @@ class TileWidgets extends ChangeNotifier {
       this._tileProvider,
       this._textCache,
       this.maxSubstitutionDifference,
+      this.tileZoomSubstitutionOffset,
       this.paintBackground,
       this.showTileDebugInfo);
 
@@ -78,6 +80,7 @@ class TileWidgets extends ChangeNotifier {
             _theme,
             _symbolTheme,
             tile,
+            tileZoomSubstitutionOffset,
             _zoomScaleFunction,
             _zoomFunction,
             _zoomDetailFunction,
