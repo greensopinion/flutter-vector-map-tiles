@@ -1,7 +1,5 @@
 import 'dart:math';
 
-import '../tile_identity.dart';
-
 import 'tile_supplier.dart';
 
 class DelayProvider extends TileProvider {
