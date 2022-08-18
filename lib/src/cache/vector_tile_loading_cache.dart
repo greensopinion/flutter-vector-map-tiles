@@ -12,6 +12,7 @@ import 'storage_cache.dart';
 
 class VectorTileLoadingCache {
   final Theme _theme;
+  final MemoryTileDataCache _tileDataCache;
   final MemoryCache _memoryCache;
   final StorageCache _delegate;
   final TileProviders _providers;
@@ -22,8 +23,8 @@ class VectorTileLoadingCache {
   final _readyCompleter = Completer<bool>();
   late final int maximumZoom;
 
-  VectorTileLoadingCache(this._delegate, this._memoryCache, this._providers,
-      this._executor, this._theme) {
+  VectorTileLoadingCache(this._delegate, this._memoryCache, this._tileDataCache,
+      this._providers, this._executor, this._theme) {
     maximumZoom = _providers.tileProviderBySource.values
         .map((e) => e.maximumZoom)
         .reduce(min);
@@ -55,6 +56,10 @@ class VectorTileLoadingCache {
 
   Future<TileData?> _loadTile(String source, String key, TileIdentity tile,
       CancellationCallback cancelled, bool cachedOnly) async {
+    final cached = _tileDataCache.get(key);
+    if (cached != null) {
+      return cached;
+    }
     var future =
         cachedOnly ? _cacheByteFuturesByKey[key] : _byteFuturesByKey[key];
     var loaded = false;
@@ -88,8 +93,11 @@ class VectorTileLoadingCache {
     if (bytes == null) {
       return null;
     }
-    return _executor.submit(Job('read $source bytes: $tile', _createTile, bytes,
-        cancelled: cancelled, deduplicationKey: 'decode $source bytes: $tile'));
+    final name = '$key/${_theme.id}';
+    final tileData = await _executor.submit(Job(name, _createTile, bytes,
+        cancelled: cancelled, deduplicationKey: name));
+    _tileDataCache.put(key, tileData);
+    return tileData;
   }
 
   Future<Uint8List?> _loadBytes(

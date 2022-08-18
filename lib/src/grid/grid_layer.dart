@@ -109,8 +109,8 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
                   options.maximumTileSubstitutionDifference,
               paintNoDataTiles: false,
               tileOffset: widget.options.tileOffset,
-              mapZoom: () =>
-                  widget.mapState.zoom + widget.options.tileOffset.zoomOffset),
+              tileZoomSubstitutionOffset: 0,
+              mapZoom: _zoom),
           widget.mapState,
           widget.stream,
           _tileSupplier)
@@ -125,7 +125,8 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
               maxSubstitutionDifference: 0,
               paintNoDataTiles: true,
               tileOffset: widget.options.tileOffset,
-              mapZoom: _backgroundZoom),
+              tileZoomSubstitutionOffset: 4,
+              mapZoom: _zoom),
           widget.mapState,
           widget.stream,
           _tileSupplier);
@@ -141,6 +142,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
         theme: widget.options.theme,
         ttl: widget.options.fileCacheTtl,
         memoryTileCacheMaxSize: widget.options.memoryTileCacheMaxSize,
+        memoryTileDataCacheMaxSize: widget.options.memoryTileDataCacheMaxSize,
         maxSizeInBytes: widget.options.fileCacheMaximumSizeInBytes,
         maxTextCacheSize: widget.options.textCacheMaxSize);
     _tileSupplier = TranslatingTileProvider(DelayProvider(
@@ -160,12 +162,10 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
     print('Cache stats:\n${_caches.stats()}');
   }
 
-  double _backgroundZoom() {
-    return max(
-        1,
-        (widget.mapState.zoom - 1 + widget.options.tileOffset.zoomOffset)
-            .floorToDouble());
-  }
+  double _zoom() => max(
+      1,
+      (widget.mapState.zoom + widget.options.tileOffset.zoomOffset)
+          .floorToDouble());
 }
 
 class _LayerOptions {
@@ -176,6 +176,7 @@ class _LayerOptions {
   final int maxSubstitutionDifference;
   final bool paintNoDataTiles;
   final TileOffset tileOffset;
+  final int tileZoomSubstitutionOffset;
   final double Function() mapZoom;
   final Caches caches;
   _LayerOptions(this.theme,
@@ -186,6 +187,7 @@ class _LayerOptions {
       required this.paintNoDataTiles,
       required this.maxSubstitutionDifference,
       required this.tileOffset,
+      required this.tileZoomSubstitutionOffset,
       required this.mapZoom});
 }
 
@@ -256,6 +258,7 @@ class _VectorTileLayerState extends DisposableState<_VectorTileLayer> {
         widget.tileProvider,
         widget.options.caches.textCache,
         widget.options.maxSubstitutionDifference,
+        widget.options.tileZoomSubstitutionOffset,
         widget.options.paintBackground,
         widget.options.showTileDebugInfo);
     _tileWidgets.addListener(() {

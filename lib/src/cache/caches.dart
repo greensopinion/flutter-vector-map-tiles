@@ -19,6 +19,7 @@ class Caches {
   late final StorageCache _cache;
   late final VectorTileLoadingCache vectorTileCache;
   late final MemoryCache memoryVectorTileCache;
+  late final MemoryTileDataCache memoryTileDataCache;
   late final TextCache textCache;
   late final List<String> providerSources;
 
@@ -28,13 +29,16 @@ class Caches {
       required Theme theme,
       required Duration ttl,
       required int memoryTileCacheMaxSize,
+      required int memoryTileDataCacheMaxSize,
       required int maxSizeInBytes,
       required int maxTextCacheSize}) {
     providerSources = providers.tileProviderBySource.keys.toList();
     _cache = StorageCache(_storage, ttl, maxSizeInBytes);
     memoryVectorTileCache = MemoryCache(maxSizeBytes: memoryTileCacheMaxSize);
-    vectorTileCache = VectorTileLoadingCache(
-        _cache, memoryVectorTileCache, providers, executor, theme);
+    memoryTileDataCache =
+        MemoryTileDataCache(maxSize: memoryTileDataCacheMaxSize);
+    vectorTileCache = VectorTileLoadingCache(_cache, memoryVectorTileCache,
+        memoryTileDataCache, providers, executor, theme);
     textCache = TextCache(maxSize: maxTextCacheSize);
   }
 
@@ -54,6 +58,8 @@ class Caches {
         .add('Storage cache hit ratio:           ${_cache.hitRatio.asPct()}%');
     cacheStats.add(
         'Vector tile cache hit ratio:       ${memoryVectorTileCache.hitRatio.asPct()}% size: ${memoryVectorTileCache.size}');
+    cacheStats.add(
+        'Tile data cache hit ratio:         ${memoryTileDataCache.hitRatio.asPct()}% size: ${memoryTileDataCache.size}');
     cacheStats.add(
         'Text cache hit ratio:              ${textCache.hitRatio.asPct()}% size: ${textCache.size}');
     return cacheStats.join('\n');
