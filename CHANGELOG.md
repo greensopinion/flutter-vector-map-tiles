@@ -1,6 +1,12 @@
+## 2.4.0
+
+* improve usage on a slow internet connection by displaying lower zoom tiles from the cache while loading tiles
+* reduce chances of high memory usage
+
 ## 2.3.0
 
 * support flutter_map 2.1
+
 ## 2.2.2
 
 * provide support for dashed paths with `line-dasharray` theme style
