@@ -76,7 +76,7 @@ class VectorTileLayerOptions extends LayerOptions {
 
   /// The maximum zoom difference when substituting tiles while overlapping tiles
   /// are loading. A higher zoom difference results in lower chance of a blank map
-  /// while loading tiles to display. A larger zoom difference trequires more
+  /// while loading tiles to display. A larger zoom difference requires more
   /// memory and can result in an application exceeding available memory, resulting
   /// in a crash. To avoid substituting tiles, use a value of 0.
   final int maximumTileSubstitutionDifference;
