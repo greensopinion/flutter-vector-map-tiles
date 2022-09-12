@@ -1,3 +1,7 @@
+## 2.4.1
+
+* fix performance regression on Flutter 3.3.1 when running in debug mode
+
 ## 2.4.0
 
 * improve usage on a slow internet connection by displaying lower zoom tiles from the cache while loading tiles

@@ -4,17 +4,17 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
-import '../stream/translated_tile_request.dart';
-import 'tile_zoom.dart';
-import 'tile_layer_composer.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../executor/executor.dart';
 import '../profiler.dart';
 import '../stream/tile_supplier.dart';
+import '../stream/translated_tile_request.dart';
 import '../tile_identity.dart';
 import 'slippy_map_translator.dart';
+import 'tile_layer_composer.dart';
 import 'tile_layer_model.dart';
+import 'tile_zoom.dart';
 
 class VectorTileModel extends ChangeNotifier {
   bool _disposed = false;
