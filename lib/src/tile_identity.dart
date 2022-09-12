@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:flutter_map/plugin_api.dart';
 
@@ -15,7 +14,7 @@ class TileIdentity extends CustomPoint<int> {
       other is TileIdentity && x == other.x && y == other.y && z == other.z;
 
   @override
-  int get hashCode => hashValues(x, y, z);
+  int get hashCode => Object.hash(x, y, z);
 
   @override
   String toString() => key();
