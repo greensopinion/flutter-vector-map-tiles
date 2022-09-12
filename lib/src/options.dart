@@ -9,7 +9,7 @@ import '../vector_map_tiles.dart';
 /// a [FlutterMap] layer options, to be used with [VectorMapTilesPlugin].
 /// See the readme for details.
 /// See [VectorTileLayerWidget] for an alternative.
-class VectorTileLayerOptions extends LayerOptions {
+class VectorTileLayerOptions {
   /// provides vector tiles, by source ID where the source ID corresponds to
   /// a source in the theme
   final TileProviders tileProviders;
