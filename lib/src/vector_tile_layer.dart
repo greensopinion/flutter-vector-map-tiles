@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart' hide Theme;
 import 'package:flutter_map/plugin_api.dart';
-import 'package:vector_map_tiles/src/options.dart';
+import 'options.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import 'grid/grid_layer.dart';
