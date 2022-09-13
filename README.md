@@ -32,15 +32,13 @@ class _MyHomePageState extends State<MyHomePage> {
             options: MapOptions(
                 center: LatLng(49.246292, -123.116226),
                 zoom: 10,
-                maxZoom: 15,
-                plugins: [VectorMapTilesPlugin()]),
-            layers: <LayerOptions>[
-              // normally you would see TileLayerOptions which provides raster tiles
-              // instead this vector tile layer replaces the standard tile layer
-              VectorTileLayerOptions(
-                  theme: _mapTheme(context),
-                  tileProviders: TileProviders(
-                      {'openmaptiles': _cachingTileProvider(_urlTemplate())})),
+                maxZoom: 15),
+            children: [
+              VectorTileLayer(
+                theme: _mapTheme()
+                tileProviders: TileProviders(
+                    {'openmaptiles': _cachingTileProvider(_urlTemplate())}),
+              )
             ],
           ))
         ])));
@@ -57,7 +55,7 @@ class _MyHomePageState extends State<MyHomePage> {
         maxSizeBytes: 1024 * 1024 * 2);
   }
 
-  _mapTheme(BuildContext context) {
+  Theme _mapTheme(BuildContext context) {
     // maps are rendered using themes
     // to provide a dark theme do something like this:
     // if (MediaQuery.of(context).platformBrightness == Brightness.dark) return myDarkTheme();
@@ -76,25 +74,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
 See the [example](example) for details.
 
-### Widget-based Layer
-
-As an alternative to using `FlutterMap` `layers`, the vector layer can be used as a child widget:
-
-```dart
-FlutterMap(
-  options: MapOptions(
-      center: LatLng(49.246292, -123.116226),
-      zoom: 10,
-      maxZoom: 15),
-  children: [
-    VectorTileLayerWidget(
-      options: VectorTileLayerOptions(
-                  theme: _mapTheme(context),
-                  tileProviders: TileProviders(
-                      {'openmaptiles': _cachingTileProvider(_urlTemplate())}))
-    )
-  ]);
-```
 
 
 
@@ -193,7 +172,7 @@ A vector tile hillshade layer can be added to your maps by following these steps
 2. Add Hillshade Vector Layer to Sources
 
 ```dart
-  VectorTileLayerOptions(
+  VectorTileLayer(
     theme: _mapTheme(),
     backgroundTheme: _backgroundTheme(),
     tileProviders: TileProviders({
@@ -234,6 +213,10 @@ Some tile providers offer tiles with more detail that are intended to be drawn a
 
 Examples provided in `vector_map_tiles` make use of Mapbox and Stadia Maps, both of which require attribution.
 Be sure to read the terms of service of your tile data provider to ensure that you understand their attribution requirements.
+
+## Upgrading
+
+For guidance on upgrading from a previous version of this library, see the [Upgrading Guide](UPGRADING).
 
 ## Development
 
