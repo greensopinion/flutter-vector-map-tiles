@@ -91,6 +91,8 @@ class _MyHomePageState extends State<MyHomePage> {
     // to provide a dark theme do something like this:
     // if (MediaQuery.of(context).platformBrightness == Brightness.dark) return myDarkTheme();
     return ProvidedThemes.lightTheme();
+    // return ThemeReader(logger: const Logger.console())
+    //     .read(myCustomStyle());
   }
 
   _backgroundTheme() {
@@ -104,6 +106,9 @@ class _MyHomePageState extends State<MyHomePage> {
     // Stadia Maps source https://docs.stadiamaps.com/vector/
     // ignore: undefined_identifier
     return 'https://tiles.stadiamaps.com/data/openmaptiles/{z}/{x}/{y}.pbf?api_key=$stadiaMapsApiKey';
+
+    // Maptiler source
+    // return 'https://api.maptiler.com/tiles/v3/{z}/{x}/{y}.pbf?key=$maptilerApiKey';
 
     // Mapbox source https://docs.mapbox.com/api/maps/vector-tiles/#example-request-retrieve-vector-tiles
     // return 'https://api.mapbox.com/v4/mapbox.mapbox-streets-v8/{z}/{x}/{y}.mvt?access_token=$mapboxApiKey',
