@@ -89,7 +89,7 @@ class TilePositioningState {
   late final CustomPoint<num> origin;
   late final CustomPoint<num> translate;
 
-  TilePositioningState(this.zoomScale, MapState mapState, double zoom) {
+  TilePositioningState(this.zoomScale, FlutterMapState mapState, double zoom) {
     final pixelOrigin =
         mapState.getNewPixelOrigin(mapState.center, mapState.zoom).round();
     origin = mapState.project(mapState.unproject(pixelOrigin, zoom), zoom);

@@ -1,5 +1,4 @@
-import 'package:flutter/material.dart' as material;
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart' hide Theme;
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:vector_map_tiles/vector_map_tiles.dart';
@@ -12,14 +11,14 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({material.Key? key}) : super(key: key);
+  const MyApp({Key? key}) : super(key: key);
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return material.MaterialApp(
+    return MaterialApp(
       title: 'vector_map_tiles Example',
-      theme: material.ThemeData.light(),
+      theme: ThemeData.light(),
       home: const MyHomePage(title: 'vector_map_tiles Example'),
     );
   }
@@ -39,8 +38,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return material.Scaffold(
-        appBar: material.AppBar(
+    return Scaffold(
+        appBar: AppBar(
           title: Text(widget.title),
         ),
         body: SafeArea(
@@ -56,22 +55,22 @@ class _MyHomePageState extends State<MyHomePage> {
                     InteractiveFlag.flingAnimation |
                     InteractiveFlag.pinchMove |
                     InteractiveFlag.pinchZoom |
-                    InteractiveFlag.doubleTapZoom,
-                plugins: [VectorMapTilesPlugin()]),
-            layers: <LayerOptions>[
-              // normally you would see TileLayerOptions which provides raster tiles
+                    InteractiveFlag.doubleTapZoom),
+            children: [
+              // normally you would see TileLayer which provides raster tiles
               // instead this vector tile layer replaces the standard tile layer
-              VectorTileLayerOptions(
-                  theme: _mapTheme(),
-                  backgroundTheme: _backgroundTheme(),
-                  // tileOffset: TileOffset.mapbox, enable with mapbox
-                  tileProviders: TileProviders(
-                      // Name must match name under "sources" in theme
-                      {'openmaptiles': _cachingTileProvider(_urlTemplate())})),
+              VectorTileLayer(
+                theme: _mapTheme(),
+                backgroundTheme: _backgroundTheme(),
+                // tileOffset: TileOffset.mapbox, enable with mapbox
+                tileProviders: TileProviders(
+                    // Name must match name under "sources" in theme
+                    {'openmaptiles': _cachingTileProvider(_urlTemplate())}),
+              )
             ],
           )),
           Row(
-              mainAxisAlignment: material.MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [_statusText()])
         ])));
   }
@@ -110,9 +109,9 @@ class _MyHomePageState extends State<MyHomePage> {
     // return 'https://api.mapbox.com/v4/mapbox.mapbox-streets-v8/{z}/{x}/{y}.mvt?access_token=$mapboxApiKey',
   }
 
-  Widget _statusText() => material.Padding(
-      padding: const material.EdgeInsets.only(top: 8, bottom: 8),
-      child: material.StreamBuilder(
+  Widget _statusText() => Padding(
+      padding: const EdgeInsets.only(top: 8, bottom: 8),
+      child: StreamBuilder(
           stream: _controller.mapEventStream,
           builder: (context, snapshot) {
             return Text(
