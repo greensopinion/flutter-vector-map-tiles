@@ -1,3 +1,7 @@
+## 3.0.0
+
+* support `flutter_map` 3.0.0
+
 ## 2.4.1
 
 * fix performance regression on Flutter 3.3.1 when running in debug mode
