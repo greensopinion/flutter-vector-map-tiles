@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'package:vector_map_tiles/src/options.dart';
+import 'package:vector_map_tiles/vector_map_tiles.dart';
 
 void main() {
   group('TileOffset', () {

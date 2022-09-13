@@ -16,6 +16,7 @@ import '../stream/tileset_executor_preprocessor.dart';
 import '../stream/tileset_ui_preprocessor.dart';
 import '../stream/translating_tile_provider.dart';
 import '../tile_identity.dart';
+import '../tile_offset.dart';
 import '../tile_viewport.dart';
 import 'constants.dart';
 import 'debounce.dart';
@@ -24,8 +25,8 @@ import 'tile/disposable_state.dart';
 import 'tile_widgets.dart';
 
 class VectorTileCompositeLayer extends StatefulWidget {
-  final VectorTileLayerOptions options;
   final FlutterMapState mapState;
+  final VectorTileLayerOptions options;
 
   const VectorTileCompositeLayer(this.options, this.mapState, {Key? key})
       : super(key: key);
