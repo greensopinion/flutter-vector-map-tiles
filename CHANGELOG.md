@@ -1,3 +1,6 @@
+## 3.0.1
+
+* improve support for theme expressions
 ## 3.0.0
 
 * support `flutter_map` 3.0.0
