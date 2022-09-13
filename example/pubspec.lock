@@ -376,10 +376,10 @@ packages:
   vector_tile_renderer:
     dependency: transitive
     description:
-      path: "../../vector_tile_renderer"
-      relative: true
-    source: path
-    version: "2.6.3"
+      name: vector_tile_renderer
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.0"
   win32:
     dependency: transitive
     description:
