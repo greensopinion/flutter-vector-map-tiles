@@ -1,3 +1,6 @@
+## 3.0.2
+
+* minor performance improvement
 ## 3.0.1
 
 * improve support for theme expressions
