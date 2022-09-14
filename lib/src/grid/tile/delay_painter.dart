@@ -118,7 +118,7 @@ class _DelayPainterState extends DisposableState<DelayPainter> {
     return AnimatedOpacity(
         key: Key('opacity-${widget.model.key}'),
         opacity: opacity,
-        duration: Duration(milliseconds: _render ? 500 : 0),
+        duration: const Duration(milliseconds: 500),
         child: child);
   }
 
