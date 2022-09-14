@@ -49,6 +49,19 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
   final _mapChanged = StreamController.broadcast();
   _MapState? _previousState;
   StreamSubscription<void>? _subscription;
+  Theme? _theme;
+  Theme? _symbolTheme;
+
+  Theme get theme =>
+      _theme ??
+      (_theme = widget.options.theme.copyWith(
+          types: ThemeLayerType.values
+              .where((it) => it != ThemeLayerType.symbol)
+              .toSet()));
+  Theme get symbolTheme =>
+      _symbolTheme ??
+      (_symbolTheme =
+          widget.options.theme.copyWith(types: {ThemeLayerType.symbol}));
 
   @override
   void initState() {
@@ -87,6 +100,8 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
     _previousState = newState;
     if (oldWidget.options.theme.id != widget.options.theme.id) {
       setState(() {
+        _theme = null;
+        _symbolTheme = null;
         _caches.dispose();
         _createCaches();
       });
@@ -99,13 +114,6 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
   Widget build(BuildContext context) {
     final options = widget.options;
     final backgroundTheme = options.backgroundTheme;
-    final symbolTheme = options.theme.copyWith(types: {ThemeLayerType.symbol});
-    final theme = options.theme.copyWith(types: {
-      ThemeLayerType.background,
-      ThemeLayerType.fill,
-      ThemeLayerType.fillExtrusion,
-      ThemeLayerType.line
-    });
     final layers = <Widget>[
       _VectorTileLayer(
           Key("${theme.id}_VectorTileLayer"),
