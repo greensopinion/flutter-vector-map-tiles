@@ -5,8 +5,8 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
+import 'package:executor_lib/executor_lib.dart';
 
-import '../executor/executor.dart';
 import '../profiler.dart';
 import '../stream/tile_supplier.dart';
 import '../stream/translated_tile_request.dart';

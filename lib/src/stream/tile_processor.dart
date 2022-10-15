@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
+import 'package:executor_lib/executor_lib.dart';
 
-import '../executor/executor.dart';
 import 'tile_supplier.dart';
 
 class TileProcessor {

@@ -1,7 +1,6 @@
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
+import 'package:executor_lib/executor_lib.dart';
 
-import '../../executor/executor.dart';
-import '../../executor/queue_executor.dart';
 import '../tile_model.dart';
 import 'delay_painter.dart';
 import 'tile_options.dart';

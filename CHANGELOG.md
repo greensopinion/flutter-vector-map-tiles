@@ -1,3 +1,7 @@
+## 3.1.2
+
+* extract executors to `executor_lib` package
+
 ## 3.0.2
 
 * minor performance improvement

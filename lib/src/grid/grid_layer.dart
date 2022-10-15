@@ -5,9 +5,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_map/plugin_api.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
+import 'package:executor_lib/executor_lib.dart';
 
 import '../cache/caches.dart';
-import '../executor/executor.dart';
 import '../options.dart';
 import '../stream/caches_tile_provider.dart';
 import '../stream/delay_provider.dart';

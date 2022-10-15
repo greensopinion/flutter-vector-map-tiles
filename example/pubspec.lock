@@ -50,6 +50,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.4"
+  executor_lib:
+    dependency: transitive
+    description:
+      name: executor_lib
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.1"
   fake_async:
     dependency: transitive
     description:
@@ -358,7 +365,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "3.0.2"
+    version: "3.1.2"
   vector_math:
     dependency: transitive
     description:
