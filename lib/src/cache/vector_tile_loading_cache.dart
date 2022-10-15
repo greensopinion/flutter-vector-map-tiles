@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 import 'package:executor_lib/executor_lib.dart';
+import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../vector_map_tiles.dart';
 import '../provider_exception.dart';
