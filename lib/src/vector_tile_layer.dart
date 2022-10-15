@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart' hide Theme;
 import 'package:flutter_map/plugin_api.dart';
-import 'options.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
+import 'extensions.dart';
 import 'grid/grid_layer.dart';
+import 'options.dart';
 import 'tile_offset.dart';
 import 'tile_providers.dart';
 import 'vector_tile_provider.dart';
-import 'extensions.dart';
 
 /// A widget for a vector tile layer, to be used as a child
 /// of a [FlutterMap].
