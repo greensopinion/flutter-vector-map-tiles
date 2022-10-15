@@ -356,7 +356,10 @@ class _VectorTileLayerState extends DisposableState<_VectorTileLayer> {
     for (int x = bounds.min.x; x <= bounds.max.x; ++x) {
       for (int y = bounds.min.y; y <= bounds.max.y; ++y) {
         if (x >= 0 && y >= 0) {
-          tiles.add(TileIdentity(viewport.zoom, x, y));
+          final tile = TileIdentity(viewport.zoom, x, y);
+          if (tile.isValid()) {
+            tiles.add(tile);
+          }
         }
       }
     }

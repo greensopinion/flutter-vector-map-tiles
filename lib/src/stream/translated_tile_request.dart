@@ -12,19 +12,21 @@ TileRequest createTranslatedRequest(TileRequest request,
     final translation =
         translator.specificZoomTranslation(tileId, zoom: maximumZoom);
     tileId = translation.translated;
-    const tileSize = 256;
-    final clipSize = tileSize / translation.fraction;
-    const buffer = 10;
-    final dx = (translation.xOffset * clipSize) - buffer;
-    final dy = (translation.yOffset * clipSize) - buffer;
-    final sizeWithBuffer = (2 * buffer) + clipSize;
-    final clip = Rectangle(dx, dy, sizeWithBuffer, sizeWithBuffer);
-    return TileRequest(
-        tileId: tileId,
-        zoom: request.zoom,
-        zoomDetail: request.zoomDetail,
-        clip: clip,
-        cancelled: request.cancelled);
+    if (tileId.isValid()) {
+      const tileSize = 256;
+      final clipSize = tileSize / translation.fraction;
+      const buffer = 10;
+      final dx = (translation.xOffset * clipSize) - buffer;
+      final dy = (translation.yOffset * clipSize) - buffer;
+      final sizeWithBuffer = (2 * buffer) + clipSize;
+      final clip = Rectangle(dx, dy, sizeWithBuffer, sizeWithBuffer);
+      return TileRequest(
+          tileId: tileId,
+          zoom: request.zoom,
+          zoomDetail: request.zoomDetail,
+          clip: clip,
+          cancelled: request.cancelled);
+    }
   }
   return request;
 }

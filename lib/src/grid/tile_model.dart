@@ -189,9 +189,10 @@ class _VectorTileModelLoader {
     if (!originalLoaded && !model.disposed) {
       try {
         var request = _newRequest();
-        if (model.tileZoomSubstitutionOffset > 0) {
+        if (model.tileZoomSubstitutionOffset > 0 && originalTile.z > 0) {
           request = createTranslatedRequest(request,
-              maximumZoom: originalTile.z - model.tileZoomSubstitutionOffset);
+              maximumZoom:
+                  max(0, originalTile.z - model.tileZoomSubstitutionOffset));
         }
         final response = await model.tileProvider.provide(request);
         model._receiveTile(response);
