@@ -1,3 +1,8 @@
+## 3.1.3
+
+* add support for more expressions
+* reduce invalid tile coordinate requests
+
 ## 3.1.2
 
 * extract executors to `executor_lib` package
