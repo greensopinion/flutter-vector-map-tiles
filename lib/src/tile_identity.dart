@@ -21,6 +21,14 @@ class TileIdentity extends CustomPoint<int> {
 
   String key() => 'z=$z,x=$x,y=$y';
 
+  bool isValid() {
+    if (z < 0 || x < 0 || y < 0) {
+      return false;
+    }
+    final max = pow(2, z).toInt();
+    return x < max && y < max;
+  }
+
   TileIdentity normalize() {
     final maxX = pow(2, z).toInt();
     if (x >= 0 && x < maxX) {

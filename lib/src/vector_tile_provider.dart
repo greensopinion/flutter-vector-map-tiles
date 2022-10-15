@@ -38,13 +38,6 @@ class NetworkVectorTileProvider extends VectorTileProvider {
   @override
   Future<Uint8List> provide(TileIdentity tile) async {
     _checkTile(tile);
-    final max = pow(2, tile.z).toInt();
-    if (tile.x >= max || tile.y >= max || tile.x < 0 || tile.y < 0) {
-      throw ProviderException(
-          message: 'Invalid tile coordinates $tile',
-          retryable: Retryable.none,
-          statusCode: 400);
-    }
     final uri = Uri.parse(_urlProvider.url(tile));
     final client = RetryClient(Client());
     try {
@@ -68,8 +61,11 @@ class NetworkVectorTileProvider extends VectorTileProvider {
   }
 
   void _checkTile(TileIdentity tile) {
-    if (tile.z < 0 || tile.z > _maximumZoom || tile.x < 0 || tile.y < 0) {
-      throw Exception('out of range');
+    if (tile.z > _maximumZoom || !tile.isValid()) {
+      throw ProviderException(
+          message: 'Invalid tile coordinates $tile',
+          retryable: Retryable.none,
+          statusCode: 400);
     }
   }
 
