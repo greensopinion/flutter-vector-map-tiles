@@ -1,3 +1,6 @@
+## 3.1.4
+
+* incorporate updated `executor_lib` dependency
 ## 3.1.3
 
 * add support for more expressions

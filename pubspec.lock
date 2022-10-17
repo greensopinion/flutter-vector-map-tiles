@@ -98,7 +98,7 @@ packages:
       name: executor_lib
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.1"
+    version: "0.2.1"
   ffi:
     dependency: transitive
     description:
