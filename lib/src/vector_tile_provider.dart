@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:http/retry.dart';
 
@@ -29,8 +30,7 @@ class NetworkVectorTileProvider extends VectorTileProvider {
   ///  confused with the maximum zoom of the map widget. The map widget will
   ///  automatically use vector tiles from lower zoom levels once the maximum
   ///  supported by this provider is reached.
-  NetworkVectorTileProvider(
-      {required String urlTemplate, this.httpHeaders, int maximumZoom = 16})
+  NetworkVectorTileProvider({required String urlTemplate, this.httpHeaders, int maximumZoom = 16})
       : _urlProvider = _UrlProvider(urlTemplate),
         _maximumZoom = maximumZoom;
 
@@ -45,13 +45,7 @@ class NetworkVectorTileProvider extends VectorTileProvider {
         return response.bodyBytes;
       }
       final logSafeUri = uri.toString().split(RegExp(r'\?')).first;
-      throw ProviderException(
-          message:
-              'Cannot retrieve tile: HTTP ${response.statusCode}: $logSafeUri ${response.body}',
-          statusCode: response.statusCode,
-          retryable: _isRetryable(response.statusCode)
-              ? Retryable.retry
-              : Retryable.none);
+      throw ProviderException(message: 'Cannot retrieve tile: HTTP ${response.statusCode}: $logSafeUri ${response.body}', statusCode: response.statusCode, retryable: _isRetryable(response.statusCode) ? Retryable.retry : Retryable.none);
     } on ClientException catch (e) {
       throw ProviderException(message: e.message, retryable: Retryable.retry);
     } finally {
@@ -61,10 +55,7 @@ class NetworkVectorTileProvider extends VectorTileProvider {
 
   void _checkTile(TileIdentity tile) {
     if (tile.z > _maximumZoom || !tile.isValid()) {
-      throw ProviderException(
-          message: 'Invalid tile coordinates $tile',
-          retryable: Retryable.none,
-          statusCode: 400);
+      throw ProviderException(message: 'Invalid tile coordinates $tile', retryable: Retryable.none, statusCode: 400);
     }
   }
 
@@ -78,8 +69,7 @@ class MemoryCacheVectorTileProvider extends VectorTileProvider {
   @override
   int get maximumZoom => delegate.maximumZoom;
 
-  MemoryCacheVectorTileProvider(
-      {required this.delegate, required int maxSizeBytes}) {
+  MemoryCacheVectorTileProvider({required this.delegate, required int maxSizeBytes}) {
     _cache = MemoryCache(maxSizeBytes: maxSizeBytes);
   }
 
@@ -92,6 +82,36 @@ class MemoryCacheVectorTileProvider extends VectorTileProvider {
       _cache.put(key, value);
     }
     return value;
+  }
+}
+
+/// [assetPathTemplate] the asset path template, e.g. `'assets/map_tiles/{z}/{x}/{y}.pbf'`
+/// [maximumZoom] the maximum zoom supported by the tile provider, not to be
+/// confused with the maximum zoom of the map widget. The map widget will
+/// automatically use vector tiles from lower zoom levels once the maximum
+/// supported by this provider is reached.
+class AssetVectorTileProvider extends VectorTileProvider {
+  AssetVectorTileProvider({required this.assetPathTemplate, required this.maximumZoom});
+  @override
+  final int maximumZoom;
+  final String assetPathTemplate;
+
+  @override
+  Future<Uint8List> provide(TileIdentity tile) {
+    final path = assetPathTemplate.replaceAllMapped(RegExp(r'\{(x|y|z)\}'), (match) {
+      switch (match.group(1)) {
+        case 'x':
+          return tile.x.toString();
+        case 'y':
+          return tile.y.toString();
+        case 'z':
+          return tile.z.toString();
+        default:
+          throw Exception('unexpected url template: $assetPathTemplate - token ${match.group(1)} is not supported');
+      }
+    });
+
+    return rootBundle.load(path).then((value) => value.buffer.asUint8List());
   }
 }
 
@@ -110,8 +130,7 @@ class _UrlProvider {
         case 'z':
           return identity.z.toInt().toString();
         default:
-          throw Exception(
-              'unexpected url template: $urlTemplate - token ${match.group(1)} is not supported');
+          throw Exception('unexpected url template: $urlTemplate - token ${match.group(1)} is not supported');
       }
     });
   }
