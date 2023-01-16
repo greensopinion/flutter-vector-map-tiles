@@ -48,13 +48,7 @@ class NetworkVectorTileProvider extends VectorTileProvider {
         return response.bodyBytes;
       }
       final logSafeUri = uri.toString().split(RegExp(r'\?')).first;
-      throw ProviderException(
-          message:
-              'Cannot retrieve tile: HTTP ${response.statusCode}: $logSafeUri ${response.body}',
-          statusCode: response.statusCode,
-          retryable: _isRetryable(response.statusCode)
-              ? Retryable.retry
-              : Retryable.none);
+      throw ProviderException(message: 'Cannot retrieve tile: HTTP ${response.statusCode}: $logSafeUri ${response.body}', statusCode: response.statusCode, retryable: _isRetryable(response.statusCode) ? Retryable.retry : Retryable.none);
     } on ClientException catch (e) {
       throw ProviderException(message: e.message, retryable: Retryable.retry);
     } finally {
@@ -64,10 +58,7 @@ class NetworkVectorTileProvider extends VectorTileProvider {
 
   void _checkTile(TileIdentity tile) {
     if (tile.z > _maximumZoom || !tile.isValid()) {
-      throw ProviderException(
-          message: 'Invalid tile coordinates $tile',
-          retryable: Retryable.none,
-          statusCode: 400);
+      throw ProviderException(message: 'Invalid tile coordinates $tile', retryable: Retryable.none, statusCode: 400);
     }
   }
 
@@ -81,8 +72,7 @@ class MemoryCacheVectorTileProvider extends VectorTileProvider {
   @override
   int get maximumZoom => delegate.maximumZoom;
 
-  MemoryCacheVectorTileProvider(
-      {required this.delegate, required int maxSizeBytes}) {
+  MemoryCacheVectorTileProvider({required this.delegate, required int maxSizeBytes}) {
     _cache = MemoryCache(maxSizeBytes: maxSizeBytes);
   }
 
@@ -113,8 +103,7 @@ class _UriProvider {
         case 'z':
           return identity.z.toInt().toString();
         default:
-          throw Exception(
-              'unexpected url template: $urlTemplate - token ${match.group(1)} is not supported');
+          throw Exception('unexpected url template: $urlTemplate - token ${match.group(1)} is not supported');
       }
     });
   }
