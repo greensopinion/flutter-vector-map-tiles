@@ -1,11 +1,14 @@
 import 'dart:typed_data';
 
+import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:http/retry.dart';
 
 import 'cache/memory_cache.dart';
 import 'provider_exception.dart';
 import 'tile_identity.dart';
+
+part 'asset_vector_tile_provider.dart';
 
 abstract class VectorTileProvider {
   /// provides a tile as a `pbf` or `mvt` format
@@ -15,7 +18,7 @@ abstract class VectorTileProvider {
 }
 
 class NetworkVectorTileProvider extends VectorTileProvider {
-  final _UrlProvider _urlProvider;
+  final _UriProvider _uriProvider;
   final Map<String, String>? httpHeaders;
   final int _maximumZoom;
 
@@ -31,13 +34,13 @@ class NetworkVectorTileProvider extends VectorTileProvider {
   ///  supported by this provider is reached.
   NetworkVectorTileProvider(
       {required String urlTemplate, this.httpHeaders, int maximumZoom = 16})
-      : _urlProvider = _UrlProvider(urlTemplate),
+      : _uriProvider = _UriProvider(urlTemplate),
         _maximumZoom = maximumZoom;
 
   @override
   Future<Uint8List> provide(TileIdentity tile) async {
     _checkTile(tile);
-    final uri = Uri.parse(_urlProvider.url(tile));
+    final uri = Uri.parse(_uriProvider.uri(tile));
     final client = RetryClient(Client());
     try {
       final response = await client.get(uri, headers: httpHeaders);
@@ -95,12 +98,12 @@ class MemoryCacheVectorTileProvider extends VectorTileProvider {
   }
 }
 
-class _UrlProvider {
+class _UriProvider {
   final String urlTemplate;
 
-  _UrlProvider(this.urlTemplate);
+  _UriProvider(this.urlTemplate);
 
-  String url(TileIdentity identity) {
+  String uri(TileIdentity identity) {
     return urlTemplate.replaceAllMapped(RegExp(r'\{(x|y|z)\}'), (match) {
       switch (match.group(1)) {
         case 'x':
