@@ -17,9 +17,10 @@ class AssetVectorTileProvider extends VectorTileProvider {
   int get maximumZoom => _maximumZoom;
 
   @override
-  Future<Uint8List> provide(TileIdentity tile) {
+  Future<Uint8List> provide(TileIdentity tile) async {
     final uri =_uriProvider.uri(tile);
-
-    return rootBundle.load(uri).then((value) => value.buffer.asUint8List());
+    final byteData = await rootBundle.load(uri);
+    
+    return byteData.buffer.asUint8List();
   }
 }
