@@ -187,7 +187,7 @@ A vector tile hillshade layer can be added to your maps by following these steps
 
 ## More Examples
 
-A more complete example showing use of this library is available at [](). The examples include use with multiple themes, tile providers, contours, hillshade and network-loaded styles.
+A more complete example showing use of this library is available [in the examples repository `flutter-vector-map-tiles-examples`](https://github.com/greensopinion/flutter-vector-map-tiles-examples). The examples include use with multiple themes, tile providers, contours, hillshade and network-loaded styles.
 
 ## Themes and Tile Providers
 
