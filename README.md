@@ -185,6 +185,9 @@ A vector tile hillshade layer can be added to your maps by following these steps
       'https://api.mapbox.com/v4/mapbox.mapbox-terrain-v2/{z}/{x}/{y}.mvt?access_token=$mapboxApiKey';    
 ```
 
+## More Examples
+
+A more complete example showing use of this library is available at [](). The examples include use with multiple themes, tile providers, contours, hillshade and network-loaded styles.
 
 ## Themes and Tile Providers
 
