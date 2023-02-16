@@ -386,7 +386,7 @@ packages:
       name: vector_tile_renderer
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.4"
+    version: "3.1.0"
   win32:
     dependency: transitive
     description:
