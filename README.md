@@ -17,62 +17,72 @@ See [vector_map_tiles/install](https://pub.dev/packages/vector_map_tiles/install
 
 ## Usage
 
-```dart
-class _MyHomePageState extends State<MyHomePage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title),
-        ),
-        body: SafeArea(
-            child: Column(children: [
-          Flexible(
-              child: FlutterMap(
-            options: MapOptions(
-                center: LatLng(49.246292, -123.116226),
-                zoom: 10,
-                maxZoom: 15),
-            children: [
-              VectorTileLayer(
-                theme: _mapTheme()
-                tileProviders: TileProviders(
-                    {'openmaptiles': _cachingTileProvider(_urlTemplate())}),
-              )
-            ],
-          ))
-        ])));
-  }
+Read the map style:
 
-  VectorTileProvider _cachingTileProvider(String urlTemplate) {
-    return MemoryCacheVectorTileProvider(
-        delegate: NetworkVectorTileProvider(
-            urlTemplate: urlTemplate,
+```dart
+  Future<Style> _readStyle() => StyleReader(
+          uri:
+              'https://tiles.stadiamaps.com/styles/osm_bright.json?api_key={key}',
+          apiKey: stadiaMapsApiKey,
+          logger: const Logger.console())
+      .read();
+```
+
+Create the map:
+
+```dart
+ FlutterMap(
+    mapController: _controller,
+    options: MapOptions(
+        center: _style!.center ?? LatLng(49.246292, -123.116226),
+        zoom: _style!.zoom ?? 10,
+        maxZoom: 22,
+        interactiveFlags: InteractiveFlag.drag |
+            InteractiveFlag.flingAnimation |
+            InteractiveFlag.pinchMove |
+            InteractiveFlag.pinchZoom |
+            InteractiveFlag.doubleTapZoom),
+    children: [
+      // normally you would see TileLayer which provides raster tiles
+      // instead this vector tile layer replaces the standard tile layer
+      VectorTileLayer(
+          theme: _style!.theme,
+          backgroundTheme: _style!.theme.copyWith(
+              types: {ThemeLayerType.background, ThemeLayerType.fill}),
+          // tileOffset: TileOffset.mapbox, enable with mapbox
+          tileProviders: _style!.providers),
+    ],
+  )
+```
+
+See the [example](example) for details.
+
+### Customizing a Theme
+
+A theme can be built-in to your application:
+
+```dart
+VectorTileLayer(theme: ThemeReader().read(_myTheme()), ...)
+```
+
+### Specifying Alternate Tiles
+
+Tiles can be loaded from alternate sources:
+
+```dart
+VectorTileLayer(tileProviders: TileProviders(
+                    {'openmaptiles': _tileProvider() },
+                    ...)
+                )
+
+VectorTileProvider _tileProvider() => NetworkVectorTileProvider(
+            urlTemplate: 'https://tiles.example.com/openmaptiles/{z}/{x}/{y}.pbf?api_key=$myApiKey',
             // this is the maximum zoom of the provider, not the
             // maximum of the map. vector tiles are rendered
             // to larger sizes to support higher zoom levels
             maximumZoom: 14),
-        maxSizeBytes: 1024 * 1024 * 2);
-  }
 
-  Theme _mapTheme(BuildContext context) {
-    // maps are rendered using themes
-    // to provide a dark theme do something like this:
-    // if (MediaQuery.of(context).platformBrightness == Brightness.dark) return myDarkTheme();
-    return ProvidedThemes.lightTheme();
-  }
-
-  String _urlTemplate() {
-    // Stadia Maps source https://docs.stadiamaps.com/vector/
-    return 'https://tiles.stadiamaps.com/data/openmaptiles/{z}/{x}/{y}.pbf?api_key=$apiKey';
-
-    // Mapbox source https://docs.mapbox.com/api/maps/vector-tiles/#example-request-retrieve-vector-tiles
-    // return 'https://api.mapbox.com/v4/mapbox.mapbox-streets-v8/{z}/{x}/{y}.mvt?access_token=$apiKey',
-  }
-}
 ```
-
-See the [example](example) for details.
 
 ## More Examples
 
