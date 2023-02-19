@@ -81,8 +81,13 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: children)));
   }
 
+// alternates:
+//   Mapbox - mapbox://styles/mapbox/streets-v12?access_token={key}
+//   Maptiler - https://api.maptiler.com/maps/outdoor/style.json?key={key}
+//   Stadia Maps - https://tiles.stadiamaps.com/styles/outdoors.json?api_key={key}
   Future<Style> _readStyle() => StyleReader(
           uri: 'https://api.maptiler.com/maps/streets-v2/style.json?key={key}',
+          // ignore: undefined_identifier
           apiKey: maptilerApiKey,
           logger: const Logger.console())
       .read();
