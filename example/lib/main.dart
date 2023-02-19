@@ -35,84 +35,85 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final MapController _controller = MapController();
+  Style? _style;
+  Object? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _initStyle();
+  }
+
+  void _initStyle() async {
+    try {
+      _style = await _readStyle();
+    } catch (e, stack) {
+      // ignore: avoid_print
+      print(e);
+      // ignore: avoid_print
+      print(stack);
+      _error = e;
+    }
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
+    final children = <Widget>[];
+    if (_error != null) {
+      children.add(Expanded(child: Text(_error!.toString())));
+    } else if (_style == null) {
+      children.add(const Center(child: CircularProgressIndicator()));
+    } else {
+      children.add(Flexible(child: _map()));
+      children.add(Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [_statusText()]));
+    }
     return Scaffold(
         appBar: AppBar(
           title: Text(widget.title),
         ),
         body: SafeArea(
-            child: Column(children: [
-          Flexible(
-              child: FlutterMap(
-            mapController: _controller,
-            options: MapOptions(
-                center: LatLng(49.246292, -123.116226),
-                zoom: 10,
-                maxZoom: 22,
-                interactiveFlags: InteractiveFlag.drag |
-                    InteractiveFlag.flingAnimation |
-                    InteractiveFlag.pinchMove |
-                    InteractiveFlag.pinchZoom |
-                    InteractiveFlag.doubleTapZoom),
-            children: [
-              // normally you would see TileLayer which provides raster tiles
-              // instead this vector tile layer replaces the standard tile layer
-              VectorTileLayer(
-                theme: _mapTheme(),
-                backgroundTheme: _backgroundTheme(),
-                // tileOffset: TileOffset.mapbox, enable with mapbox
-                tileProviders: TileProviders(
-                    // Name must match name under "sources" in theme
-                    {'openmaptiles': _cachingTileProvider(_urlTemplate())}),
-              )
-            ],
-          )),
-          Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [_statusText()])
-        ])));
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: children)));
   }
 
-  VectorTileProvider _cachingTileProvider(String urlTemplate) {
-    return MemoryCacheVectorTileProvider(
-        delegate: NetworkVectorTileProvider(
-            urlTemplate: urlTemplate,
-            // this is the maximum zoom of the provider, not the
-            // maximum of the map. vector tiles are rendered
-            // to larger sizes to support higher zoom levels
-            maximumZoom: 14),
-        maxSizeBytes: 1024 * 1024 * 2);
-  }
+// alternates:
+//   Mapbox - mapbox://styles/mapbox/streets-v12?access_token={key}
+//   Maptiler - https://api.maptiler.com/maps/outdoor/style.json?key={key}
+//   Stadia Maps - https://tiles.stadiamaps.com/styles/outdoors.json?api_key={key}
+  Future<Style> _readStyle() => StyleReader(
+          uri: 'https://api.maptiler.com/maps/streets-v2/style.json?key={key}',
+          // ignore: undefined_identifier
+          apiKey: maptilerApiKey,
+          logger: const Logger.console())
+      .read();
 
-  Theme _mapTheme() {
-    // maps are rendered using themes
-    // to provide a dark theme do something like this:
-    // if (MediaQuery.of(context).platformBrightness == Brightness.dark) return myDarkTheme();
-    return ProvidedThemes.lightTheme();
-    // return ThemeReader(logger: const Logger.console())
-    //     .read(myCustomStyle());
-  }
-
-  _backgroundTheme() {
-    return _mapTheme()
-        .copyWith(types: {ThemeLayerType.background, ThemeLayerType.fill});
-  }
-
-  String _urlTemplate() {
-    // IMPORTANT: See readme about matching tile provider with theme
-
-    // Stadia Maps source https://docs.stadiamaps.com/vector/
-    // ignore: undefined_identifier
-    return 'https://tiles.stadiamaps.com/data/openmaptiles/{z}/{x}/{y}.pbf?api_key=$stadiaMapsApiKey';
-
-    // Maptiler source
-    // return 'https://api.maptiler.com/tiles/v3/{z}/{x}/{y}.pbf?key=$maptilerApiKey';
-
-    // Mapbox source https://docs.mapbox.com/api/maps/vector-tiles/#example-request-retrieve-vector-tiles
-    // return 'https://api.mapbox.com/v4/mapbox.mapbox-streets-v8/{z}/{x}/{y}.mvt?access_token=$mapboxApiKey',
-  }
+  Widget _map() => FlutterMap(
+        mapController: _controller,
+        options: MapOptions(
+            center: _style!.center ?? LatLng(49.246292, -123.116226),
+            zoom: _style!.zoom ?? 10,
+            maxZoom: 22,
+            interactiveFlags: InteractiveFlag.drag |
+                InteractiveFlag.flingAnimation |
+                InteractiveFlag.pinchMove |
+                InteractiveFlag.pinchZoom |
+                InteractiveFlag.doubleTapZoom),
+        children: [
+          // normally you would see TileLayer which provides raster tiles
+          // instead this vector tile layer replaces the standard tile layer
+          VectorTileLayer(
+              theme: _style!.theme,
+              backgroundTheme: _style!.theme.copyWith(
+                  types: {ThemeLayerType.background, ThemeLayerType.fill}),
+              // tileOffset: TileOffset.mapbox, enable with mapbox
+              tileProviders: _style!.providers),
+        ],
+      );
 
   Widget _statusText() => Padding(
       padding: const EdgeInsets.only(top: 8, bottom: 8),

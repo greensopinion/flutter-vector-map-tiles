@@ -1,3 +1,7 @@
+## 3.2.0
+
+* Add `StyleReader` to API
+
 ## 3.1.3
 
 * add support for more expressions
