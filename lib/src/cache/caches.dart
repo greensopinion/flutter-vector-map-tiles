@@ -16,7 +16,7 @@ class Caches {
   final ByteStorage _storage = ByteStorage(
       pather: () => getTemporaryDirectory()
           .then((value) => Directory('${value.path}/.vector_map')));
-  late final StorageCache _cache;
+  late final StorageCache storageCache;
   late final VectorTileLoadingCache vectorTileCache;
   late final MemoryCache memoryVectorTileCache;
   late final MemoryTileDataCache memoryTileDataCache;
@@ -33,16 +33,16 @@ class Caches {
       required int maxSizeInBytes,
       required int maxTextCacheSize}) {
     providerSources = providers.tileProviderBySource.keys.toList();
-    _cache = StorageCache(_storage, ttl, maxSizeInBytes);
+    storageCache = StorageCache(_storage, ttl, maxSizeInBytes);
     memoryVectorTileCache = MemoryCache(maxSizeBytes: memoryTileCacheMaxSize);
     memoryTileDataCache =
         MemoryTileDataCache(maxSize: memoryTileDataCacheMaxSize);
-    vectorTileCache = VectorTileLoadingCache(_cache, memoryVectorTileCache,
-        memoryTileDataCache, providers, executor, theme);
+    vectorTileCache = VectorTileLoadingCache(storageCache,
+        memoryVectorTileCache, memoryTileDataCache, providers, executor, theme);
     textCache = TextCache(maxSize: maxTextCacheSize);
   }
 
-  Future<void> applyConstraints() => _cache.applyConstraints();
+  Future<void> applyConstraints() => storageCache.applyConstraints();
 
   void dispose() {
     memoryVectorTileCache.dispose();
@@ -54,8 +54,8 @@ class Caches {
 
   String stats() {
     final cacheStats = <String>[];
-    cacheStats
-        .add('Storage cache hit ratio:           ${_cache.hitRatio.asPct()}%');
+    cacheStats.add(
+        'Storage cache hit ratio:           ${storageCache.hitRatio.asPct()}%');
     cacheStats.add(
         'Vector tile cache hit ratio:       ${memoryVectorTileCache.hitRatio.asPct()}% size: ${memoryVectorTileCache.size}');
     cacheStats.add(

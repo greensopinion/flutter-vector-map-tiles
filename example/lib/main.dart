@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart' hide Theme;
+import 'package:flutter/material.dart' as material show Theme;
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:vector_map_tiles/experimental.dart';
 import 'package:vector_map_tiles/vector_map_tiles.dart';
-import 'package:vector_tile_renderer/vector_tile_renderer.dart';
+import 'package:vector_tile_renderer/vector_tile_renderer.dart' hide TileLayer;
 // ignore: uri_does_not_exist
 import 'api_key.dart';
 
@@ -92,28 +94,29 @@ class _MyHomePageState extends State<MyHomePage> {
           logger: const Logger.console())
       .read();
 
-  Widget _map() => FlutterMap(
-        mapController: _controller,
-        options: MapOptions(
-            center: _style!.center ?? LatLng(49.246292, -123.116226),
-            zoom: _style!.zoom ?? 10,
-            maxZoom: 22,
-            interactiveFlags: InteractiveFlag.drag |
-                InteractiveFlag.flingAnimation |
-                InteractiveFlag.pinchMove |
-                InteractiveFlag.pinchZoom |
-                InteractiveFlag.doubleTapZoom),
-        children: [
-          // normally you would see TileLayer which provides raster tiles
-          // instead this vector tile layer replaces the standard tile layer
-          VectorTileLayer(
-              theme: _style!.theme,
-              backgroundTheme: _style!.theme.copyWith(
-                  types: {ThemeLayerType.background, ThemeLayerType.fill}),
-              // tileOffset: TileOffset.mapbox, enable with mapbox
-              tileProviders: _style!.providers),
-        ],
-      );
+  Widget _map() => RasterTileState(
+      tileProviders: _style!.providers,
+      theme: _style!.theme,
+      builder: (context, tileProvider) => FlutterMap(
+            mapController: _controller,
+            options: MapOptions(
+                center: _style!.center ?? LatLng(49.246292, -123.116226),
+                zoom: _style!.zoom ?? 10,
+                maxZoom: 22,
+                interactiveFlags: InteractiveFlag.drag |
+                    InteractiveFlag.flingAnimation |
+                    InteractiveFlag.pinchMove |
+                    InteractiveFlag.pinchZoom |
+                    InteractiveFlag.doubleTapZoom),
+            children: [
+              TileLayer(
+                maxZoom: 20,
+                maxNativeZoom: 20,
+                backgroundColor: material.Theme.of(context).canvasColor,
+                tileProvider: tileProvider,
+              )
+            ],
+          ));
 
   Widget _statusText() => Padding(
       padding: const EdgeInsets.only(top: 8, bottom: 8),
