@@ -615,10 +615,10 @@ packages:
     dependency: "direct main"
     description:
       name: vector_tile_renderer
-      sha256: a816f36dc5baf9be15c6578e92d8ad4ccdb93b2b76c9a1cc3443adb56d2d7366
+      sha256: "0e2579e933f22bf12c8db2176587ecf246a6806ab4dde6817f7f77b631ead748"
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.2"
+    version: "3.2.0"
   vm_service:
     dependency: transitive
     description:
