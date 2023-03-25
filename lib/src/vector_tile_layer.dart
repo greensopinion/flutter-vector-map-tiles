@@ -60,12 +60,14 @@ class VectorTileLayer extends StatelessWidget {
   static const defaultTextCacheMaxSize = 100;
 
   /// Indicates whether debug information should be shown for tiles
+  /// For vector [layerMode] only, ignored otherwise.
   final bool showTileDebugInfo;
 
   /// Indicates whether to log cache stats
   final bool logCacheStats;
 
   /// Draws background from a vector tile source when available
+  /// For vector [layerMode] only, ignored otherwise.
   final Theme? backgroundTheme;
 
   /// The delay that should be applied to tile loading, useful for
@@ -83,6 +85,7 @@ class VectorTileLayer extends StatelessWidget {
   /// while loading tiles to display. A larger zoom difference requires more
   /// memory and can result in an application exceeding available memory, resulting
   /// in a crash. To avoid substituting tiles, use a value of 0.
+  /// For vector [layerMode] only, ignored otherwise.
   final int maximumTileSubstitutionDifference;
 
   /// the default [maximumTileSubstitutionDifference]
@@ -92,13 +95,13 @@ class VectorTileLayer extends StatelessWidget {
   static const defaultConcurrency = 4;
 
   /// The tile offset, defaults to [TileOffset.DEFAULT].
-  /// See [TileOffset.mapbox]
+  /// See [TileOffset.mapbox].
   final TileOffset tileOffset;
 
-  /// The mode of rendering
+  /// The mode of rendering. See [VectorTileLayerMode] for more details.
   final VectorTileLayerMode layerMode;
 
-  /// The maximum zoom of the tile layer.
+  /// The maximum zoom of the tile layer, for raster [layerMode] only.
   final double? maximumZoom;
 
   VectorTileLayer(

@@ -109,6 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
               tileProviders: style.providers,
               theme: style.theme,
               maximumZoom: 22,
+              // tileOffset: TileOffset.mapbox,
               layerMode: VectorTileLayerMode.raster)
         ],
       );

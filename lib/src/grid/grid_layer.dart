@@ -123,13 +123,17 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
     if (options.layerMode == VectorTileLayerMode.raster) {
       final maxZoom = options.maximumZoom ?? 18;
       final tileProvider = createRasterTileProvider(
-          theme, _caches, _executor, options.tileDelay);
+          theme, _caches, _executor, options.tileOffset, options.tileDelay);
+      final hasBackground = theme.layers
+          .where((layer) => layer.type == ThemeLayerType.background)
+          .isNotEmpty;
       layers.add(TileLayer(
-        maxZoom: maxZoom,
-        maxNativeZoom: maxZoom,
-        backgroundColor: material.Theme.of(context).canvasColor,
-        tileProvider: tileProvider,
-      ));
+          maxZoom: maxZoom,
+          maxNativeZoom: maxZoom,
+          backgroundColor: hasBackground
+              ? material.Theme.of(context).canvasColor
+              : const Color.fromARGB(0, 0, 0, 0),
+          tileProvider: tileProvider));
     }
     if (options.layerMode == VectorTileLayerMode.vector) {
       layers.add(_VectorTileLayer(
