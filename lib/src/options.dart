@@ -41,4 +41,14 @@ class VectorTileLayerOptions {
         tileOffset = layer.tileOffset,
         layerMode = layer.layerMode,
         maximumZoom = layer.maximumZoom;
+
+  bool hasRenderDifferences(VectorTileLayerOptions other) =>
+      other.theme.id != theme.id ||
+      other.theme.version != theme.version ||
+      other.showTileDebugInfo != showTileDebugInfo ||
+      other.backgroundTheme?.id != backgroundTheme?.id ||
+      other.backgroundTheme?.version != backgroundTheme?.version ||
+      other.tileOffset != tileOffset ||
+      other.layerMode != layerMode ||
+      other.maximumZoom != maximumZoom;
 }

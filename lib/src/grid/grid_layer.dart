@@ -103,7 +103,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
     final newState = widget.mapState.toMapState();
     final previousState = _previousState;
     _previousState = newState;
-    if (oldWidget.options.theme.id != widget.options.theme.id) {
+    if (widget.options.hasRenderDifferences(oldWidget.options)) {
       setState(() {
         _theme = null;
         _symbolTheme = null;
