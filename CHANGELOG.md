@@ -1,3 +1,8 @@
+## 3.3.0
+
+* introduce new option, `layerMode`
+* improve frame rate by rendering vector tiles to raster images
+
 ## 3.2.0
 
 * Add `StyleReader` to API
