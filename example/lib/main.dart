@@ -1,8 +1,6 @@
-import 'package:flutter/material.dart' hide Theme;
-import 'package:flutter/material.dart' as material show Theme;
+import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:vector_map_tiles/experimental.dart';
 import 'package:vector_map_tiles/vector_map_tiles.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart' hide TileLayer;
 // ignore: uri_does_not_exist
@@ -67,7 +65,7 @@ class _MyHomePageState extends State<MyHomePage> {
     } else if (_style == null) {
       children.add(const Center(child: CircularProgressIndicator()));
     } else {
-      children.add(Flexible(child: _map()));
+      children.add(Flexible(child: _map(_style!)));
       children.add(Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [_statusText()]));
@@ -88,35 +86,32 @@ class _MyHomePageState extends State<MyHomePage> {
 //   Maptiler - https://api.maptiler.com/maps/outdoor/style.json?key={key}
 //   Stadia Maps - https://tiles.stadiamaps.com/styles/outdoors.json?api_key={key}
   Future<Style> _readStyle() => StyleReader(
-          uri: 'https://api.maptiler.com/maps/streets-v2/style.json?key={key}',
+          uri:
+              'https://tiles.stadiamaps.com/styles/outdoors.json?api_key={key}',
           // ignore: undefined_identifier
-          apiKey: maptilerApiKey,
+          apiKey: stadiaMapsApiKey,
           logger: const Logger.console())
       .read();
 
-  Widget _map() => RasterTileState(
-      tileProviders: _style!.providers,
-      theme: _style!.theme,
-      builder: (context, tileProvider) => FlutterMap(
-            mapController: _controller,
-            options: MapOptions(
-                center: _style!.center ?? LatLng(49.246292, -123.116226),
-                zoom: _style!.zoom ?? 10,
-                maxZoom: 22,
-                interactiveFlags: InteractiveFlag.drag |
-                    InteractiveFlag.flingAnimation |
-                    InteractiveFlag.pinchMove |
-                    InteractiveFlag.pinchZoom |
-                    InteractiveFlag.doubleTapZoom),
-            children: [
-              TileLayer(
-                maxZoom: 20,
-                maxNativeZoom: 20,
-                backgroundColor: material.Theme.of(context).canvasColor,
-                tileProvider: tileProvider,
-              )
-            ],
-          ));
+  Widget _map(Style style) => FlutterMap(
+        mapController: _controller,
+        options: MapOptions(
+            center: style.center ?? LatLng(49.246292, -123.116226),
+            zoom: style.zoom ?? 10,
+            maxZoom: 22,
+            interactiveFlags: InteractiveFlag.drag |
+                InteractiveFlag.flingAnimation |
+                InteractiveFlag.pinchMove |
+                InteractiveFlag.pinchZoom |
+                InteractiveFlag.doubleTapZoom),
+        children: [
+          VectorTileLayer(
+              tileProviders: style.providers,
+              theme: style.theme,
+              maximumZoom: 22,
+              layerMode: VectorTileLayerMode.raster)
+        ],
+      );
 
   Widget _statusText() => Padding(
       padding: const EdgeInsets.only(top: 8, bottom: 8),

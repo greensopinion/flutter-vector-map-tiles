@@ -1,0 +1,32 @@
+import 'package:executor_lib/executor_lib.dart';
+import 'package:flutter/src/painting/image_provider.dart';
+import 'package:flutter_map/plugin_api.dart';
+import '../cache/caches.dart';
+import 'storage_image_cache.dart';
+import 'package:vector_tile_renderer/vector_tile_renderer.dart';
+
+import '../stream/caches_tile_provider.dart';
+import '../stream/delay_provider.dart';
+import '../stream/tile_processor.dart';
+import '../stream/tileset_executor_preprocessor.dart';
+import '../stream/tileset_ui_preprocessor.dart';
+import '../stream/translating_tile_provider.dart';
+import 'future_tile_provider.dart';
+import 'tile_loader.dart';
+
+TileProvider createRasterTileProvider(
+    Theme theme, Caches caches, Executor executor, Duration tileDelay) {
+  final tileSupplier = TranslatingTileProvider(DelayProvider(
+          CachesTileProvider(
+              caches,
+              TileProcessor(executor),
+              TilesetExecutorPreprocessor(TilesetPreprocessor(theme), executor),
+              TilesetUiPreprocessor(
+                  TilesetPreprocessor(theme, initializeGeometry: true))),
+          tileDelay)
+      .orDelegate());
+  return FutureTileProvider(
+      loader: TileLoader(theme, tileSupplier,
+              StorageImageCache(theme, caches.storageCache))
+          .loadTile);
+}

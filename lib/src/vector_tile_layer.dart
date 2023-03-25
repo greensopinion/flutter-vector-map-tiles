@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide Theme;
 import 'package:flutter_map/plugin_api.dart';
+import 'package:vector_map_tiles/src/vector_tile_layer_mode.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import 'extensions.dart';
@@ -94,6 +95,12 @@ class VectorTileLayer extends StatelessWidget {
   /// See [TileOffset.mapbox]
   final TileOffset tileOffset;
 
+  /// The mode of rendering
+  final VectorTileLayerMode layerMode;
+
+  /// The maximum zoom of the tile layer.
+  final double? maximumZoom;
+
   VectorTileLayer(
       {Key? key,
       required this.tileProviders,
@@ -110,6 +117,8 @@ class VectorTileLayer extends StatelessWidget {
       this.backgroundTheme,
       this.showTileDebugInfo = false,
       this.logCacheStats = false,
+      this.layerMode = VectorTileLayerMode.raster,
+      this.maximumZoom,
       this.tileDelay = const Duration(milliseconds: 0)})
       : super(key: key) {
     assert(concurrency >= 0 && concurrency <= 100);
