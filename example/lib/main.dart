@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart' hide Theme;
+import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:vector_map_tiles/vector_map_tiles.dart';
-import 'package:vector_tile_renderer/vector_tile_renderer.dart';
+import 'package:vector_tile_renderer/vector_tile_renderer.dart' hide TileLayer;
 // ignore: uri_does_not_exist
 import 'api_key.dart';
 
@@ -65,7 +65,7 @@ class _MyHomePageState extends State<MyHomePage> {
     } else if (_style == null) {
       children.add(const Center(child: CircularProgressIndicator()));
     } else {
-      children.add(Flexible(child: _map()));
+      children.add(Flexible(child: _map(_style!)));
       children.add(Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [_statusText()]));
@@ -86,17 +86,18 @@ class _MyHomePageState extends State<MyHomePage> {
 //   Maptiler - https://api.maptiler.com/maps/outdoor/style.json?key={key}
 //   Stadia Maps - https://tiles.stadiamaps.com/styles/outdoors.json?api_key={key}
   Future<Style> _readStyle() => StyleReader(
-          uri: 'https://api.maptiler.com/maps/streets-v2/style.json?key={key}',
+          uri:
+              'https://tiles.stadiamaps.com/styles/outdoors.json?api_key={key}',
           // ignore: undefined_identifier
-          apiKey: maptilerApiKey,
+          apiKey: stadiaMapsApiKey,
           logger: const Logger.console())
       .read();
 
-  Widget _map() => FlutterMap(
+  Widget _map(Style style) => FlutterMap(
         mapController: _controller,
         options: MapOptions(
-            center: _style!.center ?? LatLng(49.246292, -123.116226),
-            zoom: _style!.zoom ?? 10,
+            center: style.center ?? LatLng(49.246292, -123.116226),
+            zoom: style.zoom ?? 10,
             maxZoom: 22,
             interactiveFlags: InteractiveFlag.drag |
                 InteractiveFlag.flingAnimation |
@@ -104,14 +105,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 InteractiveFlag.pinchZoom |
                 InteractiveFlag.doubleTapZoom),
         children: [
-          // normally you would see TileLayer which provides raster tiles
-          // instead this vector tile layer replaces the standard tile layer
           VectorTileLayer(
-              theme: _style!.theme,
-              backgroundTheme: _style!.theme.copyWith(
-                  types: {ThemeLayerType.background, ThemeLayerType.fill}),
-              // tileOffset: TileOffset.mapbox, enable with mapbox
-              tileProviders: _style!.providers),
+              tileProviders: style.providers,
+              theme: style.theme,
+              maximumZoom: 22,
+              // tileOffset: TileOffset.mapbox,
+              layerMode: VectorTileLayerMode.raster)
         ],
       );
 

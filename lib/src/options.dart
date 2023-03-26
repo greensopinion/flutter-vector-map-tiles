@@ -1,3 +1,4 @@
+import 'vector_tile_layer_mode.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import 'tile_offset.dart';
@@ -19,6 +20,8 @@ class VectorTileLayerOptions {
   final int concurrency;
   final int maximumTileSubstitutionDifference;
   final TileOffset tileOffset;
+  final VectorTileLayerMode layerMode;
+  final double? maximumZoom;
 
   VectorTileLayerOptions(vmt.VectorTileLayer layer)
       : tileProviders = layer.tileProviders,
@@ -35,5 +38,17 @@ class VectorTileLayerOptions {
         concurrency = layer.concurrency,
         maximumTileSubstitutionDifference =
             layer.maximumTileSubstitutionDifference,
-        tileOffset = layer.tileOffset;
+        tileOffset = layer.tileOffset,
+        layerMode = layer.layerMode,
+        maximumZoom = layer.maximumZoom;
+
+  bool hasRenderDifferences(VectorTileLayerOptions other) =>
+      other.theme.id != theme.id ||
+      other.theme.version != theme.version ||
+      other.showTileDebugInfo != showTileDebugInfo ||
+      other.backgroundTheme?.id != backgroundTheme?.id ||
+      other.backgroundTheme?.version != backgroundTheme?.version ||
+      other.tileOffset != tileOffset ||
+      other.layerMode != layerMode ||
+      other.maximumZoom != maximumZoom;
 }

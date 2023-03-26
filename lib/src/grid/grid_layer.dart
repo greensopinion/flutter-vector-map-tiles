@@ -1,14 +1,16 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:executor_lib/executor_lib.dart';
+import 'package:flutter/material.dart' as material show Theme;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_map/plugin_api.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:vector_tile_renderer/vector_tile_renderer.dart';
-import 'package:executor_lib/executor_lib.dart';
+import 'package:vector_tile_renderer/vector_tile_renderer.dart' hide TileLayer;
 
 import '../cache/caches.dart';
 import '../options.dart';
+import '../raster/raster_tile_provider.dart';
 import '../stream/caches_tile_provider.dart';
 import '../stream/delay_provider.dart';
 import '../stream/tile_processor.dart';
@@ -18,6 +20,7 @@ import '../stream/translating_tile_provider.dart';
 import '../tile_identity.dart';
 import '../tile_offset.dart';
 import '../tile_viewport.dart';
+import '../vector_tile_layer_mode.dart';
 import 'constants.dart';
 import 'debounce.dart';
 import 'grid_tile_positioner.dart';
@@ -54,10 +57,12 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
 
   Theme get theme =>
       _theme ??
-      (_theme = widget.options.theme.copyWith(
-          types: ThemeLayerType.values
-              .where((it) => it != ThemeLayerType.symbol)
-              .toSet()));
+      (_theme = widget.options.layerMode == VectorTileLayerMode.raster
+          ? widget.options.theme
+          : widget.options.theme.copyWith(
+              types: ThemeLayerType.values
+                  .where((it) => it != ThemeLayerType.symbol)
+                  .toSet()));
   Theme get symbolTheme =>
       _symbolTheme ??
       (_symbolTheme =
@@ -98,7 +103,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
     final newState = widget.mapState.toMapState();
     final previousState = _previousState;
     _previousState = newState;
-    if (oldWidget.options.theme.id != widget.options.theme.id) {
+    if (widget.options.hasRenderDifferences(oldWidget.options)) {
       setState(() {
         _theme = null;
         _symbolTheme = null;
@@ -114,8 +119,24 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
   Widget build(BuildContext context) {
     final options = widget.options;
     final backgroundTheme = options.backgroundTheme;
-    final layers = <Widget>[
-      _VectorTileLayer(
+    final layers = <Widget>[];
+    if (options.layerMode == VectorTileLayerMode.raster) {
+      final maxZoom = options.maximumZoom ?? 18;
+      final tileProvider = createRasterTileProvider(
+          theme, _caches, _executor, options.tileOffset, options.tileDelay);
+      final hasBackground = theme.layers
+          .where((layer) => layer.type == ThemeLayerType.background)
+          .isNotEmpty;
+      layers.add(TileLayer(
+          maxZoom: maxZoom,
+          maxNativeZoom: maxZoom,
+          backgroundColor: hasBackground
+              ? material.Theme.of(context).canvasColor
+              : const Color.fromARGB(0, 0, 0, 0),
+          tileProvider: tileProvider));
+    }
+    if (options.layerMode == VectorTileLayerMode.vector) {
+      layers.add(_VectorTileLayer(
           Key("${theme.id}_VectorTileLayer"),
           _LayerOptions(theme,
               caches: _caches,
@@ -130,24 +151,24 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
               mapZoom: _zoom),
           widget.mapState,
           _mapChanged.stream,
-          _tileSupplier)
-    ];
-    if (backgroundTheme != null) {
-      final background = _VectorTileLayer(
-          Key("${backgroundTheme.id}_background_VectorTileLayer"),
-          _LayerOptions(backgroundTheme,
-              caches: _caches,
-              showTileDebugInfo: options.showTileDebugInfo,
-              paintBackground: true,
-              maxSubstitutionDifference: 0,
-              paintNoDataTiles: true,
-              tileOffset: widget.options.tileOffset,
-              tileZoomSubstitutionOffset: 4,
-              mapZoom: _zoom),
-          widget.mapState,
-          _mapChanged.stream,
-          _tileSupplier);
-      layers.insert(0, background);
+          _tileSupplier));
+      if (backgroundTheme != null) {
+        final background = _VectorTileLayer(
+            Key("${backgroundTheme.id}_background_VectorTileLayer"),
+            _LayerOptions(backgroundTheme,
+                caches: _caches,
+                showTileDebugInfo: options.showTileDebugInfo,
+                paintBackground: true,
+                maxSubstitutionDifference: 0,
+                paintNoDataTiles: true,
+                tileOffset: widget.options.tileOffset,
+                tileZoomSubstitutionOffset: 4,
+                mapZoom: _zoom),
+            widget.mapState,
+            _mapChanged.stream,
+            _tileSupplier);
+        layers.insert(0, background);
+      }
     }
     return Stack(children: layers);
   }
