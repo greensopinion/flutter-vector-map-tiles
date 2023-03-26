@@ -2,6 +2,7 @@
 
 * introduce new option, `layerMode`
 * improve frame rate by rendering vector tiles to raster images
+* behaviour change: defaults to providing raster tiles for rendering, set `layerMode = TileLayerMode.vector` to match previous versions
 
 ## 3.2.0
 
