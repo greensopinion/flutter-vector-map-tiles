@@ -118,7 +118,7 @@ Be sure to read the terms of service of your tile data provider to ensure that y
 
 ## Upgrading
 
-For guidance on upgrading from a previous version of this library, see the [Upgrading Guide](UPGRADING).
+For guidance on upgrading from a previous version of this library, see the [Upgrading Guide](UPGRADING.md).
 
 ## Development
 
