@@ -1,3 +1,7 @@
+## 3.3.1
+
+* fix issue where tiles would not dynamically change when theme changed
+
 ## 3.3.0
 
 * introduce new option, `layerMode`
