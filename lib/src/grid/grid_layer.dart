@@ -128,6 +128,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
           .where((layer) => layer.type == ThemeLayerType.background)
           .isNotEmpty;
       layers.add(TileLayer(
+          key: Key("${theme.id}_v${theme.version}_VectorTileLayer"),
           maxZoom: maxZoom,
           maxNativeZoom: maxZoom,
           backgroundColor: hasBackground
@@ -137,7 +138,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
     }
     if (options.layerMode == VectorTileLayerMode.vector) {
       layers.add(_VectorTileLayer(
-          Key("${theme.id}_VectorTileLayer"),
+          Key("${theme.id}_v${theme.version}_VectorTileLayer"),
           _LayerOptions(theme,
               caches: _caches,
               symbolTheme: symbolTheme,
@@ -154,7 +155,8 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
           _tileSupplier));
       if (backgroundTheme != null) {
         final background = _VectorTileLayer(
-            Key("${backgroundTheme.id}_background_VectorTileLayer"),
+            Key(
+                "${backgroundTheme.id}_v${theme.version}_background_VectorTileLayer"),
             _LayerOptions(backgroundTheme,
                 caches: _caches,
                 showTileDebugInfo: options.showTileDebugInfo,
