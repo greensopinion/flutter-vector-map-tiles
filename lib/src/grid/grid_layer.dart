@@ -122,8 +122,8 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
     final layers = <Widget>[];
     if (options.layerMode == VectorTileLayerMode.raster) {
       final maxZoom = options.maximumZoom ?? 18;
-      final tileProvider = createRasterTileProvider(
-          theme, _caches, _executor, options.tileOffset, options.tileDelay);
+      final tileProvider = createRasterTileProvider(theme, _caches, _executor,
+          options.tileOffset, options.tileDelay, options.concurrency);
       final hasBackground = theme.layers
           .where((layer) => layer.type == ThemeLayerType.background)
           .isNotEmpty;
@@ -131,6 +131,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
           key: Key("${theme.id}_v${theme.version}_VectorTileLayer"),
           maxZoom: maxZoom,
           maxNativeZoom: maxZoom,
+          evictErrorTileStrategy: EvictErrorTileStrategy.notVisible,
           backgroundColor: hasBackground
               ? material.Theme.of(context).canvasColor
               : const Color.fromARGB(0, 0, 0, 0),
