@@ -1,3 +1,7 @@
+## 3.3.2
+
+* limit raster tile rendering concurrency
+
 ## 3.3.1
 
 * fix issue where tiles would not dynamically change when theme changed

@@ -14,8 +14,13 @@ import 'future_tile_provider.dart';
 import 'storage_image_cache.dart';
 import 'tile_loader.dart';
 
-TileProvider createRasterTileProvider(Theme theme, Caches caches,
-    Executor executor, TileOffset tileOffset, Duration tileDelay) {
+TileProvider createRasterTileProvider(
+    Theme theme,
+    Caches caches,
+    Executor executor,
+    TileOffset tileOffset,
+    Duration tileDelay,
+    int concurrency) {
   final tileSupplier = TranslatingTileProvider(DelayProvider(
           CachesTileProvider(
               caches,
@@ -27,6 +32,6 @@ TileProvider createRasterTileProvider(Theme theme, Caches caches,
       .orDelegate());
   return FutureTileProvider(
       loader: TileLoader(theme, tileSupplier, tileOffset,
-              StorageImageCache(theme, caches.storageCache))
+              StorageImageCache(theme, caches.storageCache), concurrency)
           .loadTile);
 }
