@@ -145,7 +145,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
       layers.add(TileLayer(
           key: Key("${theme.id}_v${theme.version}_VectorTileLayer"),
           maxZoom: maxZoom,
-          maxNativeZoom: maxZoom,
+          maxNativeZoom: maxZoom.ceil(),
           evictErrorTileStrategy: EvictErrorTileStrategy.notVisible,
           backgroundColor: hasBackground
               ? material.Theme.of(context).canvasColor

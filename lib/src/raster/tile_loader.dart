@@ -34,8 +34,8 @@ class TileLoader {
         maxQueueSize: _maxOutstandingJobs);
   }
 
-  Future<ImageInfo> loadTile(
-      Coords<num> coords, TileLayer options, bool Function() cancelled) async {
+  Future<ImageInfo> loadTile(TileCoordinates coords, TileLayer options,
+      bool Function() cancelled) async {
     final requestedTile =
         TileIdentity(coords.z.toInt(), coords.x.toInt(), coords.y.toInt());
     var requestZoom = requestedTile.z;
