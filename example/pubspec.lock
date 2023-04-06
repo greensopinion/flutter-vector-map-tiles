@@ -443,10 +443,10 @@ packages:
     dependency: transitive
     description:
       name: vector_tile_renderer
-      sha256: "0e2579e933f22bf12c8db2176587ecf246a6806ab4dde6817f7f77b631ead748"
+      sha256: "53219efabfcc83053b860c81fba22b9c974028a9ca3be214e5fb00d0e2b0487b"
       url: "https://pub.dev"
     source: hosted
-    version: "3.2.0"
+    version: "3.2.1"
   win32:
     dependency: transitive
     description:
