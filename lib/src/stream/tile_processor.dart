@@ -11,9 +11,9 @@ class TileProcessor {
 
   TileProcessor(this._executor);
 
-  Future<Tile> process(
-      TileRequest request, TileData tileData, CancellationCallback cancelled) {
-    final key = 'process ${request.tileId.key()} clip=${request.clip}';
+  Future<Tile> process(TileRequest request, String source, TileData tileData,
+      CancellationCallback cancelled) {
+    final key = 'process $source ${request.tileId.key()} clip=${request.clip}';
     return _executor.submit(Job<_Request, Tile>(
         key, _processTile, _Request(tileData, request.clip),
         cancelled: cancelled, deduplicationKey: key));
