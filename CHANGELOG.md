@@ -1,3 +1,7 @@
+## 3.3.3
+
+* fix concurrency issue affecting styles with multiple tile sources
+
 ## 3.3.2
 
 * limit raster tile rendering concurrency
