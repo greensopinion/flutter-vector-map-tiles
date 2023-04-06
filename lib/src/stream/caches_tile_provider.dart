@@ -69,8 +69,10 @@ class CachesTileProvider extends TileProvider {
   Future<Map<String, Tile>> _createTiles(
       TileRequest request, Map<String, TileData> tileDataBySource) async {
     final sourceToTileFuture = tileDataBySource.map((source, tileData) =>
-        MapEntry(source,
-            _tileProcessor.process(request, tileData, request.cancelled)));
+        MapEntry(
+            source,
+            _tileProcessor.process(
+                request, source, tileData, request.cancelled)));
     Map<String, Tile> tileBySource = {};
     for (final entry in sourceToTileFuture.entries) {
       request.testCancelled();
