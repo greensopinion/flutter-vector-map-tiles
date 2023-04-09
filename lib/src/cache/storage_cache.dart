@@ -1,7 +1,7 @@
 import 'dart:io';
-import 'dart:math';
 import 'dart:typed_data';
 
+import '../extensions.dart';
 import 'byte_storage.dart';
 import 'cache_stats.dart';
 
@@ -67,14 +67,19 @@ class StorageCache with CacheStats {
         .where((e) => e.value.type == FileSystemEntityType.file)
         .toList();
     int size = entries.map((e) => e.value.size).reduce((a, b) => a + b);
-    final random = Random();
-    while (size > _maxSizeInBytes && entries.isNotEmpty) {
-      final toRemove = entries.removeAt(random.nextInt(entries.length));
-      try {
-        await toRemove.key.delete();
-        size -= toRemove.value.size;
-      } catch (e) {
-        // ignore, race condition file was deleted
+    if (size > _maxSizeInBytes) {
+      final entriesByAccessed = entries
+          .sorted((a, b) => a.value.accessed.compareTo(b.value.accessed));
+      for (final entry in entriesByAccessed) {
+        try {
+          await entry.key.delete();
+          size -= entry.value.size;
+          if (size <= _maxSizeInBytes) {
+            break;
+          }
+        } catch (e) {
+          // ignore, race condition file was deleted
+        }
       }
     }
   }

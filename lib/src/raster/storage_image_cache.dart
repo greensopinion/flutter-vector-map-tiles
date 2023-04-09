@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:vector_map_tiles/src/cache/storage_cache.dart';
+import '../cache/storage_cache.dart';
 
 import '../../vector_map_tiles.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
