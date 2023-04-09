@@ -1,3 +1,7 @@
+## 3.3.4
+
+* evict oldest entries from cache when cache max size is exceeded
+
 ## 3.3.3
 
 * fix concurrency issue affecting styles with multiple tile sources
