@@ -3,9 +3,9 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:ui' as ui;
 
+import 'package:executor_lib/executor_lib.dart';
 import 'package:flutter/widgets.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
-import 'package:executor_lib/executor_lib.dart';
 
 import '../profiler.dart';
 import '../stream/tile_supplier.dart';
