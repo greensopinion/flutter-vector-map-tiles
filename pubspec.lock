@@ -582,10 +582,9 @@ packages:
   vector_tile_renderer:
     dependency: "direct main"
     description:
-      name: vector_tile_renderer
-      sha256: "53219efabfcc83053b860c81fba22b9c974028a9ca3be214e5fb00d0e2b0487b"
-      url: "https://pub.dev"
-    source: hosted
+      path: "../vector_tile_renderer"
+      relative: true
+    source: path
     version: "3.2.1"
   vm_service:
     dependency: transitive

@@ -2,9 +2,11 @@ import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import 'tile_layer_model.dart';
 import 'tile_model.dart';
+import '../style/style.dart';
 
 class TileLayerComposer {
-  List<TileLayerModel> compose(VectorTileModel vectorTileModel, Theme theme) {
+  List<TileLayerModel> compose(
+      VectorTileModel vectorTileModel, Theme theme, SpriteStyle? sprites) {
     final layersByGroupId = <String, _Layer>{};
     var groupSeed = 0;
     String? currentGroupId;
@@ -45,6 +47,7 @@ class TileLayerComposer {
                 id: '${theme.id}_${e.key}',
                 layers: e.value.themeLayers,
                 version: theme.version),
+            sprites: sprites,
             id: '${theme.id}_${e.key}',
             tileset: null))
         .toList(growable: false);

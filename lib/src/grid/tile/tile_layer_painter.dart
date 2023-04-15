@@ -24,7 +24,12 @@ class TileLayerPainter extends CustomPainter {
     tileSizer.apply(canvas);
 
     final tileClip = tileSizer.tileClip(size, tileSizer.effectiveScale);
-    Renderer(theme: model.theme).render(canvas, model.tileset!,
+    Renderer(theme: model.theme).render(
+        canvas,
+        TileSource(
+            tileset: model.tileset!,
+            spriteAtlas: model.spriteImage,
+            spriteIndex: model.sprites?.index),
         clip: tileClip,
         zoomScaleFactor: tileSizer.effectiveScale,
         zoom: zoom.zoom);

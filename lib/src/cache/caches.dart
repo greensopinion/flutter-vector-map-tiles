@@ -10,6 +10,7 @@ import 'memory_cache.dart';
 import 'storage_cache.dart';
 import 'text_cache.dart';
 import 'vector_tile_loading_cache.dart';
+import 'atlas_image_cache.dart';
 
 class Caches {
   final Executor executor;
@@ -22,11 +23,13 @@ class Caches {
   late final MemoryTileDataCache memoryTileDataCache;
   late final TextCache textCache;
   late final List<String> providerSources;
+  late final AtlasImageCache? atlasImageCache;
 
   Caches(
       {required TileProviders providers,
       required this.executor,
       required Theme theme,
+      required SpriteStyle? sprites,
       required Duration ttl,
       required int memoryTileCacheMaxSize,
       required int memoryTileDataCacheMaxSize,
@@ -40,12 +43,16 @@ class Caches {
     vectorTileCache = VectorTileLoadingCache(storageCache,
         memoryVectorTileCache, memoryTileDataCache, providers, executor, theme);
     textCache = TextCache(maxSize: maxTextCacheSize);
+    atlasImageCache = sprites == null
+        ? null
+        : AtlasImageCache(theme, sprites.atlasProvider, storageCache);
   }
 
   Future<void> applyConstraints() => storageCache.applyConstraints();
 
   void dispose() {
     memoryVectorTileCache.dispose();
+    atlasImageCache?.dispose();
   }
 
   void didHaveMemoryPressure() {

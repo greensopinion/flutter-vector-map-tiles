@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
+import 'dart:ui' as ui;
 
 import '../../vector_map_tiles.dart';
 import '../cache/text_cache.dart';
@@ -21,6 +22,8 @@ class TileWidgets extends ChangeNotifier {
   final ZoomFunction _zoomDetailFunction;
   final Theme _theme;
   final Theme? _symbolTheme;
+  final SpriteStyle? _sprites;
+  final Future<ui.Image> Function()? _spriteAtlasProvider;
   final TileProvider _tileProvider;
   final TextCache _textCache;
   final bool paintBackground;
@@ -34,6 +37,8 @@ class TileWidgets extends ChangeNotifier {
       this._zoomDetailFunction,
       this._theme,
       this._symbolTheme,
+      this._sprites,
+      this._spriteAtlasProvider,
       this._tileProvider,
       this._textCache,
       this.maxSubstitutionDifference,
@@ -79,6 +84,8 @@ class TileWidgets extends ChangeNotifier {
             _tileProvider,
             _theme,
             _symbolTheme,
+            _sprites,
+            _spriteAtlasProvider,
             tile,
             tileZoomSubstitutionOffset,
             _zoomScaleFunction,

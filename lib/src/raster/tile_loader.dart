@@ -17,6 +17,8 @@ import 'storage_image_cache.dart';
 
 class TileLoader {
   final Theme _theme;
+  final SpriteStyle? _sprites;
+  final Future<Image> Function()? _spriteAtlas;
   final TranslatingTileProvider _provider;
   final StorageImageCache _imageCache;
   final TileOffset _tileOffset;
@@ -24,8 +26,8 @@ class TileLoader {
   final _scale = 2.0;
   late final ConcurrencyExecutor _jobQueue;
 
-  TileLoader(this._theme, this._provider, this._tileOffset, this._imageCache,
-      this._concurrency) {
+  TileLoader(this._theme, this._sprites, this._spriteAtlas, this._provider,
+      this._tileOffset, this._imageCache, this._concurrency) {
     _jobQueue = ConcurrencyExecutor(
         delegate: ImmediateExecutor(),
         concurrencyLimit: _concurrency * 2,
@@ -70,6 +72,7 @@ class TileLoader {
     final translatedRequest =
         createTranslatedRequest(originalRequest, maximumZoom: requestZoom);
 
+    final spriteAtlas = await _spriteAtlas?.call();
     final tileResponse = await _provider.provide(translatedRequest);
     final tileset = tileResponse.tileset;
     if (tileset == null) {
@@ -103,7 +106,11 @@ class TileLoader {
     final tileClip =
         tileSizer.tileClip(Size.square(size), tileSizer.effectiveScale);
 
-    Renderer(theme: _theme).render(canvas, tileResponse.tileset!,
+    final tile = TileSource(
+        tileset: tileResponse.tileset!,
+        spriteAtlas: spriteAtlas,
+        spriteIndex: _sprites?.index);
+    Renderer(theme: _theme).render(canvas, tile,
         zoomScaleFactor: zoomScaleFactor,
         zoom: requestedTile.z.toDouble(),
         clip: tileClip);

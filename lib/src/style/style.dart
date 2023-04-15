@@ -13,6 +13,7 @@ class Style {
   final String? name;
   final Theme theme;
   final TileProviders providers;
+  final SpriteStyle? sprites;
   final LatLng? center;
   final double? zoom;
 
@@ -20,8 +21,16 @@ class Style {
       {this.name,
       required this.theme,
       required this.providers,
+      this.sprites,
       this.center,
       this.zoom});
+}
+
+class SpriteStyle {
+  final Future<Uint8List> Function() atlasProvider;
+  final SpriteIndex index;
+
+  SpriteStyle({required this.atlasProvider, required this.index});
 }
 
 class StyleReader {
@@ -33,7 +42,8 @@ class StyleReader {
       : logger = logger ?? const Logger.noop();
 
   Future<Style> read() async {
-    final url = StyleUriMapper(key: apiKey).map(uri);
+    final uriMapper = StyleUriMapper(key: apiKey);
+    final url = uriMapper.map(uri);
     final styleText = await _httpGet(url);
     final style = await compute(jsonDecode, styleText);
     if (style is! Map<String, dynamic>) {
@@ -57,9 +67,29 @@ class StyleReader {
       zoom = null;
       centerPoint = null;
     }
+    final spriteUri = style['sprite'];
+    SpriteStyle? sprites;
+    if (spriteUri is String && spriteUri.trim().isNotEmpty) {
+      final spriteUris = uriMapper.mapSprite(uri, spriteUri);
+      for (final spriteUri in spriteUris) {
+        dynamic spritesJson;
+        try {
+          final spritesJsonText = await _httpGet(spriteUri.json);
+          spritesJson = await compute(jsonDecode, spritesJsonText);
+        } catch (e) {
+          logger.log(() => 'error reading sprite uri: ${spriteUri.json}');
+          continue;
+        }
+        sprites = SpriteStyle(
+            atlasProvider: () => _loadBinary(spriteUri.image),
+            index: SpriteIndexReader(logger: logger).read(spritesJson));
+        break;
+      }
+    }
     return Style(
         theme: ThemeReader(logger: logger).read(style),
         providers: TileProviders(providerByName),
+        sprites: sprites,
         name: name,
         center: centerPoint,
         zoom: zoom);
@@ -101,6 +131,15 @@ Future<String> _httpGet(String url) async {
   final response = await get(Uri.parse(url));
   if (response.statusCode == 200) {
     return response.body;
+  } else {
+    throw 'HTTP ${response.statusCode}: ${response.body}';
+  }
+}
+
+Future<Uint8List> _loadBinary(String url) async {
+  final response = await get(Uri.parse(url));
+  if (response.statusCode == 200) {
+    return response.bodyBytes;
   } else {
     throw 'HTTP ${response.statusCode}: ${response.body}';
   }
