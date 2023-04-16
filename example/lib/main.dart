@@ -109,7 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
               theme: style.theme,
               sprites: style.sprites,
               maximumZoom: 22,
-              // tileOffset: TileOffset.mapbox,
+              tileOffset: TileOffset.mapbox,
               layerMode: VectorTileLayerMode.vector)
         ],
       );
