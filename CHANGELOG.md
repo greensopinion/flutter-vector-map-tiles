@@ -1,3 +1,7 @@
+## 3.3.5
+
+* minor optimization
+
 ## 3.3.4
 
 * evict oldest entries from cache when cache max size is exceeded

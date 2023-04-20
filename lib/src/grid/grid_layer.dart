@@ -54,6 +54,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
   StreamSubscription<void>? _subscription;
   Theme? _theme;
   Theme? _symbolTheme;
+  TileProvider? _tileProvider;
 
   Theme get theme =>
       _theme ??
@@ -89,6 +90,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
     _subscription?.cancel();
     _mapChanged.close();
     _caches.dispose();
+    _tileProvider = null;
     _executor.dispose();
   }
 
@@ -108,6 +110,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
         _theme = null;
         _symbolTheme = null;
         _caches.dispose();
+        _tileProvider = null;
         _createCaches();
       });
     } else if (newState != previousState) {
@@ -122,8 +125,10 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
     final layers = <Widget>[];
     if (options.layerMode == VectorTileLayerMode.raster) {
       final maxZoom = options.maximumZoom ?? 18;
-      final tileProvider = createRasterTileProvider(theme, _caches, _executor,
-          options.tileOffset, options.tileDelay, options.concurrency);
+      final tileProvider = _tileProvider ??
+          createRasterTileProvider(theme, _caches, _executor,
+              options.tileOffset, options.tileDelay, options.concurrency);
+      _tileProvider = tileProvider;
       final hasBackground = theme.layers
           .where((layer) => layer.type == ThemeLayerType.background)
           .isNotEmpty;
