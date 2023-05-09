@@ -138,10 +138,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_map
-      sha256: "50a6af52a6382c5d771dd11355d2f29993cbecdafe13b0407042c4b310ffd952"
+      sha256: "52c65a977daae42f9aae6748418dd1535eaf27186e9bac9bf431843082bc75a3"
       url: "https://pub.dev"
     source: hosted
-    version: "4.0.0-dev.1"
+    version: "4.0.0"
   frontend_server_client:
     dependency: transitive
     description:
