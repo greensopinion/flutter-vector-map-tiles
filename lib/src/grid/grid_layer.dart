@@ -376,7 +376,14 @@ class _VectorTileLayerState extends DisposableState<_VectorTileLayer> {
         pixelBounds.max.unscaleBy(tileSize).ceil() - const CustomPoint(1, 1);
     final topLeft = CustomPoint<int>(a.x.toInt(), a.y.toInt());
     final bottomRight = CustomPoint<int>(b.x.toInt(), b.y.toInt());
-    return TileViewport(zoom, Bounds<int>(topLeft, bottomRight));
+    int offscreenTile = 0;
+    if (zoom > 10) {
+      offscreenTile = zoom ~/ 3;
+    }
+    return TileViewport(
+        zoom,
+        Bounds<int>(topLeft - CustomPoint(offscreenTile, offscreenTile),
+            bottomRight + CustomPoint(offscreenTile, offscreenTile)));
   }
 
   List<TileIdentity> _expand(TileViewport viewport) {
