@@ -380,6 +380,7 @@ class _VectorTileLayerState extends DisposableState<_VectorTileLayer> {
     if (zoom > 10) {
       offscreenTile = zoom ~/ 3;
     }
+
     return TileViewport(
         zoom,
         Bounds<int>(topLeft - CustomPoint(offscreenTile, offscreenTile),
