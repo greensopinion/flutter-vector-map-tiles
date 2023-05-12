@@ -32,8 +32,7 @@ class VectorTileCompositeLayer extends StatefulWidget {
   final FlutterMapState mapState;
   final VectorTileLayerOptions options;
 
-  const VectorTileCompositeLayer(this.options, this.mapState, {Key? key})
-      : super(key: key);
+  const VectorTileCompositeLayer(this.options, this.mapState, {super.key});
 
   @override
   State<StatefulWidget> createState() {
@@ -378,8 +377,7 @@ class _VectorTileLayerState extends DisposableState<_VectorTileLayer> {
   Bounds _tiledPixelBounds() {
     final zoom = _mapState.zoom;
     final scale = _mapState.getZoomScale(zoom, _clampedZoom);
-    final centerPoint = _mapState
-        .project(_mapState.center, _clampedZoom);
+    final centerPoint = _mapState.project(_mapState.center, _clampedZoom);
     final halfSize = _mapState.size / (scale * 2);
 
     return Bounds(centerPoint - halfSize, centerPoint + halfSize);
