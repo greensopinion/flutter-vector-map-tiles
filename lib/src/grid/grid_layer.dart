@@ -357,8 +357,8 @@ class _VectorTileLayerState extends DisposableState<_VectorTileLayer> {
   Bounds _tiledPixelBounds() {
     final zoom = _mapState.zoom;
     final scale = _mapState.getZoomScale(zoom, _clampedZoom);
-    final centerPoint =
-        _mapState.project(_mapState.center, _clampedZoom).floor();
+    final centerPoint = _mapState
+        .project(_mapState.center, _clampedZoom);
     final halfSize = _mapState.size / (scale * 2);
 
     return Bounds(centerPoint - halfSize, centerPoint + halfSize);
