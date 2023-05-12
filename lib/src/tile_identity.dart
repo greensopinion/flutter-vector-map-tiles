@@ -5,9 +5,7 @@ import 'package:flutter_map/plugin_api.dart';
 class TileIdentity extends CustomPoint<int> {
   final int z;
 
-  TileIdentity(int z, int x, int y)
-      : z = z.toInt(),
-        super(x, y);
+  TileIdentity(this.z, super.x, super.y);
 
   @override
   operator ==(other) =>

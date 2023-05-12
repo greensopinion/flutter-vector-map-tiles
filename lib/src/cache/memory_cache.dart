@@ -15,6 +15,6 @@ class _Sizer extends Sizer<Uint8List> {
 }
 
 class MemoryTileDataCache extends Cache<String, TileData> {
-  MemoryTileDataCache({required int maxSize})
-      : super(maxSize: maxSize, sizer: Sizer<TileData>(), copier: Copier());
+  MemoryTileDataCache({required super.maxSize})
+      : super(sizer: Sizer<TileData>(), copier: Copier());
 }

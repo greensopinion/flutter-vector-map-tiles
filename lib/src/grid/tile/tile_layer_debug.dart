@@ -6,7 +6,7 @@ import 'tile_options.dart';
 class TileDebugLayer extends StatelessWidget {
   final VectorTileOptions options;
 
-  const TileDebugLayer({Key? key, required this.options}) : super(key: key);
+  const TileDebugLayer({super.key, required this.options});
 
   @override
   Widget build(BuildContext context) {
