@@ -3,19 +3,21 @@ import 'package:flutter_map/plugin_api.dart';
 
 class FutureTileProvider extends TileProvider {
   final Future<ImageInfo> Function(
-      Coords<num> coords, TileLayer options, bool Function() cancelled) loader;
+          TileCoordinates coords, TileLayer options, bool Function() cancelled)
+      loader;
 
   FutureTileProvider({required this.loader});
 
   @override
-  ImageProvider getImage(Coords<num> coords, TileLayer options) =>
-      _FutureImageProvider(loader, coords, options);
+  ImageProvider getImage(TileCoordinates coordinates, TileLayer options) =>
+      _FutureImageProvider(loader, coordinates, options);
 }
 
 class _FutureImageProvider extends ImageProvider<_FutureImageProvider> {
   final Future<ImageInfo> Function(
-      Coords<num> coords, TileLayer options, bool Function() cancelled) loader;
-  final Coords<num> coords;
+          TileCoordinates coords, TileLayer options, bool Function() cancelled)
+      loader;
+  final TileCoordinates coords;
   final TileLayer options;
 
   _FutureImageProvider(this.loader, this.coords, this.options);

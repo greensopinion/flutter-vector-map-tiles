@@ -108,27 +108,27 @@ class VectorTileLayer extends StatelessWidget {
   /// The maximum zoom of the tile layer, for raster [layerMode] only.
   final double? maximumZoom;
 
-  VectorTileLayer(
-      {Key? key,
-      required this.tileProviders,
-      required this.theme,
-      this.sprites,
-      this.fileCacheTtl = defaultCacheTtl,
-      this.memoryTileCacheMaxSize = defaultTileCacheMaxSize,
-      this.memoryTileDataCacheMaxSize = defaultTileDataCacheMaxSize,
-      this.fileCacheMaximumSizeInBytes = defaultCacheMaxSize,
-      this.textCacheMaxSize = defaultTextCacheMaxSize,
-      this.concurrency = defaultConcurrency,
-      this.tileOffset = TileOffset.DEFAULT,
-      this.maximumTileSubstitutionDifference =
-          defaultMaxTileSubstitutionDifference,
-      this.backgroundTheme,
-      this.showTileDebugInfo = false,
-      this.logCacheStats = false,
-      this.layerMode = VectorTileLayerMode.raster,
-      this.maximumZoom,
-      this.tileDelay = const Duration(milliseconds: 0)})
-      : super(key: key) {
+  VectorTileLayer({
+    super.key,
+    required this.tileProviders,
+    required this.theme,
+    this.sprites,
+    this.fileCacheTtl = defaultCacheTtl,
+    this.memoryTileCacheMaxSize = defaultTileCacheMaxSize,
+    this.memoryTileDataCacheMaxSize = defaultTileDataCacheMaxSize,
+    this.fileCacheMaximumSizeInBytes = defaultCacheMaxSize,
+    this.textCacheMaxSize = defaultTextCacheMaxSize,
+    this.concurrency = defaultConcurrency,
+    this.tileOffset = TileOffset.DEFAULT,
+    this.maximumTileSubstitutionDifference =
+        defaultMaxTileSubstitutionDifference,
+    this.backgroundTheme,
+    this.showTileDebugInfo = false,
+    this.logCacheStats = false,
+    this.layerMode = VectorTileLayerMode.raster,
+    this.maximumZoom,
+    this.tileDelay = const Duration(milliseconds: 0),
+  }) {
     assert(concurrency >= 0 && concurrency <= 100);
     final providers = theme.tileSources
         .map((source) => tileProviders.tileProviderBySource[source])

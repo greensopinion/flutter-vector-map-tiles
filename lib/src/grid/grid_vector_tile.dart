@@ -102,8 +102,7 @@ class _GridVectorTileState extends DisposableState<GridVectorTile> {
 class _GridVectorTileLayer extends material.StatefulWidget {
   final TileLayerModel model;
 
-  const _GridVectorTileLayer({material.Key? key, required this.model})
-      : super(key: key);
+  const _GridVectorTileLayer({super.key, required this.model});
 
   @override
   material.State<material.StatefulWidget> createState() {

@@ -20,9 +20,10 @@ class TileViewport {
     final multiplier = pow(2, zoomDifference.abs()).toInt();
     if (zoomDifference > 0) {
       // tile is bigger
-      final boundsTopLeft = bounds.topLeft.multiplyBy(1 / multiplier).floor();
+      final boundsTopLeft =
+          bounds.topLeft.toDoublePoint().multiplyBy(1 / multiplier).floor();
       final boundsBottomRight =
-          bounds.bottomRight.multiplyBy(1 / multiplier).ceil();
+          bounds.bottomRight.toDoublePoint().multiplyBy(1 / multiplier).ceil();
       final tilePoint = CustomPoint(tile.x, tile.y);
       return Bounds(boundsTopLeft, boundsBottomRight)
           .containsPartialBounds(Bounds(tilePoint, tilePoint));
