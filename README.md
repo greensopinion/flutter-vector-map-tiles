@@ -34,8 +34,8 @@ Create the map:
  FlutterMap(
     mapController: _controller,
     options: MapOptions(
-        center: _style!.center ?? LatLng(49.246292, -123.116226),
-        zoom: _style!.zoom ?? 10,
+        center: style.center ?? LatLng(49.246292, -123.116226),
+        zoom: style.zoom ?? 10,
         maxZoom: 22,
         interactiveFlags: InteractiveFlag.drag |
             InteractiveFlag.flingAnimation |
@@ -46,12 +46,10 @@ Create the map:
       // normally you would see TileLayer which provides raster tiles
       // instead this vector tile layer replaces the standard tile layer
       VectorTileLayer(
-          theme: _style!.theme,
+          theme: style.theme,
           sprites: style.sprites,
-          backgroundTheme: _style!.theme.copyWith(
-              types: {ThemeLayerType.background, ThemeLayerType.fill}),
           // tileOffset: TileOffset.mapbox, enable with mapbox
-          tileProviders: _style!.providers),
+          tileProviders: style.providers),
     ],
   )
 ```
