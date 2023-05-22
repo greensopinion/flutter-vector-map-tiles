@@ -91,6 +91,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
     _subscription?.cancel();
     _mapChanged.close();
     _caches.dispose();
+    _tileProvider?.dispose();
     _tileProvider = null;
     _executor.dispose();
   }
