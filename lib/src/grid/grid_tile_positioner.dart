@@ -86,8 +86,8 @@ class GridTileSizer {
 
 class TilePositioningState {
   final double zoomScale;
-  late final CustomPoint<num> origin;
-  late final CustomPoint<num> translate;
+  late final CustomPoint<double> origin;
+  late final CustomPoint<double> translate;
 
   TilePositioningState(this.zoomScale, FlutterMapState mapState, double zoom) {
     final pixelOrigin =
