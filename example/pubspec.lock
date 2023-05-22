@@ -418,9 +418,10 @@ packages:
   vector_tile_renderer:
     dependency: transitive
     description:
-      path: "../../vector_tile_renderer"
-      relative: true
-    source: path
+      name: vector_tile_renderer
+      sha256: de212da0f5e48107d3b763a940a428eb1f49d8a4664d41ac0b654f77209a2d0b
+      url: "https://pub.dev"
+    source: hosted
     version: "4.0.0"
   win32:
     dependency: transitive
