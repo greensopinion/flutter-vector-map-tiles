@@ -1,6 +1,7 @@
 
-## 3.4.0
+## 4.0.0
 
+* update to flutter_map 4.0.0
 * add support for icons via sprites
 
 ## 3.3.5
