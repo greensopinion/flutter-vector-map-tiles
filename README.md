@@ -47,6 +47,7 @@ Create the map:
       // instead this vector tile layer replaces the standard tile layer
       VectorTileLayer(
           theme: _style!.theme,
+          sprites: style.sprites,
           backgroundTheme: _style!.theme.copyWith(
               types: {ThemeLayerType.background, ThemeLayerType.fill}),
           // tileOffset: TileOffset.mapbox, enable with mapbox
