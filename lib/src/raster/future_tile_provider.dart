@@ -27,7 +27,17 @@ class _FutureImageProvider extends ImageProvider<_FutureImageProvider> {
 
   @override
   ImageStreamCompleter loadBuffer(
-      _FutureImageProvider key, DecoderBufferCallback decode) {
+          _FutureImageProvider key,
+          // ignore: deprecated_member_use
+          DecoderBufferCallback decode) =>
+      _load(key);
+
+  @override
+  ImageStreamCompleter loadImage(
+          _FutureImageProvider key, ImageDecoderCallback decode) =>
+      _load(key);
+
+  ImageStreamCompleter _load(_FutureImageProvider key) {
     final cancellation = _CancellationState();
     final completer =
         OneFrameImageStreamCompleter(_loadImage(cancellation.isCancelled));

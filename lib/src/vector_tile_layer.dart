@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide Theme;
 import 'package:flutter_map/plugin_api.dart';
+import 'package:vector_map_tiles/src/style/style.dart';
 import 'vector_tile_layer_mode.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
@@ -20,6 +21,9 @@ class VectorTileLayer extends StatelessWidget {
 
   /// the theme used to render tiles
   final Theme theme;
+
+  /// the sprites to be used when rendering tiles
+  final SpriteStyle? sprites;
 
   /// the time to live of items in the file cache
   /// consider the terms of your tile provider service
@@ -108,6 +112,7 @@ class VectorTileLayer extends StatelessWidget {
       {Key? key,
       required this.tileProviders,
       required this.theme,
+      this.sprites,
       this.fileCacheTtl = defaultCacheTtl,
       this.memoryTileCacheMaxSize = defaultTileCacheMaxSize,
       this.memoryTileDataCacheMaxSize = defaultTileDataCacheMaxSize,

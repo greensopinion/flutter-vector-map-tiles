@@ -16,6 +16,7 @@ import 'tile_loader.dart';
 
 TileProvider createRasterTileProvider(
     Theme theme,
+    SpriteStyle? sprites,
     Caches caches,
     Executor executor,
     TileOffset tileOffset,
@@ -31,7 +32,13 @@ TileProvider createRasterTileProvider(
           tileDelay)
       .orDelegate());
   return FutureTileProvider(
-      loader: TileLoader(theme, tileSupplier, tileOffset,
-              StorageImageCache(theme, caches.storageCache), concurrency)
+      loader: TileLoader(
+              theme,
+              sprites,
+              caches.atlasImageCache?.retrieve,
+              tileSupplier,
+              tileOffset,
+              StorageImageCache(theme, caches.storageCache),
+              concurrency)
           .loadTile);
 }

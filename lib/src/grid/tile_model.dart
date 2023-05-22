@@ -11,6 +11,7 @@ import '../profiler.dart';
 import '../stream/tile_supplier.dart';
 import '../stream/translated_tile_request.dart';
 import '../tile_identity.dart';
+import '../style/style.dart';
 import 'slippy_map_translator.dart';
 import 'tile_layer_composer.dart';
 import 'tile_layer_model.dart';
@@ -26,6 +27,9 @@ class VectorTileModel extends ChangeNotifier {
   final TileProvider tileProvider;
   final Theme theme;
   final Theme? symbolTheme;
+  final SpriteStyle? sprites;
+  ui.Image? spriteImage;
+  final Future<ui.Image> Function()? spriteAtlasProvider;
   bool paintBackground;
   final bool showTileDebugInfo;
   late final TileZoomProvider zoomProvider;
@@ -45,6 +49,8 @@ class VectorTileModel extends ChangeNotifier {
       this.tileProvider,
       this.theme,
       this.symbolTheme,
+      this.sprites,
+      this.spriteAtlasProvider,
       this.tile,
       this.tileZoomSubstitutionOffset,
       ZoomScaleFunction zoomScaleFunction,
@@ -54,7 +60,7 @@ class VectorTileModel extends ChangeNotifier {
       this.showTileDebugInfo) {
     zoomProvider = TileZoomProvider(
         tile, zoomScaleFunction, zoomFunction, zoomDetailFunction);
-    layers = TileLayerComposer().compose(this, theme);
+    layers = TileLayerComposer().compose(this, theme, sprites);
     defaultTranslation =
         SlippyMapTranslator(tileProvider.maximumZoom).translate(tile);
     _firstRenderedTask = tileRenderingTask(tile);
@@ -73,14 +79,16 @@ class VectorTileModel extends ChangeNotifier {
     _VectorTileModelLoader(this).startLoading();
   }
 
-  void _receiveTile(TileResponse received) {
+  void _receiveTile(TileResponse received, ui.Image? spriteImage) {
     final newTranslation = SlippyMapTranslator(tileProvider.maximumZoom)
         .specificZoomTranslation(tile, zoom: received.identity.z);
     tileset = received.tileset;
     translation = newTranslation;
+    this.spriteImage = spriteImage;
     for (final layer in layers) {
       layer.tileset = tileset;
       layer.translation = translation;
+      layer.spriteImage = spriteImage;
     }
     notifyListeners();
     _notifyLayers();
@@ -165,6 +173,7 @@ class _VectorTileModelLoader {
   _VectorTileModelLoader(this.model);
 
   void startLoading() async {
+    final spriteImage = await model.spriteAtlasProvider?.call();
     final originalTile = model.tile.normalize();
     final maxZoom = model.tileProvider.maximumZoom;
     var originalLoaded = false;
@@ -179,7 +188,7 @@ class _VectorTileModelLoader {
         break;
       }
       if (localTile != null && localTile.tileset != null) {
-        model._receiveTile(localTile);
+        model._receiveTile(localTile, spriteImage);
         originalLoaded = z == originalTile.z;
         if (model.hasData) {
           break;
@@ -195,7 +204,7 @@ class _VectorTileModelLoader {
                   max(0, originalTile.z - model.tileZoomSubstitutionOffset));
         }
         final response = await model.tileProvider.provide(request);
-        model._receiveTile(response);
+        model._receiveTile(response, spriteImage);
       } catch (e) {
         if (e is SocketException) {
           // nothing to do
