@@ -10,19 +10,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_map:
-    ^5.0.0
-    #path: ../flutter_map
+  flutter_map: ^5.0.0
   http: ^1.0.0
   latlong2: ^0.9.0
   path_provider: ^2.0.2
-  vector_tile_renderer:
-    ^4.0.0
-    #path: ../vector_tile_renderer
+  vector_tile_renderer: ^4.0.0
   async: ^2.8.2
-  executor_lib:
-    ^1.1.0
-    #path: ../executor_lib
+  executor_lib: ^1.1.0
 
 dev_dependencies:
   flutter_lints: ^2.0.1

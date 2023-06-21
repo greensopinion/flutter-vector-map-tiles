@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:vector_map_tiles/vector_map_tiles.dart';
-// ignore: depend_on_referenced_packages
 import 'package:vector_tile_renderer/vector_tile_renderer.dart' hide TileLayer;
 // ignore: uri_does_not_exist
 import 'api_key.dart';
@@ -31,10 +30,10 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-  MyHomePageState createState() => MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> {
   final MapController _controller = MapController();
   Style? _style;
   Object? _error;
