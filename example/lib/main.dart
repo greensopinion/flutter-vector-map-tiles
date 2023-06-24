@@ -30,7 +30,7 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -95,7 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget _map(Style style) => FlutterMap(
         mapController: _controller,
         options: MapOptions(
-            center: style.center ?? LatLng(49.246292, -123.116226),
+            center: style.center ?? const LatLng(49.246292, -123.116226),
             zoom: style.zoom ?? 10,
             maxZoom: 22,
             interactiveFlags: InteractiveFlag.drag |

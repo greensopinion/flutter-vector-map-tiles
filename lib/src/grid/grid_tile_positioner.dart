@@ -32,9 +32,10 @@ class GridTilePositioner {
   }
 
   Offset _tileOffset(TileIdentity tile) {
-    final tilePosition = (tile.toDoublePoint().scaleBy(tileSize) - state.origin)
-            .multiplyBy(state.zoomScale) +
-        state.translate;
+    final tilePosition =
+        ((tile.toDoublePoint().scaleBy(tileSize) - state.origin) *
+                state.zoomScale) +
+            state.translate;
     return Offset(tilePosition.x.toDouble(), tilePosition.y.toDouble());
   }
 }
@@ -93,7 +94,7 @@ class TilePositioningState {
     final pixelOrigin =
         mapState.getNewPixelOrigin(mapState.center, mapState.zoom).round();
     origin = mapState.project(mapState.unproject(pixelOrigin, zoom), zoom);
-    translate = origin.multiplyBy(zoomScale) - pixelOrigin;
+    translate = (origin * zoomScale) - pixelOrigin;
   }
 }
 

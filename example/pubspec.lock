@@ -41,14 +41,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.17.1"
-  cupertino_icons:
-    dependency: "direct main"
-    description:
-      name: cupertino_icons
-      sha256: e35129dc44c9118cee2a5603506d823bab99c68393879edb440e0090d07586be
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.5"
   executor_lib:
     dependency: transitive
     description:
@@ -98,18 +90,18 @@ packages:
     dependency: "direct dev"
     description:
       name: flutter_lints
-      sha256: b543301ad291598523947dc534aaddc5aaad597b709d2426d3a0e0d44c5cb493
+      sha256: aeb0b80a8b3709709c9cc496cdc027c5b3216796bc0af0ce1007eaf24464fd4c
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.4"
+    version: "2.0.1"
   flutter_map:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: flutter_map
-      sha256: "52c65a977daae42f9aae6748418dd1535eaf27186e9bac9bf431843082bc75a3"
+      sha256: "5286f72f87deb132daa1489442d6cc46e986fc105cb727d9ae1b602b35b1d1f3"
       url: "https://pub.dev"
     source: hosted
-    version: "4.0.0"
+    version: "5.0.0"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -119,10 +111,10 @@ packages:
     dependency: transitive
     description:
       name: http
-      sha256: "5895291c13fa8a3bd82e76d5627f69e0d85ca6a30dcac95c4ea19a5d555879c2"
+      sha256: "4c3f04bfb64d3efd508d06b41b825542f08122d30bda4933fb95c069d22a4fa3"
       url: "https://pub.dev"
     source: hosted
-    version: "0.13.6"
+    version: "1.0.0"
   http_parser:
     dependency: transitive
     description:
@@ -148,21 +140,21 @@ packages:
     source: hosted
     version: "0.6.7"
   latlong2:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: latlong2
-      sha256: "08ef7282ba9f76e8495e49e2dc4d653015ac929dce5f92b375a415d30b407ea0"
+      sha256: "18712164760cee655bc790122b0fd8f3d5b3c36da2cb7bf94b68a197fbb0811b"
       url: "https://pub.dev"
     source: hosted
-    version: "0.8.2"
+    version: "0.9.0"
   lints:
     dependency: transitive
     description:
       name: lints
-      sha256: a2c3d198cb5ea2e179926622d433331d8b58374ab8f29cdda6e863bd62fd369c
+      sha256: "0a217c6c989d21039f1498c3ed9f3ed71b354e69873f13a8dfc3c9fe76f1b452"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.1"
+    version: "2.1.1"
   lists:
     dependency: transitive
     description:
@@ -239,10 +231,10 @@ packages:
     dependency: transitive
     description:
       name: path_provider_linux
-      sha256: "2ae08f2216225427e64ad224a24354221c2c7907e448e6e0e8b57b1eb9f10ad1"
+      sha256: ffbb8cc9ed2c9ec0e4b7a541e56fd79b138e8f47d2fb86815f15358a349b3b57
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.10"
+    version: "2.1.11"
   path_provider_platform_interface:
     dependency: transitive
     description:
@@ -360,14 +352,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.5.1"
-  tuple:
-    dependency: transitive
-    description:
-      name: tuple
-      sha256: "0ea99cd2f9352b2586583ab2ce6489d1f95a5f6de6fb9492faaf97ae2060f0aa"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.1"
   typed_data:
     dependency: transitive
     description:
@@ -390,7 +374,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "4.0.0"
+    version: "5.0.0"
   vector_math:
     dependency: transitive
     description:
@@ -408,7 +392,7 @@ packages:
     source: hosted
     version: "1.0.0"
   vector_tile_renderer:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: vector_tile_renderer
       sha256: de212da0f5e48107d3b763a940a428eb1f49d8a4664d41ac0b654f77209a2d0b
@@ -440,5 +424,5 @@ packages:
     source: hosted
     version: "1.0.0"
 sdks:
-  dart: ">=3.0.0-0 <4.0.0"
-  flutter: ">=3.3.0"
+  dart: ">=3.0.0 <4.0.0"
+  flutter: ">=3.10.0"
