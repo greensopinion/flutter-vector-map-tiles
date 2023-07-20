@@ -40,6 +40,7 @@ class _GridVectorTileState extends DisposableState<GridVectorTile> {
     final textCache = widget.textCache;
     final symbolTheme = model.symbolTheme;
     options = VectorTileOptions(model, model.layers.first.theme,
+        sprites: model.layers.first.sprites,
         textCache: textCache,
         paintBackground: model.paintBackground,
         symbolsDelayPainterModel: null);
@@ -47,6 +48,7 @@ class _GridVectorTileState extends DisposableState<GridVectorTile> {
     if (symbolTheme != null) {
       _symbolsDelayModel = SymbolsDelayPainterModel(model);
       _symbolPainter = VectorTilePainter(VectorTileOptions(model, symbolTheme,
+          sprites: model.layers.first.sprites,
           textCache: textCache,
           paintBackground: false,
           symbolsDelayPainterModel: _symbolsDelayModel));
@@ -100,8 +102,7 @@ class _GridVectorTileState extends DisposableState<GridVectorTile> {
 class _GridVectorTileLayer extends material.StatefulWidget {
   final TileLayerModel model;
 
-  const _GridVectorTileLayer({material.Key? key, required this.model})
-      : super(key: key);
+  const _GridVectorTileLayer({super.key, required this.model});
 
   @override
   material.State<material.StatefulWidget> createState() {

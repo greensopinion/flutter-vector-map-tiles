@@ -37,8 +37,7 @@ class DelayPainter extends StatefulWidget {
   final DelayPainterModel model;
   final CustomPainter delegate;
 
-  const DelayPainter({Key? key, required this.model, required this.delegate})
-      : super(key: key);
+  const DelayPainter({super.key, required this.model, required this.delegate});
 
   @override
   State<StatefulWidget> createState() {

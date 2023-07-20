@@ -20,18 +20,19 @@ class TileViewport {
     final multiplier = pow(2, zoomDifference.abs()).toInt();
     if (zoomDifference > 0) {
       // tile is bigger
-      final boundsTopLeft = bounds.topLeft.multiplyBy(1 / multiplier).floor();
+      final boundsTopLeft =
+          (bounds.topLeft.toDoublePoint() * (1 / multiplier)).floor();
       final boundsBottomRight =
-          bounds.bottomRight.multiplyBy(1 / multiplier).ceil();
+          (bounds.bottomRight.toDoublePoint() * (1 / multiplier)).ceil();
       final tilePoint = CustomPoint(tile.x, tile.y);
       return Bounds(boundsTopLeft, boundsBottomRight)
           .containsPartialBounds(Bounds(tilePoint, tilePoint));
     }
     // tile is smaller
-    final tileZoomTopLeft = bounds.topLeft.multiplyBy(multiplier);
+    final tileZoomTopLeft = bounds.topLeft * multiplier;
     if (tile.x >= tileZoomTopLeft.x && tile.y >= tileZoomTopLeft.y) {
       final tileZoomBottomRight =
-          (bounds.bottomRight + const CustomPoint(1, 1)).multiplyBy(multiplier);
+          (bounds.bottomRight + const CustomPoint(1, 1)) * multiplier;
       return tile.x < tileZoomBottomRight.x && tile.y < tileZoomBottomRight.y;
     }
     return false;

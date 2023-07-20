@@ -47,7 +47,12 @@ class VectorTilePainter extends CustomPainter {
 
     final tileClip = tileSizer.tileClip(size, tileSizer.effectiveScale);
     Renderer(theme: options.theme, painterProvider: _cachingPainterProvider)
-        .render(canvas, model.tileset!,
+        .render(
+            canvas,
+            TileSource(
+                tileset: model.tileset!,
+                spriteAtlas: model.spriteImage,
+                spriteIndex: model.sprites?.index),
             clip: tileClip,
             zoomScaleFactor: tileSizer.effectiveScale,
             zoom: zoom.zoomDetail);
@@ -67,7 +72,8 @@ class VectorTilePainter extends CustomPainter {
     canvas.clipRect(Offset.zero & size);
     tileSizer.apply(canvas);
     final tileClip = tileSizer.tileClip(size, tileSizer.effectiveScale);
-    Renderer(theme: options.theme).render(canvas, Tileset({}),
+    Renderer(theme: options.theme).render(
+        canvas, TileSource(tileset: Tileset({})),
         clip: tileClip,
         zoomScaleFactor: tileSizer.effectiveScale,
         zoom: model.lastRenderedZoom.zoom);

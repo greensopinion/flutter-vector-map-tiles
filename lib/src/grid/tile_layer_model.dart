@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/widgets.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
@@ -10,6 +12,7 @@ import 'tile_zoom.dart';
 class TileLayerModel extends ChangeNotifier {
   final String id;
   final Theme theme;
+  final SpriteStyle? sprites;
   final Duration delay;
   final Duration initialDelay;
   Tileset? tileset;
@@ -23,8 +26,11 @@ class TileLayerModel extends ChangeNotifier {
   TileIdentity? lastRenderedTile;
   var _renderedOnce = false;
 
+  ui.Image? spriteImage;
+
   TileLayerModel(
       {required this.theme,
+      required this.sprites,
       required this.id,
       required this.delay,
       required this.initialDelay,

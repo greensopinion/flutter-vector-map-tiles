@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide Theme;
 import 'package:flutter_map/plugin_api.dart';
+import 'package:vector_map_tiles/src/style/style.dart';
 import 'vector_tile_layer_mode.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
@@ -20,6 +21,9 @@ class VectorTileLayer extends StatelessWidget {
 
   /// the theme used to render tiles
   final Theme theme;
+
+  /// the sprites to be used when rendering tiles
+  final SpriteStyle? sprites;
 
   /// the time to live of items in the file cache
   /// consider the terms of your tile provider service
@@ -104,26 +108,27 @@ class VectorTileLayer extends StatelessWidget {
   /// The maximum zoom of the tile layer, for raster [layerMode] only.
   final double? maximumZoom;
 
-  VectorTileLayer(
-      {Key? key,
-      required this.tileProviders,
-      required this.theme,
-      this.fileCacheTtl = defaultCacheTtl,
-      this.memoryTileCacheMaxSize = defaultTileCacheMaxSize,
-      this.memoryTileDataCacheMaxSize = defaultTileDataCacheMaxSize,
-      this.fileCacheMaximumSizeInBytes = defaultCacheMaxSize,
-      this.textCacheMaxSize = defaultTextCacheMaxSize,
-      this.concurrency = defaultConcurrency,
-      this.tileOffset = TileOffset.DEFAULT,
-      this.maximumTileSubstitutionDifference =
-          defaultMaxTileSubstitutionDifference,
-      this.backgroundTheme,
-      this.showTileDebugInfo = false,
-      this.logCacheStats = false,
-      this.layerMode = VectorTileLayerMode.raster,
-      this.maximumZoom,
-      this.tileDelay = const Duration(milliseconds: 0)})
-      : super(key: key) {
+  VectorTileLayer({
+    super.key,
+    required this.tileProviders,
+    required this.theme,
+    this.sprites,
+    this.fileCacheTtl = defaultCacheTtl,
+    this.memoryTileCacheMaxSize = defaultTileCacheMaxSize,
+    this.memoryTileDataCacheMaxSize = defaultTileDataCacheMaxSize,
+    this.fileCacheMaximumSizeInBytes = defaultCacheMaxSize,
+    this.textCacheMaxSize = defaultTextCacheMaxSize,
+    this.concurrency = defaultConcurrency,
+    this.tileOffset = TileOffset.DEFAULT,
+    this.maximumTileSubstitutionDifference =
+        defaultMaxTileSubstitutionDifference,
+    this.backgroundTheme,
+    this.showTileDebugInfo = false,
+    this.logCacheStats = false,
+    this.layerMode = VectorTileLayerMode.raster,
+    this.maximumZoom,
+    this.tileDelay = const Duration(milliseconds: 0),
+  }) {
     assert(concurrency >= 0 && concurrency <= 100);
     final providers = theme.tileSources
         .map((source) => tileProviders.tileProviderBySource[source])

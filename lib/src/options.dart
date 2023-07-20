@@ -4,10 +4,12 @@ import 'tile_offset.dart';
 import 'tile_providers.dart';
 import 'vector_tile_layer.dart' as vmt;
 import 'vector_tile_layer_mode.dart';
+import 'style/style.dart';
 
 class VectorTileLayerOptions {
   final TileProviders tileProviders;
   final Theme theme;
+  final SpriteStyle? sprites;
   final Duration fileCacheTtl;
   final int fileCacheMaximumSizeInBytes;
   final int memoryTileCacheMaxSize;
@@ -26,6 +28,7 @@ class VectorTileLayerOptions {
   VectorTileLayerOptions(vmt.VectorTileLayer layer)
       : tileProviders = layer.tileProviders,
         theme = layer.theme,
+        sprites = layer.sprites,
         fileCacheTtl = layer.fileCacheTtl,
         fileCacheMaximumSizeInBytes = layer.fileCacheMaximumSizeInBytes,
         memoryTileCacheMaxSize = layer.memoryTileCacheMaxSize,
@@ -45,6 +48,7 @@ class VectorTileLayerOptions {
   bool hasRenderDifferences(VectorTileLayerOptions other) =>
       other.theme.id != theme.id ||
       other.theme.version != theme.version ||
+      other.sprites != sprites ||
       other.showTileDebugInfo != showTileDebugInfo ||
       other.backgroundTheme?.id != backgroundTheme?.id ||
       other.backgroundTheme?.version != backgroundTheme?.version ||

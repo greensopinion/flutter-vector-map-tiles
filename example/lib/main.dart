@@ -11,7 +11,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   // This widget is the root of your application.
   @override
@@ -25,12 +25,12 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+  const MyHomePage({super.key, required this.title});
 
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -86,17 +86,16 @@ class _MyHomePageState extends State<MyHomePage> {
 //   Maptiler - https://api.maptiler.com/maps/outdoor/style.json?key={key}
 //   Stadia Maps - https://tiles.stadiamaps.com/styles/outdoors.json?api_key={key}
   Future<Style> _readStyle() => StyleReader(
-          uri:
-              'https://tiles.stadiamaps.com/styles/outdoors.json?api_key={key}',
+          uri: 'mapbox://styles/mapbox/streets-v12?access_token={key}',
           // ignore: undefined_identifier
-          apiKey: stadiaMapsApiKey,
+          apiKey: mapboxApiKey,
           logger: const Logger.console())
       .read();
 
   Widget _map(Style style) => FlutterMap(
         mapController: _controller,
         options: MapOptions(
-            center: style.center ?? LatLng(49.246292, -123.116226),
+            center: style.center ?? const LatLng(49.246292, -123.116226),
             zoom: style.zoom ?? 10,
             maxZoom: 22,
             interactiveFlags: InteractiveFlag.drag |
@@ -108,9 +107,10 @@ class _MyHomePageState extends State<MyHomePage> {
           VectorTileLayer(
               tileProviders: style.providers,
               theme: style.theme,
+              sprites: style.sprites,
               maximumZoom: 22,
-              // tileOffset: TileOffset.mapbox,
-              layerMode: VectorTileLayerMode.raster)
+              tileOffset: TileOffset.mapbox,
+              layerMode: VectorTileLayerMode.vector)
         ],
       );
 

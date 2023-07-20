@@ -1,7 +1,12 @@
+
+## 4.0.0
+
+* update to flutter_map 4.0.0
+* add support for icons via sprites
+
 ## 3.3.5
 
 * minor optimization
-
 ## 3.3.4
 
 * evict oldest entries from cache when cache max size is exceeded

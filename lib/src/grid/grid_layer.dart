@@ -17,6 +17,7 @@ import '../stream/tile_processor.dart';
 import '../stream/tileset_executor_preprocessor.dart';
 import '../stream/tileset_ui_preprocessor.dart';
 import '../stream/translating_tile_provider.dart';
+import '../style/style.dart';
 import '../tile_identity.dart';
 import '../tile_offset.dart';
 import '../tile_viewport.dart';
@@ -31,8 +32,7 @@ class VectorTileCompositeLayer extends StatefulWidget {
   final FlutterMapState mapState;
   final VectorTileLayerOptions options;
 
-  const VectorTileCompositeLayer(this.options, this.mapState, {Key? key})
-      : super(key: key);
+  const VectorTileCompositeLayer(this.options, this.mapState, {super.key});
 
   @override
   State<StatefulWidget> createState() {
@@ -90,6 +90,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
     _subscription?.cancel();
     _mapChanged.close();
     _caches.dispose();
+    _tileProvider?.dispose();
     _tileProvider = null;
     _executor.dispose();
   }
@@ -110,6 +111,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
         _theme = null;
         _symbolTheme = null;
         _caches.dispose();
+        _tileProvider?.dispose();
         _tileProvider = null;
         _createCaches();
       });
@@ -125,9 +127,16 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
     final layers = <Widget>[];
     if (options.layerMode == VectorTileLayerMode.raster) {
       final maxZoom = options.maximumZoom ?? 18;
+
       final tileProvider = _tileProvider ??
-          createRasterTileProvider(theme, _caches, _executor,
-              options.tileOffset, options.tileDelay, options.concurrency);
+          createRasterTileProvider(
+              theme,
+              widget.options.sprites,
+              _caches,
+              _executor,
+              options.tileOffset,
+              options.tileDelay,
+              options.concurrency);
       _tileProvider = tileProvider;
       final hasBackground = theme.layers
           .where((layer) => layer.type == ThemeLayerType.background)
@@ -135,7 +144,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
       layers.add(TileLayer(
           key: Key("${theme.id}_v${theme.version}_VectorTileLayer"),
           maxZoom: maxZoom,
-          maxNativeZoom: maxZoom,
+          maxNativeZoom: maxZoom.ceil(),
           evictErrorTileStrategy: EvictErrorTileStrategy.notVisible,
           backgroundColor: hasBackground
               ? material.Theme.of(context).canvasColor
@@ -148,6 +157,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
           _LayerOptions(theme,
               caches: _caches,
               symbolTheme: symbolTheme,
+              sprites: options.sprites,
               showTileDebugInfo: options.showTileDebugInfo,
               paintBackground: backgroundTheme == null,
               maxSubstitutionDifference:
@@ -186,6 +196,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
         executor: _executor,
         providers: widget.options.tileProviders,
         theme: widget.options.theme,
+        sprites: widget.options.sprites,
         ttl: widget.options.fileCacheTtl,
         memoryTileCacheMaxSize: widget.options.memoryTileCacheMaxSize,
         memoryTileDataCacheMaxSize: widget.options.memoryTileDataCacheMaxSize,
@@ -217,6 +228,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
 class _LayerOptions {
   final Theme theme;
   final Theme? symbolTheme;
+  final SpriteStyle? sprites;
   final bool showTileDebugInfo;
   final bool paintBackground;
   final int maxSubstitutionDifference;
@@ -227,6 +239,7 @@ class _LayerOptions {
   final Caches caches;
   _LayerOptions(this.theme,
       {this.symbolTheme,
+      this.sprites,
       required this.caches,
       required this.showTileDebugInfo,
       required this.paintBackground,
@@ -301,6 +314,8 @@ class _VectorTileLayerState extends DisposableState<_VectorTileLayer> {
         () => _detailZoom,
         widget.options.theme,
         widget.options.symbolTheme,
+        widget.options.sprites,
+        widget.options.caches.atlasImageCache?.retrieve,
         widget.tileProvider,
         widget.options.caches.textCache,
         widget.options.maxSubstitutionDifference,
@@ -362,8 +377,7 @@ class _VectorTileLayerState extends DisposableState<_VectorTileLayer> {
   Bounds _tiledPixelBounds() {
     final zoom = _mapState.zoom;
     final scale = _mapState.getZoomScale(zoom, _clampedZoom);
-    final centerPoint =
-        _mapState.project(_mapState.center, _clampedZoom).floor();
+    final centerPoint = _mapState.project(_mapState.center, _clampedZoom);
     final halfSize = _mapState.size / (scale * 2);
 
     return Bounds(centerPoint - halfSize, centerPoint + halfSize);

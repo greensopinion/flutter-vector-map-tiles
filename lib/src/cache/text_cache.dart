@@ -4,8 +4,7 @@ import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 import 'cache.dart';
 
 class TextCache extends Cache<StyledSymbol, TextPainter> {
-  TextCache({required int maxSize})
-      : super(maxSize: maxSize, sizer: Sizer(), copier: Copier());
+  TextCache({required super.maxSize}) : super(sizer: Sizer(), copier: Copier());
 }
 
 class CachingTextPainterProvider extends TextPainterProvider {

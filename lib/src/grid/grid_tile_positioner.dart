@@ -33,7 +33,8 @@ class GridTilePositioner {
 
   Offset _tileOffset(TileIdentity tile) {
     final tilePosition =
-        (tile.scaleBy(tileSize) - state.origin).multiplyBy(state.zoomScale) +
+        ((tile.toDoublePoint().scaleBy(tileSize) - state.origin) *
+                state.zoomScale) +
             state.translate;
     return Offset(tilePosition.x.toDouble(), tilePosition.y.toDouble());
   }
@@ -86,14 +87,14 @@ class GridTileSizer {
 
 class TilePositioningState {
   final double zoomScale;
-  late final CustomPoint<num> origin;
-  late final CustomPoint<num> translate;
+  late final CustomPoint<double> origin;
+  late final CustomPoint<double> translate;
 
   TilePositioningState(this.zoomScale, FlutterMapState mapState, double zoom) {
     final pixelOrigin =
         mapState.getNewPixelOrigin(mapState.center, mapState.zoom).round();
     origin = mapState.project(mapState.unproject(pixelOrigin, zoom), zoom);
-    translate = origin.multiplyBy(zoomScale) - pixelOrigin;
+    translate = (origin * zoomScale) - pixelOrigin;
   }
 }
 
