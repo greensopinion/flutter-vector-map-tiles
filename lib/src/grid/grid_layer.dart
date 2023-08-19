@@ -6,6 +6,7 @@ import 'package:flutter/material.dart' as material show Theme;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_map/plugin_api.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:vector_map_tiles/src/cache/cache_storage_function.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart' hide TileLayer;
 
 import '../cache/caches.dart';
@@ -201,7 +202,8 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
         memoryTileCacheMaxSize: widget.options.memoryTileCacheMaxSize,
         memoryTileDataCacheMaxSize: widget.options.memoryTileDataCacheMaxSize,
         maxSizeInBytes: widget.options.fileCacheMaximumSizeInBytes,
-        maxTextCacheSize: widget.options.textCacheMaxSize);
+        maxTextCacheSize: widget.options.textCacheMaxSize,
+        cacheStorage: widget.options.cacheFolder ?? cacheStorageResolver);
     _tileSupplier = TranslatingTileProvider(DelayProvider(
             CachesTileProvider(
                 _caches,
