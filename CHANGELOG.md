@@ -1,4 +1,10 @@
 
+## 5.0.0
+
+* support layer `minzoom`
+* support application-provided cache folder via `VectorTileLayer.cacheFolder`
+* update to flutter_map 5.0.0
+
 ## 4.0.0
 
 * update to flutter_map 4.0.0
