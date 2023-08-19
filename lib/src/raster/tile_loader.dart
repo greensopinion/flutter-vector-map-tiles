@@ -142,4 +142,4 @@ class _TileJob {
   _TileJob(this.requestedTile, this.requestZoom, this.tileSize, this.cancelled);
 }
 
-int _maxOutstandingJobs = 50;
+int _maxOutstandingJobs = 100;
