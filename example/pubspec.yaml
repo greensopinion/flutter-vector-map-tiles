@@ -25,6 +25,7 @@ dependencies:
   flutter:
     sdk: flutter
   vector_tile_renderer: ^4.0.0
+    #path: ../../vector_tile_renderer 
   vector_map_tiles:
     path: ../
   flutter_map: ^5.0.0
