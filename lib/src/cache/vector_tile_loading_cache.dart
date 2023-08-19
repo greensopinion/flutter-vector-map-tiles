@@ -64,8 +64,12 @@ class VectorTileLoadingCache {
         cachedOnly ? _cacheByteFuturesByKey[key] : _byteFuturesByKey[key];
     var loaded = false;
     if (future == null) {
+      final provider = _providers.get(source);
+      if (tile.z < provider.minimumZoom) {
+        return _emptyTile();
+      }
       loaded = true;
-      future = _loadBytes(source, key, tile, cachedOnly);
+      future = _loadBytes(provider, key, tile, cachedOnly);
       if (cachedOnly) {
         _cacheByteFuturesByKey[key] = future;
       } else {
@@ -77,8 +81,7 @@ class VectorTileLoadingCache {
       bytes = await future;
     } on ProviderException catch (error) {
       if (error.statusCode == 404 || error.statusCode == 204) {
-        return TileFactory(_theme, const Logger.noop())
-            .createTileData(VectorTile(layers: []));
+        return _emptyTile();
       }
       rethrow;
     } finally {
@@ -100,16 +103,19 @@ class VectorTileLoadingCache {
     return tileData;
   }
 
-  Future<Uint8List?> _loadBytes(
-      String source, String key, TileIdentity tile, bool cachedOnly) async {
+  Future<Uint8List?> _loadBytes(VectorTileProvider provider, String key,
+      TileIdentity tile, bool cachedOnly) async {
     var bytes = _memoryCache.get(key) ?? await _delegate.retrieve(key);
     if (bytes == null && !cachedOnly) {
-      bytes = await _providers.get(source).provide(tile);
+      bytes = await provider.provide(tile);
       _memoryCache.put(key, bytes);
       await _delegate.put(key, bytes);
     }
     return bytes;
   }
+
+  TileData _emptyTile() => TileFactory(_theme, const Logger.noop())
+      .createTileData(VectorTile(layers: []));
 }
 
 Theme? _theme;

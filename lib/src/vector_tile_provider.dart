@@ -12,15 +12,19 @@ abstract class VectorTileProvider {
   Future<Uint8List> provide(TileIdentity tile);
 
   int get maximumZoom;
+
+  int get minimumZoom;
 }
 
 class NetworkVectorTileProvider extends VectorTileProvider {
   final _UrlProvider _urlProvider;
   final Map<String, String>? httpHeaders;
-  final int _maximumZoom;
 
   @override
-  int get maximumZoom => _maximumZoom;
+  final int maximumZoom;
+
+  @override
+  final int minimumZoom;
 
   /// [urlTemplate] the URL template, e.g. `'https://tiles.stadiamaps.com/data/openmaptiles/{z}/{x}/{y}.pbf?api_key=$apiKey'`
   /// [httpHeaders] HTTP headers to include in requests, suitable for passing
@@ -30,9 +34,11 @@ class NetworkVectorTileProvider extends VectorTileProvider {
   ///  automatically use vector tiles from lower zoom levels once the maximum
   ///  supported by this provider is reached.
   NetworkVectorTileProvider(
-      {required String urlTemplate, this.httpHeaders, int maximumZoom = 16})
-      : _urlProvider = _UrlProvider(urlTemplate),
-        _maximumZoom = maximumZoom;
+      {required String urlTemplate,
+      this.httpHeaders,
+      this.maximumZoom = 16,
+      this.minimumZoom = 1})
+      : _urlProvider = _UrlProvider(urlTemplate);
 
   @override
   Future<Uint8List> provide(TileIdentity tile) async {
@@ -60,7 +66,7 @@ class NetworkVectorTileProvider extends VectorTileProvider {
   }
 
   void _checkTile(TileIdentity tile) {
-    if (tile.z > _maximumZoom || !tile.isValid()) {
+    if (tile.z > maximumZoom || tile.z < minimumZoom || !tile.isValid()) {
       throw ProviderException(
           message: 'Invalid tile coordinates $tile',
           retryable: Retryable.none,
@@ -77,6 +83,9 @@ class MemoryCacheVectorTileProvider extends VectorTileProvider {
 
   @override
   int get maximumZoom => delegate.maximumZoom;
+
+  @override
+  int get minimumZoom => delegate.minimumZoom;
 
   MemoryCacheVectorTileProvider(
       {required this.delegate, required int maxSizeBytes}) {
