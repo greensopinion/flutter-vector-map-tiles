@@ -1,8 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:path_provider/path_provider.dart';
-
 typedef PathFunction = Future<Directory> Function();
 
 class ByteStorage {

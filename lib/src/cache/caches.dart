@@ -1,16 +1,15 @@
 import 'dart:io';
 
 import 'package:executor_lib/executor_lib.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../vector_map_tiles.dart';
+import 'atlas_image_cache.dart';
 import 'byte_storage.dart';
 import 'memory_cache.dart';
 import 'storage_cache.dart';
 import 'text_cache.dart';
 import 'vector_tile_loading_cache.dart';
-import 'atlas_image_cache.dart';
 
 class Caches {
   final Executor executor;
