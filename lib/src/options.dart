@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import 'tile_offset.dart';
@@ -24,6 +26,7 @@ class VectorTileLayerOptions {
   final TileOffset tileOffset;
   final VectorTileLayerMode layerMode;
   final double? maximumZoom;
+  final Future<Directory> Function()? cacheFolder;
 
   VectorTileLayerOptions(vmt.VectorTileLayer layer)
       : tileProviders = layer.tileProviders,
@@ -43,7 +46,8 @@ class VectorTileLayerOptions {
             layer.maximumTileSubstitutionDifference,
         tileOffset = layer.tileOffset,
         layerMode = layer.layerMode,
-        maximumZoom = layer.maximumZoom;
+        maximumZoom = layer.maximumZoom,
+        cacheFolder = layer.cacheFolder;
 
   bool hasRenderDifferences(VectorTileLayerOptions other) =>
       other.theme.id != theme.id ||

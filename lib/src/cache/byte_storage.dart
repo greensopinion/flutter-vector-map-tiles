@@ -11,8 +11,7 @@ class ByteStorage {
 
   ByteStorage._withPath(this._pather);
 
-  ByteStorage({PathFunction pather = getTemporaryDirectory})
-      : this._withPath(pather);
+  ByteStorage({required PathFunction pather}) : this._withPath(pather);
 
   Future<String> get _storagePath async {
     String? path = _path;

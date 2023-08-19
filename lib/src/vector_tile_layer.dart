@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart' hide Theme;
 import 'package:flutter_map/plugin_api.dart';
 import 'package:vector_map_tiles/src/style/style.dart';
@@ -108,27 +110,33 @@ class VectorTileLayer extends StatelessWidget {
   /// The maximum zoom of the tile layer, for raster [layerMode] only.
   final double? maximumZoom;
 
-  VectorTileLayer({
-    super.key,
-    required this.tileProviders,
-    required this.theme,
-    this.sprites,
-    this.fileCacheTtl = defaultCacheTtl,
-    this.memoryTileCacheMaxSize = defaultTileCacheMaxSize,
-    this.memoryTileDataCacheMaxSize = defaultTileDataCacheMaxSize,
-    this.fileCacheMaximumSizeInBytes = defaultCacheMaxSize,
-    this.textCacheMaxSize = defaultTextCacheMaxSize,
-    this.concurrency = defaultConcurrency,
-    this.tileOffset = TileOffset.DEFAULT,
-    this.maximumTileSubstitutionDifference =
-        defaultMaxTileSubstitutionDifference,
-    this.backgroundTheme,
-    this.showTileDebugInfo = false,
-    this.logCacheStats = false,
-    this.layerMode = VectorTileLayerMode.raster,
-    this.maximumZoom,
-    this.tileDelay = const Duration(milliseconds: 0),
-  }) {
+  /// A function that resolves a folder for filesystem caching.
+  /// If unspecified, defaults to a subfolder of the temporary directory.
+  /// Applications that wish to delete persistent cache data should specify
+  /// this function.
+  final Future<Directory> Function()? cacheFolder;
+
+  VectorTileLayer(
+      {super.key,
+      required this.tileProviders,
+      required this.theme,
+      this.sprites,
+      this.fileCacheTtl = defaultCacheTtl,
+      this.memoryTileCacheMaxSize = defaultTileCacheMaxSize,
+      this.memoryTileDataCacheMaxSize = defaultTileDataCacheMaxSize,
+      this.fileCacheMaximumSizeInBytes = defaultCacheMaxSize,
+      this.textCacheMaxSize = defaultTextCacheMaxSize,
+      this.concurrency = defaultConcurrency,
+      this.tileOffset = TileOffset.DEFAULT,
+      this.maximumTileSubstitutionDifference =
+          defaultMaxTileSubstitutionDifference,
+      this.backgroundTheme,
+      this.showTileDebugInfo = false,
+      this.logCacheStats = false,
+      this.layerMode = VectorTileLayerMode.raster,
+      this.maximumZoom,
+      this.tileDelay = const Duration(milliseconds: 0),
+      this.cacheFolder}) {
     assert(concurrency >= 0 && concurrency <= 100);
     final providers = theme.tileSources
         .map((source) => tileProviders.tileProviderBySource[source])

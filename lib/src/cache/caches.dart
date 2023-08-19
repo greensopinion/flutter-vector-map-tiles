@@ -14,9 +14,7 @@ import 'atlas_image_cache.dart';
 
 class Caches {
   final Executor executor;
-  final ByteStorage _storage = ByteStorage(
-      pather: () => getTemporaryDirectory()
-          .then((value) => Directory('${value.path}/.vector_map')));
+  late final ByteStorage _storage;
   late final StorageCache storageCache;
   late final VectorTileLoadingCache vectorTileCache;
   late final MemoryCache memoryVectorTileCache;
@@ -34,7 +32,9 @@ class Caches {
       required int memoryTileCacheMaxSize,
       required int memoryTileDataCacheMaxSize,
       required int maxSizeInBytes,
-      required int maxTextCacheSize}) {
+      required int maxTextCacheSize,
+      required Future<Directory> Function() cacheStorage}) {
+    _storage = ByteStorage(pather: cacheStorage);
     providerSources = providers.tileProviderBySource.keys.toList();
     storageCache = StorageCache(_storage, ttl, maxSizeInBytes);
     memoryVectorTileCache = MemoryCache(maxSizeBytes: memoryTileCacheMaxSize);
