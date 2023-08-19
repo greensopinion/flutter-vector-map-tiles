@@ -11,7 +11,7 @@ void main() {
     final style = await reader.read();
     expect(style.name, 'Outdoors');
     expect(style.zoom, 11.6);
-    expect(style.center, const LatLng(47.372, 8.542));
+    expect(style.center, LatLng(47.372, 8.542));
     expect(style.providers.tileProviderBySource.keys.toSet(),
         <String>{'openmaptiles'});
   });
