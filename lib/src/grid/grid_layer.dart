@@ -6,7 +6,7 @@ import 'package:flutter/material.dart' as material show Theme;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_map/plugin_api.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:vector_map_tiles/src/cache/cache_storage_function.dart';
+import '../cache/cache_storage_function.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart' hide TileLayer;
 
 import '../cache/caches.dart';
@@ -166,7 +166,8 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
               paintNoDataTiles: false,
               tileOffset: widget.options.tileOffset,
               tileZoomSubstitutionOffset: 0,
-              mapZoom: _zoom),
+              mapZoom: _zoom,
+              rotation: _rotation),
           widget.mapState,
           _mapChanged.stream,
           _tileSupplier));
@@ -182,7 +183,8 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
                 paintNoDataTiles: true,
                 tileOffset: widget.options.tileOffset,
                 tileZoomSubstitutionOffset: 4,
-                mapZoom: _zoom),
+                mapZoom: _zoom,
+                rotation: _rotation),
             widget.mapState,
             _mapChanged.stream,
             _tileSupplier);
@@ -225,6 +227,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
       1,
       (widget.mapState.zoom + widget.options.tileOffset.zoomOffset)
           .floorToDouble());
+  double _rotation() => widget.mapState.rotationRad;
 }
 
 class _LayerOptions {
@@ -238,6 +241,7 @@ class _LayerOptions {
   final TileOffset tileOffset;
   final int tileZoomSubstitutionOffset;
   final double Function() mapZoom;
+  final double Function() rotation;
   final Caches caches;
   _LayerOptions(this.theme,
       {this.symbolTheme,
@@ -249,7 +253,8 @@ class _LayerOptions {
       required this.maxSubstitutionDifference,
       required this.tileOffset,
       required this.tileZoomSubstitutionOffset,
-      required this.mapZoom});
+      required this.mapZoom,
+      required this.rotation});
 }
 
 class _VectorTileLayer extends StatefulWidget {
@@ -279,6 +284,7 @@ class _VectorTileLayerState extends DisposableState<_VectorTileLayer> {
   double get _detailZoom =>
       widget.options.mapZoom() - widget.options.tileOffset.zoomOffset;
   double get _clampedZoom => max(1.0, _zoom.floorToDouble());
+  double get _rotation => widget.options.rotation();
 
   @override
   void initState() {
@@ -314,6 +320,7 @@ class _VectorTileLayerState extends DisposableState<_VectorTileLayer> {
         (tileZoom) => _zoomScaler.zoomScale(tileZoom),
         () => _zoom,
         () => _detailZoom,
+        () => _rotation,
         widget.options.theme,
         widget.options.symbolTheme,
         widget.options.sprites,
@@ -332,7 +339,6 @@ class _VectorTileLayerState extends DisposableState<_VectorTileLayer> {
   @override
   Widget build(BuildContext context) {
     _tileWidgets.updateWidgets();
-
     final tiles = _tileWidgets.all.entries
         .where((entry) =>
             widget.options.paintNoDataTiles || entry.value.model.hasData)

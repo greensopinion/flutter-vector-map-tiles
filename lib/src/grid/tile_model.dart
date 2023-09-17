@@ -32,8 +32,8 @@ class VectorTileModel extends ChangeNotifier {
   final Future<ui.Image> Function()? spriteAtlasProvider;
   bool paintBackground;
   final bool showTileDebugInfo;
-  late final TileZoomProvider zoomProvider;
-  TileZoom lastRenderedZoom = TileZoom.undefined();
+  final TileStateProvider stateProvider;
+  TileState lastRenderedState = TileState.undefined();
   TileIdentity? lastRenderedTile;
 
   late final TileTranslation defaultTranslation;
@@ -53,13 +53,9 @@ class VectorTileModel extends ChangeNotifier {
       this.spriteAtlasProvider,
       this.tile,
       this.tileZoomSubstitutionOffset,
-      ZoomScaleFunction zoomScaleFunction,
-      ZoomFunction zoomFunction,
-      ZoomFunction zoomDetailFunction,
+      this.stateProvider,
       this.paintBackground,
       this.showTileDebugInfo) {
-    zoomProvider = TileZoomProvider(
-        tile, zoomScaleFunction, zoomFunction, zoomDetailFunction);
     layers = TileLayerComposer().compose(this, theme, sprites);
     defaultTranslation =
         SlippyMapTranslator(tileProvider.maximumZoom).translate(tile);
@@ -94,10 +90,17 @@ class VectorTileModel extends ChangeNotifier {
     _notifyLayers();
   }
 
-  TileZoom updateRendering() {
-    lastRenderedZoom = zoomProvider.provide();
+  void stateUpdated() {
+    if (hasChanged()) {
+      notifyListeners();
+      _notifyLayers();
+    }
+  }
+
+  TileState updateRendering() {
+    lastRenderedState = stateProvider.provide();
     lastRenderedTile = translation?.translated;
-    return lastRenderedZoom;
+    return lastRenderedState;
   }
 
   void _notifyLayers() {
@@ -107,7 +110,7 @@ class VectorTileModel extends ChangeNotifier {
   }
 
   bool hasChanged() =>
-      lastRenderedZoom != zoomProvider.provide() ||
+      lastRenderedState != stateProvider.provide() ||
       lastRenderedTile != translation?.translated;
 
   @override
@@ -218,7 +221,7 @@ class _VectorTileModelLoader {
   }
 
   TileRequest _newRequest() {
-    final zoom = model.zoomProvider.provide();
+    final zoom = model.stateProvider.provide();
     return TileRequest(
         tileId: model.tile.normalize(),
         zoom: zoom.zoom,

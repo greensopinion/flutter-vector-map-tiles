@@ -1,4 +1,8 @@
 
+## 6.0.0
+
+* support icon/text rotation to align with viewport
+
 ## 5.0.0
 
 * support layer `minzoom`

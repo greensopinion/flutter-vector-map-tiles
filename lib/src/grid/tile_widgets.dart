@@ -1,6 +1,7 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/widgets.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
-import 'dart:ui' as ui;
 
 import '../../vector_map_tiles.dart';
 import '../cache/text_cache.dart';
@@ -20,6 +21,7 @@ class TileWidgets extends ChangeNotifier {
   final ZoomScaleFunction _zoomScaleFunction;
   final ZoomFunction _zoomFunction;
   final ZoomFunction _zoomDetailFunction;
+  final RotationFunction _rotationFunction;
   final Theme _theme;
   final Theme? _symbolTheme;
   final SpriteStyle? _sprites;
@@ -35,6 +37,7 @@ class TileWidgets extends ChangeNotifier {
       this._zoomScaleFunction,
       this._zoomFunction,
       this._zoomDetailFunction,
+      this._rotationFunction,
       this._theme,
       this._symbolTheme,
       this._sprites,
@@ -88,9 +91,8 @@ class TileWidgets extends ChangeNotifier {
             _spriteAtlasProvider,
             tile,
             tileZoomSubstitutionOffset,
-            _zoomScaleFunction,
-            _zoomFunction,
-            _zoomDetailFunction,
+            TileStateProvider(tile, _zoomScaleFunction, _zoomFunction,
+                _zoomDetailFunction, _rotationFunction),
             paintBackground,
             showTileDebugInfo);
         model.addListener(_modelChanged);
@@ -117,6 +119,7 @@ class TileWidgets extends ChangeNotifier {
       _removeAndDispose(it);
     }
     notifyListeners();
+    _propagateUpdated();
   }
 
   @override
@@ -217,5 +220,13 @@ class TileWidgets extends ChangeNotifier {
     _idToModel.remove(obsolete.tile);
     _idToWidget.remove(obsolete.tile);
     obsolete.dispose();
+  }
+
+  void _propagateUpdated() {
+    for (final model in _idToModel.values) {
+      if (!_loadingModels.contains(model)) {
+        model.stateUpdated();
+      }
+    }
   }
 }
