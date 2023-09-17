@@ -98,7 +98,8 @@ class _MyHomePageState extends State<MyHomePage> {
             center: style.center ?? const LatLng(49.246292, -123.116226),
             zoom: style.zoom ?? 10,
             maxZoom: 22,
-            interactiveFlags: InteractiveFlag.drag |
+            interactiveFlags: InteractiveFlag.rotate |
+                InteractiveFlag.drag |
                 InteractiveFlag.flingAnimation |
                 InteractiveFlag.pinchMove |
                 InteractiveFlag.pinchZoom |

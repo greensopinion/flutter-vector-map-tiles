@@ -1,10 +1,10 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
-import '../cache/storage_cache.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../vector_map_tiles.dart';
+import '../cache/storage_cache.dart';
 
 class StorageImageCache {
   late final String themeKey;

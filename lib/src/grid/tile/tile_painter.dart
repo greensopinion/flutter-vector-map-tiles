@@ -28,7 +28,7 @@ class VectorTilePainter extends CustomPainter {
     if (model.disposed) {
       return;
     }
-    final zoom = model.updateRendering();
+    final tileState = model.updateRendering();
     if (model.tileset == null) {
       if (options.paintBackground) {
         _paintBackground(canvas, size);
@@ -40,7 +40,7 @@ class VectorTilePainter extends CustomPainter {
       return;
     }
     ++options.paintCount;
-    final tileSizer = GridTileSizer(translation, zoom.zoomScale, size);
+    final tileSizer = GridTileSizer(translation, tileState.zoomScale, size);
     canvas.save();
     canvas.clipRect(Offset.zero & size);
     tileSizer.apply(canvas);
@@ -55,7 +55,8 @@ class VectorTilePainter extends CustomPainter {
                 spriteIndex: model.sprites?.index),
             clip: tileClip,
             zoomScaleFactor: tileSizer.effectiveScale,
-            zoom: zoom.zoomDetail);
+            zoom: tileState.zoomDetail,
+            rotation: tileState.rotation);
     _lastPainted = _PaintMode.vector;
     _lastPaintedId = translation.translated;
 
@@ -67,7 +68,7 @@ class VectorTilePainter extends CustomPainter {
   void _paintBackground(Canvas canvas, Size size) {
     final model = options.model;
     final tileSizer = GridTileSizer(
-        model.defaultTranslation, model.lastRenderedZoom.zoomScale, size);
+        model.defaultTranslation, model.lastRenderedState.zoomScale, size);
     canvas.save();
     canvas.clipRect(Offset.zero & size);
     tileSizer.apply(canvas);
@@ -76,7 +77,8 @@ class VectorTilePainter extends CustomPainter {
         canvas, TileSource(tileset: Tileset({})),
         clip: tileClip,
         zoomScaleFactor: tileSizer.effectiveScale,
-        zoom: model.lastRenderedZoom.zoom);
+        zoom: model.lastRenderedState.zoom,
+        rotation: model.lastRenderedState.rotation);
     _lastPainted = _PaintMode.background;
     _lastPaintedId = null;
     canvas.restore();

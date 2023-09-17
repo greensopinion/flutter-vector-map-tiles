@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart' hide Theme;
 import 'package:flutter_map/plugin_api.dart';
-import 'package:vector_map_tiles/src/style/style.dart';
+import 'style/style.dart';
 import 'vector_tile_layer_mode.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 

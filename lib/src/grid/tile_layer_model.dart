@@ -21,7 +21,7 @@ class TileLayerModel extends ChangeNotifier {
   var _disposed = false;
   var visible = true;
   late final ScheduledDebounce debounce;
-  TileZoom lastRenderedZoom = TileZoom.undefined();
+  TileState lastRenderedState = TileState.undefined();
   var lastRenderedVisible = true;
   TileIdentity? lastRenderedTile;
   var _renderedOnce = false;
@@ -40,6 +40,7 @@ class TileLayerModel extends ChangeNotifier {
         delay: delay,
         jitter: Duration(milliseconds: delay.inMilliseconds ~/ 2),
         maxAge: Duration(milliseconds: delay.inMilliseconds * 20));
+    tileModel.addListener(_modelUpdated);
   }
 
   @override
@@ -55,17 +56,25 @@ class TileLayerModel extends ChangeNotifier {
     }
   }
 
+  void _modelUpdated() {
+    if (visible &&
+        _renderedOnce &&
+        lastRenderedState != tileModel.stateProvider.provide()) {
+      notifyListeners();
+    }
+  }
+
   void _makeVisible() {
     visible = true;
     notifyListeners();
   }
 
-  TileZoom updateRendering() {
-    final previousRenderedZoom = lastRenderedZoom;
-    lastRenderedZoom = tileModel.zoomProvider.provide();
+  TileState updateRendering() {
+    final previousRenderedState = lastRenderedState;
+    lastRenderedState = tileModel.stateProvider.provide();
     lastRenderedVisible = visible;
     lastRenderedTile = tileModel.translation?.translated;
-    if (previousRenderedZoom != lastRenderedZoom &&
+    if (previousRenderedState != lastRenderedState &&
         nextDelay().inMilliseconds > 0) {
       visible = false;
       debounce.update();
@@ -73,7 +82,7 @@ class TileLayerModel extends ChangeNotifier {
     if (visible) {
       _renderedOnce = true;
     }
-    return lastRenderedZoom;
+    return lastRenderedState;
   }
 
   Duration nextDelay() {
@@ -85,6 +94,6 @@ class TileLayerModel extends ChangeNotifier {
 
   bool hasChanged() =>
       visible != lastRenderedVisible ||
-      lastRenderedZoom != tileModel.zoomProvider.provide() ||
+      lastRenderedState != tileModel.stateProvider.provide() ||
       lastRenderedTile != tileModel.translation?.translated;
 }

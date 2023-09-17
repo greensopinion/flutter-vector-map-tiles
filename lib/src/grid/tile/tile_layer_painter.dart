@@ -11,7 +11,7 @@ class TileLayerPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final zoom = model.updateRendering();
+    final tileState = model.updateRendering();
     final tileset = model.tileset;
     final translation = model.translation;
     if (tileset == null || translation == null || !model.visible) {
@@ -20,7 +20,7 @@ class TileLayerPainter extends CustomPainter {
 
     canvas.save();
     canvas.clipRect(Offset.zero & size);
-    final tileSizer = GridTileSizer(translation, zoom.zoomScale, size);
+    final tileSizer = GridTileSizer(translation, tileState.zoomScale, size);
     tileSizer.apply(canvas);
 
     final tileClip = tileSizer.tileClip(size, tileSizer.effectiveScale);
@@ -32,7 +32,8 @@ class TileLayerPainter extends CustomPainter {
             spriteIndex: model.sprites?.index),
         clip: tileClip,
         zoomScaleFactor: tileSizer.effectiveScale,
-        zoom: zoom.zoom);
+        zoom: tileState.zoom,
+        rotation: tileState.rotation);
     canvas.restore();
   }
 

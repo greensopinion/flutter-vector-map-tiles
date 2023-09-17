@@ -25,8 +25,8 @@ class _TileDebugPainter extends CustomPainter {
     if (translation == null) {
       return;
     }
-    final zoom = options.model.zoomProvider.provide();
-    final tileSizer = GridTileSizer(translation, zoom.zoomScale, size);
+    final state = options.model.stateProvider.provide();
+    final tileSizer = GridTileSizer(translation, state.zoomScale, size);
     final paint = Paint()
       ..strokeWidth = 2.0
       ..style = PaintingStyle.stroke
@@ -47,7 +47,7 @@ class _TileDebugPainter extends CustomPainter {
         text: TextSpan(
             style: textStyle,
             text:
-                '${options.model.tile}\ntranslated=${translation.zoomDifference} from ${translation.translated.z}\nzoom=${zoom.zoom.toStringAsFixed(3)} zoomDetail=${zoom.zoomDetail.toStringAsFixed(3)}\nscale=$roundedScale\nsize=${size.width}\npaintCount=${options.paintCount}'),
+                '${options.model.tile}\ntranslated=${translation.zoomDifference} from ${translation.translated.z}\nzoom=${state.zoom.toStringAsFixed(3)} zoomDetail=${state.zoomDetail.toStringAsFixed(3)}\nscale=$roundedScale\nsize=${size.width}\npaintCount=${options.paintCount}'),
         textAlign: TextAlign.start,
         textDirection: TextDirection.ltr)
       ..layout();

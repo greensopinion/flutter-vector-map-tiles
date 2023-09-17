@@ -3,8 +3,9 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:executor_lib/executor_lib.dart';
-import 'storage_cache.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
+
+import 'storage_cache.dart';
 
 class AtlasImageCache {
   final Theme _theme;

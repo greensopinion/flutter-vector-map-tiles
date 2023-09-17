@@ -113,6 +113,7 @@ class TileLoader {
     Renderer(theme: _theme).render(canvas, tile,
         zoomScaleFactor: zoomScaleFactor,
         zoom: requestedTile.z.toDouble(),
+        rotation: 0.0,
         clip: tileClip);
 
     final picture = recorder.endRecording();
