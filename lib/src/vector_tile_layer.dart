@@ -159,7 +159,7 @@ The theme uses the following sources: ${theme.tileSources.toList().sorted().join
 
   @override
   Widget build(BuildContext context) {
-    final mapState = FlutterMapState.maybeOf(context)!;
-    return VectorTileCompositeLayer(VectorTileLayerOptions(this), mapState);
+    final mapCamera = MapCamera.maybeOf(context)!;
+    return VectorTileCompositeLayer(VectorTileLayerOptions(this), mapCamera);
   }
 }
