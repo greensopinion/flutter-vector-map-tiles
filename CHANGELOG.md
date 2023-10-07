@@ -1,4 +1,8 @@
 
+## 6.0.1
+
+* eliminate noise from disposed `ImageStreamCompleter` since it's expected
+
 ## 6.0.0
 
 * support icon/text rotation to align with viewport
