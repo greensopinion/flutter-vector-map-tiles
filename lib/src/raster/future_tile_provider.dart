@@ -41,9 +41,13 @@ class _FutureImageProvider extends ImageProvider<_FutureImageProvider> {
 
   ImageStreamCompleter _load(_FutureImageProvider key) {
     final cancellation = _CancellationState();
-    final completer =
-        OneFrameImageStreamCompleter(_loadImage(cancellation.isCancelled));
+    final completer = _ImageStreamCompleter();
     completer.addOnLastListenerRemovedCallback(cancellation.cancel);
+    _loadImage(cancellation.isCancelled).then((imageInfo) {
+      completer.quietlySetImage(imageInfo);
+    }, onError: (Object error, StackTrace stack) {
+      completer.reportError(exception: error, stack: stack);
+    });
     return completer;
   }
 
@@ -60,5 +64,16 @@ class _CancellationState {
 
   bool isCancelled() {
     return _cancelled;
+  }
+}
+
+class _ImageStreamCompleter extends ImageStreamCompleter {
+  void quietlySetImage(ImageInfo image) {
+    try {
+      super.setImage(image);
+    } on StateError catch (_) {
+      // expected, disposed
+      image.dispose();
+    }
   }
 }
