@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart' hide Theme;
-import 'package:flutter_map/plugin_api.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'style/style.dart';
 import 'vector_tile_layer_mode.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
@@ -144,9 +144,9 @@ class VectorTileLayer extends StatelessWidget {
     assert(
         providers.isNotEmpty,
         '''
-tileProviders must provide at least one provider that matches the given theme. 
+tileProviders must provide at least one provider that matches the given theme.
 Usually this is an indication that TileProviders in the code doesn't match the sources
-required by the theme. 
+required by the theme.
 The theme uses the following sources: ${theme.tileSources.toList().sorted().join(', ')}.
 '''
             .trim());
@@ -159,7 +159,12 @@ The theme uses the following sources: ${theme.tileSources.toList().sorted().join
 
   @override
   Widget build(BuildContext context) {
-    final mapState = FlutterMapState.maybeOf(context)!;
-    return VectorTileCompositeLayer(VectorTileLayerOptions(this), mapState);
+    final mapOptions = MapOptions.maybeOf(context)!;
+    final mapCamera = MapCamera.maybeOf(context)!;
+    return VectorTileCompositeLayer(
+      VectorTileLayerOptions(this),
+      mapOptions: mapOptions,
+      mapCamera: mapCamera,
+    );
   }
 }
