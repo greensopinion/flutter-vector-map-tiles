@@ -66,7 +66,9 @@ class StorageCache with CacheStats {
         .asyncMap((f) => _toEntry(f))
         .where((e) => e.value.type == FileSystemEntityType.file)
         .toList();
-    int size = entries.map((e) => e.value.size).reduce((a, b) => a + b);
+    int size = entries.isEmpty
+        ? 0
+        : entries.map((e) => e.value.size).reduce((a, b) => a + b);
     if (size > _maxSizeInBytes) {
       final entriesByAccessed = entries
           .sorted((a, b) => a.value.accessed.compareTo(b.value.accessed));
