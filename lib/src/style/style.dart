@@ -36,16 +36,16 @@ class SpriteStyle {
 class StyleReader {
   final String uri;
   final String? apiKey;
+  final Map<String, dynamic>? styleData;
   final Logger logger;
 
-  StyleReader({required this.uri, this.apiKey, Logger? logger})
+  StyleReader({required this.uri, this.apiKey, this.styleData, Logger? logger})
       : logger = logger ?? const Logger.noop();
 
   Future<Style> read() async {
     final uriMapper = StyleUriMapper(key: apiKey);
     final url = uriMapper.map(uri);
-    final styleText = await _httpGet(url);
-    final style = await compute(jsonDecode, styleText);
+    final style = styleData ?? await _fetchStyle(url);
     if (style is! Map<String, dynamic>) {
       throw _invalidStyle(url);
     }
@@ -93,6 +93,12 @@ class StyleReader {
         name: name,
         center: centerPoint,
         zoom: zoom);
+  }
+
+  Future<dynamic> _fetchStyle(String url) async {
+    final styleText = await _httpGet(url);
+    final style = await compute(jsonDecode, styleText);
+    return style;
   }
 
   Future<Map<String, VectorTileProvider>> _readProviderByName(
