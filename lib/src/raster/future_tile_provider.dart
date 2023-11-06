@@ -1,10 +1,8 @@
 import 'package:flutter/painting.dart';
-import 'package:flutter_map/plugin_api.dart';
+import 'package:flutter_map/flutter_map.dart';
 
 class FutureTileProvider extends TileProvider {
-  final Future<ImageInfo> Function(
-          TileCoordinates coords, TileLayer options, bool Function() cancelled)
-      loader;
+  final Future<ImageInfo> Function(TileCoordinates coords, TileLayer options, bool Function() cancelled) loader;
 
   FutureTileProvider({required this.loader});
 
@@ -14,9 +12,7 @@ class FutureTileProvider extends TileProvider {
 }
 
 class _FutureImageProvider extends ImageProvider<_FutureImageProvider> {
-  final Future<ImageInfo> Function(
-          TileCoordinates coords, TileLayer options, bool Function() cancelled)
-      loader;
+  final Future<ImageInfo> Function(TileCoordinates coords, TileLayer options, bool Function() cancelled) loader;
   final TileCoordinates coords;
   final TileLayer options;
 
@@ -35,9 +31,7 @@ class _FutureImageProvider extends ImageProvider<_FutureImageProvider> {
       _load(key);
 
   @override
-  ImageStreamCompleter loadImage(
-          _FutureImageProvider key, ImageDecoderCallback decode) =>
-      _load(key);
+  ImageStreamCompleter loadImage(_FutureImageProvider key, ImageDecoderCallback decode) => _load(key);
 
   ImageStreamCompleter _load(_FutureImageProvider key) {
     final cancellation = _CancellationState();
@@ -51,8 +45,7 @@ class _FutureImageProvider extends ImageProvider<_FutureImageProvider> {
     return completer;
   }
 
-  Future<ImageInfo> _loadImage(bool Function() cancelled) =>
-      loader(coords, options, cancelled);
+  Future<ImageInfo> _loadImage(bool Function() cancelled) => loader(coords, options, cancelled);
 }
 
 class _CancellationState {

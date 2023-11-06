@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart' hide Theme;
-import 'package:flutter_map/plugin_api.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'style/style.dart';
 import 'vector_tile_layer_mode.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
@@ -128,8 +128,7 @@ class VectorTileLayer extends StatelessWidget {
       this.textCacheMaxSize = defaultTextCacheMaxSize,
       this.concurrency = defaultConcurrency,
       this.tileOffset = TileOffset.DEFAULT,
-      this.maximumTileSubstitutionDifference =
-          defaultMaxTileSubstitutionDifference,
+      this.maximumTileSubstitutionDifference = defaultMaxTileSubstitutionDifference,
       this.backgroundTheme,
       this.showTileDebugInfo = false,
       this.logCacheStats = false,
@@ -138,9 +137,8 @@ class VectorTileLayer extends StatelessWidget {
       this.tileDelay = const Duration(milliseconds: 0),
       this.cacheFolder}) {
     assert(concurrency >= 0 && concurrency <= 100);
-    final providers = theme.tileSources
-        .map((source) => tileProviders.tileProviderBySource[source])
-        .whereType<VectorTileProvider>();
+    final providers =
+        theme.tileSources.map((source) => tileProviders.tileProviderBySource[source]).whereType<VectorTileProvider>();
     assert(
         providers.isNotEmpty,
         '''
@@ -150,16 +148,14 @@ required by the theme.
 The theme uses the following sources: ${theme.tileSources.toList().sorted().join(', ')}.
 '''
             .trim());
-    assert(
-        maximumTileSubstitutionDifference >= 0 &&
-            maximumTileSubstitutionDifference <= 3,
+    assert(maximumTileSubstitutionDifference >= 0 && maximumTileSubstitutionDifference <= 3,
         'maximumTileSubstitutionDifference must be >= 0 and <= 3');
     assert(memoryTileDataCacheMaxSize >= 0 && memoryTileDataCacheMaxSize < 100);
   }
 
   @override
   Widget build(BuildContext context) {
-    final mapState = FlutterMapState.maybeOf(context)!;
+    final mapState = MapCamera.maybeOf(context)!;
     return VectorTileCompositeLayer(VectorTileLayerOptions(this), mapState);
   }
 }

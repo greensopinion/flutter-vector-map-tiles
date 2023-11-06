@@ -4,7 +4,7 @@ import 'dart:ui';
 
 import 'package:executor_lib/executor_lib.dart';
 import 'package:flutter/widgets.dart' hide Image;
-import 'package:flutter_map/plugin_api.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart' hide TileLayer;
 
 import '../../vector_map_tiles.dart';
@@ -26,39 +26,31 @@ class TileLoader {
   final _scale = 2.0;
   late final ConcurrencyExecutor _jobQueue;
 
-  TileLoader(this._theme, this._sprites, this._spriteAtlas, this._provider,
-      this._tileOffset, this._imageCache, this._concurrency) {
+  TileLoader(this._theme, this._sprites, this._spriteAtlas, this._provider, this._tileOffset, this._imageCache,
+      this._concurrency) {
     _jobQueue = ConcurrencyExecutor(
-        delegate: ImmediateExecutor(),
-        concurrencyLimit: _concurrency * 2,
-        maxQueueSize: _maxOutstandingJobs);
+        delegate: ImmediateExecutor(), concurrencyLimit: _concurrency * 2, maxQueueSize: _maxOutstandingJobs);
   }
 
-  Future<ImageInfo> loadTile(TileCoordinates coords, TileLayer options,
-      bool Function() cancelled) async {
-    final requestedTile =
-        TileIdentity(coords.z.toInt(), coords.x.toInt(), coords.y.toInt());
+  Future<ImageInfo> loadTile(TileCoordinates coords, TileLayer options, bool Function() cancelled) async {
+    final requestedTile = TileIdentity(coords.z.toInt(), coords.x.toInt(), coords.y.toInt());
     var requestZoom = requestedTile.z;
     if (_tileOffset.zoomOffset < 0) {
-      requestZoom = max(
-          1, min(requestZoom + _tileOffset.zoomOffset, _provider.maximumZoom));
+      requestZoom = max(1, min(requestZoom + _tileOffset.zoomOffset, _provider.maximumZoom));
     }
     final cached = await _imageCache.retrieve(requestedTile);
     if (cached != null) {
       return ImageInfo(image: cached, scale: _scale);
     }
-    final job =
-        _TileJob(requestedTile, requestZoom, options.tileSize, cancelled);
-    return _jobQueue.submit(Job<_TileJob, ImageInfo>(
-        'render $requestedTile', _renderJob, job,
-        deduplicationKey: 'render $requestedTile'));
+    final job = _TileJob(requestedTile, requestZoom, options.tileSize, cancelled);
+    return _jobQueue.submit(
+        Job<_TileJob, ImageInfo>('render $requestedTile', _renderJob, job, deduplicationKey: 'render $requestedTile'));
   }
 
-  Future<ImageInfo> _renderJob(job) => _renderTile(
-      job.requestedTile, job.requestZoom, job.tileSize, job.cancelled);
+  Future<ImageInfo> _renderJob(job) => _renderTile(job.requestedTile, job.requestZoom, job.tileSize, job.cancelled);
 
-  Future<ImageInfo> _renderTile(TileIdentity requestedTile, int requestZoom,
-      double tileSize, bool Function() cancelled) async {
+  Future<ImageInfo> _renderTile(
+      TileIdentity requestedTile, int requestZoom, double tileSize, bool Function() cancelled) async {
     if (cancelled()) {
       throw CancellationException();
     }
@@ -69,8 +61,7 @@ class TileLoader {
         zoom: requestedTile.z.toDouble(),
         zoomDetail: requestedTile.z.toDouble(),
         cancelled: cancelled);
-    final translatedRequest =
-        createTranslatedRequest(originalRequest, maximumZoom: requestZoom);
+    final translatedRequest = createTranslatedRequest(originalRequest, maximumZoom: requestZoom);
 
     final spriteAtlas = await _spriteAtlas?.call();
     final tileResponse = await _provider.provide(translatedRequest);
@@ -79,8 +70,7 @@ class TileLoader {
       throw 'No tile: $requestedTile';
     }
     if (tileResponse.identity.z != translation.original.z) {
-      translation = translator.specificZoomTranslation(requestedTile,
-          zoom: tileResponse.identity.z);
+      translation = translator.specificZoomTranslation(requestedTile, zoom: tileResponse.identity.z);
     }
 
     final size = tileSize * _scale;
@@ -103,18 +93,11 @@ class TileLoader {
       tileSizer.apply(canvas);
       zoomScaleFactor = tileSizer.effectiveScale / _scale;
     }
-    final tileClip =
-        tileSizer.tileClip(Size.square(size), tileSizer.effectiveScale);
+    final tileClip = tileSizer.tileClip(Size.square(size), tileSizer.effectiveScale);
 
-    final tile = TileSource(
-        tileset: tileResponse.tileset!,
-        spriteAtlas: spriteAtlas,
-        spriteIndex: _sprites?.index);
+    final tile = TileSource(tileset: tileResponse.tileset!, spriteAtlas: spriteAtlas, spriteIndex: _sprites?.index);
     Renderer(theme: _theme).render(canvas, tile,
-        zoomScaleFactor: zoomScaleFactor,
-        zoom: requestedTile.z.toDouble(),
-        rotation: 0.0,
-        clip: tileClip);
+        zoomScaleFactor: zoomScaleFactor, zoom: requestedTile.z.toDouble(), rotation: 0.0, clip: tileClip);
 
     final picture = recorder.endRecording();
     final image = await picture.toImage(size.toInt(), size.toInt());
