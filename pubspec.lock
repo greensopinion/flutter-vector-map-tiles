@@ -138,10 +138,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_map
-      sha256: "5286f72f87deb132daa1489442d6cc46e986fc105cb727d9ae1b602b35b1d1f3"
+      sha256: "2b925948b675ef74ca524179fb133dbe0a21741889ccf56ad08fc8dcc38ba94b"
       url: "https://pub.dev"
     source: hosted
-    version: "5.0.0"
+    version: "6.0.1"
   frontend_server_client:
     dependency: transitive
     description:
@@ -230,6 +230,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.1"
+  logger:
+    dependency: transitive
+    description:
+      name: logger
+      sha256: "6bbb9d6f7056729537a4309bda2e74e18e5d9f14302489cc1e93f33b3fe32cac"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.2+1"
   logging:
     dependency: transitive
     description:
@@ -402,10 +410,10 @@ packages:
     dependency: transitive
     description:
       name: protobuf
-      sha256: "01dd9bd0fa02548bf2ceee13545d4a0ec6046459d847b6b061d8a27237108a08"
+      sha256: "68645b24e0716782e58948f8467fd42a880f255096a821f9e7d0ec625b00c84d"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.0"
+    version: "3.1.0"
   pub_semver:
     dependency: transitive
     description:
@@ -558,19 +566,21 @@ packages:
   vector_tile:
     dependency: transitive
     description:
-      name: vector_tile
-      sha256: "2ac77f6bbd7ddd97efe059207d67bb7eaf807ab98ad58d99fe41a22c230f44e1"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.0"
+      path: "."
+      ref: master
+      resolved-ref: bafbe17f15b8fe36453e5c02de30adc831f5b091
+      url: "https://github.com/aovooyov/dart-vector-tile.git"
+    source: git
+    version: "2.0.0"
   vector_tile_renderer:
     dependency: "direct main"
     description:
-      name: vector_tile_renderer
-      sha256: "33bf5c237c8186e27f9e430a5d06da7e61546fea61b162fd45b29ca4b079af5f"
-      url: "https://pub.dev"
-    source: hosted
-    version: "5.0.1"
+      path: "."
+      ref: main
+      resolved-ref: "7c0b5913cb3bfe75cc3f0a50c52b4821f46ff874"
+      url: "https://github.com/aovooyov/dart-vector-tile-renderer.git"
+    source: git
+    version: "6.0.0"
   vm_service:
     dependency: transitive
     description:

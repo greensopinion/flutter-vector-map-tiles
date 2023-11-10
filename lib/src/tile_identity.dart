@@ -1,8 +1,6 @@
 import 'dart:math';
 
-import 'package:flutter_map/plugin_api.dart';
-
-class TileIdentity extends CustomPoint<int> {
+class TileIdentity extends Point<int> {
   final int z;
 
   TileIdentity(this.z, super.x, super.y);

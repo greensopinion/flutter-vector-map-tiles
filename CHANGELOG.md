@@ -1,3 +1,6 @@
+## 7.0.0
+
+- Updated dependencies
 
 ## 6.0.1
 
