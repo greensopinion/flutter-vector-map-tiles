@@ -1,5 +1,9 @@
 ## 7.0.0
 
+  - Fixed layer transform
+  
+## 7.0.0
+
 - Updated dependencies
 
 ## 6.0.1

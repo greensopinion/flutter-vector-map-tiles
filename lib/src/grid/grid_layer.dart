@@ -191,7 +191,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
         layers.insert(0, background);
       }
     }
-    return Stack(children: layers);
+    return MobileLayerTransformer(child: Stack(children: layers));
   }
 
   void _createCaches() {
