@@ -1,7 +1,7 @@
-## 7.0.0
+## 7.0.1
 
   - Fixed layer transform
-  
+
 ## 7.0.0
 
 - Updated dependencies
