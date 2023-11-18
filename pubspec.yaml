@@ -1,6 +1,6 @@
 name: vector_map_tiles
 description: A plugin for `flutter_map` that enables the use of vector tiles.
-version: 6.0.1
+version: 6.0.2
 homepage: https://github.com/greensopinion/flutter-vector-map-tiles
 
 environment:

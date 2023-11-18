@@ -1,4 +1,8 @@
 
+## 6.0.2
+
+* support concurrent use of different map themes in the same application
+
 ## 6.0.1
 
 * eliminate noise from disposed `ImageStreamCompleter` since it's expected

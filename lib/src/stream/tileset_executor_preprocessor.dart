@@ -33,25 +33,27 @@ class TilesetExecutorPreprocessor {
       await _readyCompleter.future;
     }
     final deduplicationKey = 'preprocess: $identity clip=$clip zoom=$zoom';
-    final preprocessed = await _executor.submit(Job(
-        deduplicationKey, _preprocessTile, _TilesetAndZoom(tileset, zoom),
+    final preprocessed = await _executor.submit(Job(deduplicationKey,
+        _preprocessTile, _TilesetAndZoom(_preprocessor.theme.id, tileset, zoom),
         cancelled: cancelled, deduplicationKey: deduplicationKey));
     return preprocessed;
   }
 }
 
-TilesetPreprocessor? _preprocessor;
+final _preprocessorByThemeId = <String, TilesetPreprocessor>{};
 
 class _TilesetAndZoom {
+  final String themeId;
   final Tileset tileset;
   final int zoom;
 
-  _TilesetAndZoom(this.tileset, this.zoom);
+  _TilesetAndZoom(this.themeId, this.tileset, this.zoom);
 }
 
 Future<void> _setupPreprocessor(TilesetPreprocessor preprocessor) async {
-  _preprocessor = preprocessor;
+  _preprocessorByThemeId[preprocessor.theme.id] = preprocessor;
 }
 
 Tileset _preprocessTile(_TilesetAndZoom it) =>
-    _preprocessor!.preprocess(it.tileset, zoom: it.zoom.toDouble());
+    _preprocessorByThemeId[it.themeId]!
+        .preprocess(it.tileset, zoom: it.zoom.toDouble());

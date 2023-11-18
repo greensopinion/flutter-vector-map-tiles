@@ -97,7 +97,8 @@ class VectorTileLoadingCache {
       return null;
     }
     final name = '$key/${_theme.id}';
-    final tileData = await _executor.submit(Job(name, _createTile, bytes,
+    final tileData = await _executor.submit(Job(
+        name, _createTile, _ThemeTile(themeId: _theme.id, bytes: bytes),
         cancelled: cancelled, deduplicationKey: name));
     _tileDataCache.put(key, tileData);
     return tileData;
@@ -118,12 +119,19 @@ class VectorTileLoadingCache {
       .createTileData(VectorTile(layers: []));
 }
 
-Theme? _theme;
+class _ThemeTile {
+  final String themeId;
+  final Uint8List bytes;
 
-Future<void> _setupTheme(Theme theme) async {
-  _theme = theme;
+  _ThemeTile({required this.themeId, required this.bytes});
 }
 
-TileData _createTile(Uint8List bytes) =>
-    TileFactory(_theme!, const Logger.noop())
-        .createTileData(VectorTileReader().read(bytes));
+final _themeById = <String, Theme>{};
+
+Future<void> _setupTheme(Theme theme) async {
+  _themeById[theme.id] = theme;
+}
+
+TileData _createTile(_ThemeTile themeTile) =>
+    TileFactory(_themeById[themeTile.themeId]!, const Logger.noop())
+        .createTileData(VectorTileReader().read(themeTile.bytes));
