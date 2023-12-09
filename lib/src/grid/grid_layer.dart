@@ -124,7 +124,6 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
   Widget build(BuildContext context) {
     final options = widget.options;
     final backgroundTheme = options.backgroundTheme;
-    final layers = <Widget>[];
     if (options.layerMode == VectorTileLayerMode.raster) {
       final maxZoom = options.maximumZoom ?? 18;
 
@@ -138,52 +137,51 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
               options.tileDelay,
               options.concurrency);
       _tileProvider = tileProvider;
-      layers.add(TileLayer(
+      return TileLayer(
           key: Key("${theme.id}_v${theme.version}_VectorTileLayer"),
           maxZoom: maxZoom,
           maxNativeZoom: maxZoom.ceil(),
           evictErrorTileStrategy: EvictErrorTileStrategy.notVisible,
-          tileProvider: tileProvider));
+          tileProvider: tileProvider);
     }
-    if (options.layerMode == VectorTileLayerMode.vector) {
-      layers.add(_VectorTileLayer(
-          Key("${theme.id}_v${theme.version}_VectorTileLayer"),
-          _LayerOptions(theme,
+    final layers = <Widget>[];
+    if (backgroundTheme != null) {
+      final background = _VectorTileLayer(
+          Key(
+              "${backgroundTheme.id}_v${theme.version}_background_VectorTileLayer"),
+          _LayerOptions(backgroundTheme,
               caches: _caches,
-              symbolTheme: symbolTheme,
-              sprites: options.sprites,
               showTileDebugInfo: options.showTileDebugInfo,
-              paintBackground: backgroundTheme == null,
-              maxSubstitutionDifference:
-                  options.maximumTileSubstitutionDifference,
-              paintNoDataTiles: false,
+              paintBackground: true,
+              maxSubstitutionDifference: 0,
+              paintNoDataTiles: true,
               tileOffset: widget.options.tileOffset,
-              tileZoomSubstitutionOffset: 0,
+              tileZoomSubstitutionOffset: 4,
               mapZoom: _zoom,
               rotation: _rotation),
           widget.mapCamera,
           _mapChanged.stream,
-          _tileSupplier));
-      if (backgroundTheme != null) {
-        final background = _VectorTileLayer(
-            Key(
-                "${backgroundTheme.id}_v${theme.version}_background_VectorTileLayer"),
-            _LayerOptions(backgroundTheme,
-                caches: _caches,
-                showTileDebugInfo: options.showTileDebugInfo,
-                paintBackground: true,
-                maxSubstitutionDifference: 0,
-                paintNoDataTiles: true,
-                tileOffset: widget.options.tileOffset,
-                tileZoomSubstitutionOffset: 4,
-                mapZoom: _zoom,
-                rotation: _rotation),
-            widget.mapCamera,
-            _mapChanged.stream,
-            _tileSupplier);
-        layers.insert(0, background);
-      }
+          _tileSupplier);
+      layers.add(background);
     }
+    layers.add(_VectorTileLayer(
+        Key("${theme.id}_v${theme.version}_VectorTileLayer"),
+        _LayerOptions(theme,
+            caches: _caches,
+            symbolTheme: symbolTheme,
+            sprites: options.sprites,
+            showTileDebugInfo: options.showTileDebugInfo,
+            paintBackground: backgroundTheme == null,
+            maxSubstitutionDifference:
+                options.maximumTileSubstitutionDifference,
+            paintNoDataTiles: false,
+            tileOffset: widget.options.tileOffset,
+            tileZoomSubstitutionOffset: 0,
+            mapZoom: _zoom,
+            rotation: _rotation),
+        widget.mapCamera,
+        _mapChanged.stream,
+        _tileSupplier));
     return MobileLayerTransformer(child: Stack(children: layers));
   }
 
