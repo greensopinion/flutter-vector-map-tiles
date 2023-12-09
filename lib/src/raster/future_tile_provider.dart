@@ -1,5 +1,5 @@
 import 'package:flutter/painting.dart';
-import 'package:flutter_map/plugin_api.dart';
+import 'package:flutter_map/flutter_map.dart';
 
 class FutureTileProvider extends TileProvider {
   final Future<ImageInfo> Function(

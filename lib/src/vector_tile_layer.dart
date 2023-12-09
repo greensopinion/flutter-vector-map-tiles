@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart' hide Theme;
-import 'package:flutter_map/plugin_api.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'style/style.dart';
 import 'vector_tile_layer_mode.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
@@ -159,7 +159,7 @@ The theme uses the following sources: ${theme.tileSources.toList().sorted().join
 
   @override
   Widget build(BuildContext context) {
-    final mapState = FlutterMapState.maybeOf(context)!;
-    return VectorTileCompositeLayer(VectorTileLayerOptions(this), mapState);
+    final mapCamera = MapCamera.maybeOf(context)!;
+    return VectorTileCompositeLayer(VectorTileLayerOptions(this), mapCamera);
   }
 }

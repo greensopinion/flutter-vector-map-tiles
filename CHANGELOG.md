@@ -1,3 +1,8 @@
+## 7.0.0
+
+* update `flutter_map` dependency to 6.1.0
+
+See [UPGRADING](https://github.com/greensopinion/flutter-vector-map-tiles/blob/main/UPGRADING.md) for details.
 
 ## 6.0.2
 
