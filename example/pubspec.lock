@@ -287,10 +287,10 @@ packages:
     dependency: transitive
     description:
       name: protobuf
-      sha256: "01dd9bd0fa02548bf2ceee13545d4a0ec6046459d847b6b061d8a27237108a08"
+      sha256: "68645b24e0716782e58948f8467fd42a880f255096a821f9e7d0ec625b00c84d"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.0"
+    version: "3.1.0"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -366,7 +366,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "6.0.0"
+    version: "6.0.2"
   vector_math:
     dependency: transitive
     description:
@@ -379,18 +379,18 @@ packages:
     dependency: transitive
     description:
       name: vector_tile
-      sha256: "2ac77f6bbd7ddd97efe059207d67bb7eaf807ab98ad58d99fe41a22c230f44e1"
+      sha256: "3adb04426f3aebefce56f3fdf8ab2e23cc9f7d5b06ff8ca33ae87e3a1e441874"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
+    version: "2.0.0"
   vector_tile_renderer:
     dependency: "direct main"
     description:
       name: vector_tile_renderer
-      sha256: "33bf5c237c8186e27f9e430a5d06da7e61546fea61b162fd45b29ca4b079af5f"
+      sha256: fe348e8d60485d956a4cb5e28c374a6fd452fc72060088892c72cb786053c052
       url: "https://pub.dev"
     source: hosted
-    version: "5.0.1"
+    version: "5.1.0"
   web:
     dependency: transitive
     description:
