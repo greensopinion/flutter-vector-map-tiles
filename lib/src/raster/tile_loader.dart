@@ -35,6 +35,10 @@ class TileLoader {
   }
 
   Future<ImageInfo> loadTile(TileCoordinates coords, TileLayer options,
+          bool Function() cancelled) =>
+      loadTileImage(coords, options.tileSize, cancelled);
+
+  Future<ImageInfo> loadTileImage(TileCoordinates coords, double tileSize,
       bool Function() cancelled) async {
     final requestedTile =
         TileIdentity(coords.z.toInt(), coords.x.toInt(), coords.y.toInt());
@@ -47,8 +51,7 @@ class TileLoader {
     if (cached != null) {
       return ImageInfo(image: cached, scale: _scale);
     }
-    final job =
-        _TileJob(requestedTile, requestZoom, options.tileSize, cancelled);
+    final job = _TileJob(requestedTile, requestZoom, tileSize, cancelled);
     return _jobQueue.submit(Job<_TileJob, ImageInfo>(
         'render $requestedTile', _renderJob, job,
         deduplicationKey: 'render $requestedTile'));

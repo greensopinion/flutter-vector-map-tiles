@@ -1,5 +1,6 @@
 library vector_map_tiles;
 
+export 'src/raster/server_tile_provider.dart' show createTileProvider;
 export 'src/style/style.dart';
 export 'src/theme_extensions.dart';
 export 'src/tile_identity.dart';

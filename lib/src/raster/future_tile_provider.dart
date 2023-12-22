@@ -6,7 +6,9 @@ class FutureTileProvider extends TileProvider {
           TileCoordinates coords, TileLayer options, bool Function() cancelled)
       loader;
 
-  FutureTileProvider({required this.loader});
+  final Function() disposer;
+
+  FutureTileProvider({required this.loader, required this.disposer});
 
   @override
   ImageProvider getImage(TileCoordinates coordinates, TileLayer options) =>
