@@ -1,3 +1,7 @@
+## 7.1.0
+
+* support vector theme raster layers
+
 ## 7.0.1
 
 * fix [issue 188](https://github.com/greensopinion/flutter-vector-map-tiles/issues/188) where raster mode map would be rotated incorrectly
