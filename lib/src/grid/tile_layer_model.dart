@@ -16,6 +16,7 @@ class TileLayerModel extends ChangeNotifier {
   final Duration delay;
   final Duration initialDelay;
   Tileset? tileset;
+  RasterTileset? rasterTileset;
   TileTranslation? translation;
   final VectorTileModel tileModel;
   var _disposed = false;

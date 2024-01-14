@@ -28,6 +28,8 @@ class TileLayerPainter extends CustomPainter {
         canvas,
         TileSource(
             tileset: model.tileset!,
+            rasterTileset:
+                model.rasterTileset ?? const RasterTileset(tiles: {}),
             spriteAtlas: model.spriteImage,
             spriteIndex: model.sprites?.index),
         clip: tileClip,

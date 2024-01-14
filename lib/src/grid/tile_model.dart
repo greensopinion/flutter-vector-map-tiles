@@ -7,11 +7,11 @@ import 'package:executor_lib/executor_lib.dart';
 import 'package:flutter/widgets.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
+import '../../vector_map_tiles.dart';
 import '../profiler.dart';
 import '../stream/tile_supplier.dart';
+import '../stream/tile_supplier_raster.dart';
 import '../stream/translated_tile_request.dart';
-import '../tile_identity.dart';
-import '../style/style.dart';
 import 'slippy_map_translator.dart';
 import 'tile_layer_composer.dart';
 import 'tile_layer_model.dart';
@@ -25,6 +25,7 @@ class VectorTileModel extends ChangeNotifier {
   final TileIdentity tile;
   final int tileZoomSubstitutionOffset;
   final TileProvider tileProvider;
+  final RasterTileProvider rasterTileProvider;
   final Theme theme;
   final Theme? symbolTheme;
   final SpriteStyle? sprites;
@@ -39,6 +40,7 @@ class VectorTileModel extends ChangeNotifier {
   late final TileTranslation defaultTranslation;
   TileTranslation? translation;
   Tileset? tileset;
+  RasterTileset? rasterTileset;
   late final TimelineTask _firstRenderedTask;
   bool _firstRendered = false;
   bool showLabels = true;
@@ -47,6 +49,7 @@ class VectorTileModel extends ChangeNotifier {
 
   VectorTileModel(
       this.tileProvider,
+      this.rasterTileProvider,
       this.theme,
       this.symbolTheme,
       this.sprites,
@@ -75,16 +78,21 @@ class VectorTileModel extends ChangeNotifier {
     _VectorTileModelLoader(this).startLoading();
   }
 
-  void _receiveTile(TileResponse received, ui.Image? spriteImage) {
+  void _receiveTile(TileResponse received, RasterTileset rasterTileset,
+      ui.Image? spriteImage) {
     final newTranslation = SlippyMapTranslator(tileProvider.maximumZoom)
         .specificZoomTranslation(tile, zoom: received.identity.z);
     tileset = received.tileset;
     translation = newTranslation;
+    this.rasterTileset = rasterTileset;
     this.spriteImage = spriteImage;
     for (final layer in layers) {
       layer.tileset = tileset;
       layer.translation = translation;
       layer.spriteImage = spriteImage;
+    }
+    if (disposed) {
+      _disposeImages();
     }
     notifyListeners();
     _notifyLayers();
@@ -128,12 +136,17 @@ class VectorTileModel extends ChangeNotifier {
       for (final layer in layers) {
         layer.dispose();
       }
-
       if (!_firstRendered) {
         _firstRendered = true;
         _firstRenderedTask.finish(arguments: {'cancelled': true});
       }
+      _disposeImages();
     }
+  }
+
+  void _disposeImages() {
+    rasterTileset?.dispose();
+    rasterTileset = null;
   }
 
   @override
@@ -191,8 +204,13 @@ class _VectorTileModelLoader {
         break;
       }
       if (localTile != null && localTile.tileset != null) {
-        model._receiveTile(localTile, spriteImage);
+        var rasterTileset = const RasterTileset(tiles: {});
         originalLoaded = z == originalTile.z;
+        if (localTile.tileset != null) {
+          rasterTileset = await model.rasterTileProvider
+              .retrieve(model.tile, skipMissing: true);
+        }
+        model._receiveTile(localTile, rasterTileset, spriteImage);
         if (model.hasData) {
           break;
         }
@@ -206,8 +224,17 @@ class _VectorTileModelLoader {
               maximumZoom:
                   max(0, originalTile.z - model.tileZoomSubstitutionOffset));
         }
-        final response = await model.tileProvider.provide(request);
-        model._receiveTile(response, spriteImage);
+        final loading = model.tileProvider.provide(request);
+        final rasterTileset = await model.rasterTileProvider
+            .retrieve(model.tile, skipMissing: true);
+        late final TileResponse tileResponse;
+        try {
+          tileResponse = await loading;
+        } catch (_) {
+          rasterTileset.dispose();
+          rethrow;
+        }
+        model._receiveTile(tileResponse, rasterTileset, spriteImage);
       } catch (e) {
         if (e is SocketException) {
           // nothing to do

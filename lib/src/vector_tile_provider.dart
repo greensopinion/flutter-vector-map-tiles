@@ -7,6 +7,8 @@ import 'cache/memory_cache.dart';
 import 'provider_exception.dart';
 import 'tile_identity.dart';
 
+enum TileProviderType { vector, raster }
+
 abstract class VectorTileProvider {
   /// provides a tile as a `pbf` or `mvt` format
   Future<Uint8List> provide(TileIdentity tile);
@@ -14,9 +16,13 @@ abstract class VectorTileProvider {
   int get maximumZoom;
 
   int get minimumZoom;
+
+  TileProviderType get type => TileProviderType.vector;
 }
 
 class NetworkVectorTileProvider extends VectorTileProvider {
+  @override
+  final TileProviderType type;
   final _UrlProvider _urlProvider;
   final Map<String, String>? httpHeaders;
 
@@ -35,6 +41,7 @@ class NetworkVectorTileProvider extends VectorTileProvider {
   ///  supported by this provider is reached.
   NetworkVectorTileProvider(
       {required String urlTemplate,
+      this.type = TileProviderType.vector,
       this.httpHeaders,
       this.maximumZoom = 16,
       this.minimumZoom = 1})

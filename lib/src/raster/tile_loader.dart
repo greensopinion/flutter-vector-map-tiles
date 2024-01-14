@@ -11,6 +11,7 @@ import '../../vector_map_tiles.dart';
 import '../grid/grid_tile_positioner.dart';
 import '../grid/slippy_map_translator.dart';
 import '../stream/tile_supplier.dart';
+import '../stream/tile_supplier_raster.dart';
 import '../stream/translated_tile_request.dart';
 import '../stream/translating_tile_provider.dart';
 import 'storage_image_cache.dart';
@@ -20,14 +21,22 @@ class TileLoader {
   final SpriteStyle? _sprites;
   final Future<Image> Function()? _spriteAtlas;
   final TranslatingTileProvider _provider;
+  final RasterTileProvider _rasterTileProvider;
   final StorageImageCache _imageCache;
   final TileOffset _tileOffset;
   final int _concurrency;
   final _scale = 2.0;
   late final ConcurrencyExecutor _jobQueue;
 
-  TileLoader(this._theme, this._sprites, this._spriteAtlas, this._provider,
-      this._tileOffset, this._imageCache, this._concurrency) {
+  TileLoader(
+      this._theme,
+      this._sprites,
+      this._spriteAtlas,
+      this._provider,
+      this._rasterTileProvider,
+      this._tileOffset,
+      this._imageCache,
+      this._concurrency) {
     _jobQueue = ConcurrencyExecutor(
         delegate: ImmediateExecutor(),
         concurrencyLimit: _concurrency * 2,
@@ -73,53 +82,61 @@ class TileLoader {
         createTranslatedRequest(originalRequest, maximumZoom: requestZoom);
 
     final spriteAtlas = await _spriteAtlas?.call();
-    final tileResponse = await _provider.provide(translatedRequest);
-    final tileset = tileResponse.tileset;
-    if (tileset == null) {
-      throw 'No tile: $requestedTile';
+    final tileResponseFuture = _provider.provide(translatedRequest);
+    final rasterTile =
+        await _rasterTileProvider.retrieve(requestedTile.normalize());
+    try {
+      final tileResponse = await tileResponseFuture;
+      final tileset = tileResponse.tileset;
+      if (tileset == null) {
+        throw 'No tile: $requestedTile';
+      }
+      if (tileResponse.identity.z != translation.original.z) {
+        translation = translator.specificZoomTranslation(requestedTile,
+            zoom: tileResponse.identity.z);
+      }
+
+      final size = tileSize * _scale;
+      final tileSizer = GridTileSizer(translation, _scale, Size.square(size));
+
+      final rect = Rect.fromLTRB(0, 0, size, size);
+
+      if (cancelled()) {
+        throw CancellationException();
+      }
+
+      final recorder = PictureRecorder();
+      final canvas = Canvas(recorder, rect);
+      canvas.clipRect(rect);
+      double zoomScaleFactor;
+      if (tileSizer.effectiveScale == 1.0) {
+        canvas.scale(_scale, _scale);
+        zoomScaleFactor = _scale;
+      } else {
+        tileSizer.apply(canvas);
+        zoomScaleFactor = tileSizer.effectiveScale / _scale;
+      }
+      final tileClip =
+          tileSizer.tileClip(Size.square(size), tileSizer.effectiveScale);
+
+      final tile = TileSource(
+          tileset: tileResponse.tileset!,
+          rasterTileset: rasterTile,
+          spriteAtlas: spriteAtlas,
+          spriteIndex: _sprites?.index);
+      Renderer(theme: _theme).render(canvas, tile,
+          zoomScaleFactor: zoomScaleFactor,
+          zoom: requestedTile.z.toDouble(),
+          rotation: 0.0,
+          clip: tileClip);
+
+      final picture = recorder.endRecording();
+      final image = await picture.toImage(size.toInt(), size.toInt());
+      await _cache(translation.original, image);
+      return ImageInfo(image: image, scale: _scale);
+    } finally {
+      rasterTile.dispose();
     }
-    if (tileResponse.identity.z != translation.original.z) {
-      translation = translator.specificZoomTranslation(requestedTile,
-          zoom: tileResponse.identity.z);
-    }
-
-    final size = tileSize * _scale;
-    final tileSizer = GridTileSizer(translation, _scale, Size.square(size));
-
-    final rect = Rect.fromLTRB(0, 0, size, size);
-
-    if (cancelled()) {
-      throw CancellationException();
-    }
-
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder, rect);
-    canvas.clipRect(rect);
-    double zoomScaleFactor;
-    if (tileSizer.effectiveScale == 1.0) {
-      canvas.scale(_scale, _scale);
-      zoomScaleFactor = _scale;
-    } else {
-      tileSizer.apply(canvas);
-      zoomScaleFactor = tileSizer.effectiveScale / _scale;
-    }
-    final tileClip =
-        tileSizer.tileClip(Size.square(size), tileSizer.effectiveScale);
-
-    final tile = TileSource(
-        tileset: tileResponse.tileset!,
-        spriteAtlas: spriteAtlas,
-        spriteIndex: _sprites?.index);
-    Renderer(theme: _theme).render(canvas, tile,
-        zoomScaleFactor: zoomScaleFactor,
-        zoom: requestedTile.z.toDouble(),
-        rotation: 0.0,
-        clip: tileClip);
-
-    final picture = recorder.endRecording();
-    final image = await picture.toImage(size.toInt(), size.toInt());
-    await _cache(translation.original, image);
-    return ImageInfo(image: image, scale: _scale);
   }
 
   Future<void> _cache(TileIdentity tile, Image image) async {

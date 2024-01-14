@@ -6,6 +6,7 @@ import 'package:executor_lib/executor_lib.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import 'storage_cache.dart';
+import 'extensions.dart';
 
 class AtlasImageCache {
   final Theme _theme;
@@ -64,8 +65,4 @@ class AtlasImageCache {
 
   String _key() =>
       'icon-atlas-${_theme.id.fileSafe()}-${_theme.version.fileSafe()}.png';
-}
-
-extension _FileSafe on String {
-  String fileSafe() => replaceAll(RegExp(r'[^a-zA-Z0-9]+'), '-');
 }

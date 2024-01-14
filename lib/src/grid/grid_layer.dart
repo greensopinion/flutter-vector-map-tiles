@@ -5,21 +5,23 @@ import 'package:executor_lib/executor_lib.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import '../cache/cache_storage_function.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart' hide TileLayer;
 
+import '../cache/cache_storage_function.dart';
 import '../cache/caches.dart';
 import '../options.dart';
 import '../raster/raster_tile_provider.dart';
 import '../stream/caches_tile_provider.dart';
 import '../stream/delay_provider.dart';
 import '../stream/tile_processor.dart';
+import '../stream/tile_supplier_raster.dart';
 import '../stream/tileset_executor_preprocessor.dart';
 import '../stream/tileset_ui_preprocessor.dart';
 import '../stream/translating_tile_provider.dart';
 import '../style/style.dart';
 import '../tile_identity.dart';
 import '../tile_offset.dart';
+import '../tile_providers.dart';
 import '../tile_viewport.dart';
 import '../vector_tile_layer_mode.dart';
 import 'constants.dart';
@@ -45,6 +47,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
   late Executor _executor;
   late Caches _caches;
   late TranslatingTileProvider _tileSupplier;
+  late RasterTileProvider _rasterTileProvider;
   late final _cacheStats = ScheduledDebounce(_printCacheStats,
       delay: const Duration(seconds: 1),
       jitter: const Duration(milliseconds: 0),
@@ -132,6 +135,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
               theme,
               widget.options.sprites,
               _caches,
+              _rasterTileProvider,
               _executor,
               options.tileOffset,
               options.tileDelay,
@@ -149,7 +153,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
       final background = _VectorTileLayer(
           Key(
               "${backgroundTheme.id}_v${theme.version}_background_VectorTileLayer"),
-          _LayerOptions(backgroundTheme,
+          _LayerOptions(const TileProviders({}), backgroundTheme,
               caches: _caches,
               showTileDebugInfo: options.showTileDebugInfo,
               paintBackground: true,
@@ -161,12 +165,15 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
               rotation: _rotation),
           widget.mapCamera,
           _mapChanged.stream,
-          _tileSupplier);
+          _tileSupplier,
+          RasterTileProvider(
+              providers: const TileProviders({}),
+              cache: _caches.imageLoadingCache));
       layers.add(background);
     }
     layers.add(_VectorTileLayer(
         Key("${theme.id}_v${theme.version}_VectorTileLayer"),
-        _LayerOptions(theme,
+        _LayerOptions(options.tileProviders, theme,
             caches: _caches,
             symbolTheme: symbolTheme,
             sprites: options.sprites,
@@ -181,7 +188,8 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
             rotation: _rotation),
         widget.mapCamera,
         _mapChanged.stream,
-        _tileSupplier));
+        _tileSupplier,
+        _rasterTileProvider));
     return MobileLayerTransformer(child: Stack(children: layers));
   }
 
@@ -207,6 +215,9 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
                     initializeGeometry: true))),
             widget.options.tileDelay)
         .orDelegate());
+    _rasterTileProvider = RasterTileProvider(
+        providers: widget.options.tileProviders,
+        cache: _caches.imageLoadingCache);
   }
 
   void _printCacheStats() {
@@ -222,6 +233,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
 }
 
 class _LayerOptions {
+  final TileProviders providers;
   final Theme theme;
   final Theme? symbolTheme;
   final SpriteStyle? sprites;
@@ -234,7 +246,7 @@ class _LayerOptions {
   final double Function() mapZoom;
   final double Function() rotation;
   final Caches caches;
-  _LayerOptions(this.theme,
+  _LayerOptions(this.providers, this.theme,
       {this.symbolTheme,
       this.sprites,
       required this.caches,
@@ -253,9 +265,10 @@ class _VectorTileLayer extends StatefulWidget {
   final MapCamera mapState;
   final Stream<void> stream;
   final TranslatingTileProvider tileProvider;
+  final RasterTileProvider rasterTileProvider;
 
-  const _VectorTileLayer(
-      Key key, this.options, this.mapState, this.stream, this.tileProvider)
+  const _VectorTileLayer(Key key, this.options, this.mapState, this.stream,
+      this.tileProvider, this.rasterTileProvider)
       : super(key: key);
 
   @override
@@ -317,6 +330,7 @@ class _VectorTileLayerState extends DisposableState<_VectorTileLayer> {
         widget.options.sprites,
         widget.options.caches.atlasImageCache?.retrieve,
         widget.tileProvider,
+        widget.rasterTileProvider,
         widget.options.caches.textCache,
         widget.options.maxSubstitutionDifference,
         widget.options.tileZoomSubstitutionOffset,
