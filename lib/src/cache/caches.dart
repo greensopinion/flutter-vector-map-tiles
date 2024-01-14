@@ -63,6 +63,7 @@ class Caches {
   void dispose() {
     memoryVectorTileCache.dispose();
     atlasImageCache?.dispose();
+    imageLoadingCache.dispose();
   }
 
   void didHaveMemoryPressure() {
@@ -79,6 +80,8 @@ class Caches {
         'Tile data cache hit ratio:         ${memoryTileDataCache.hitRatio.asPct()}% size: ${memoryTileDataCache.size}');
     cacheStats.add(
         'Text cache hit ratio:              ${textCache.hitRatio.asPct()}% size: ${textCache.size}');
+    cacheStats.add(
+        'Image cache hit ratio:             ${imageLoadingCache.memoryCache.hitRatio.asPct()}% size: ${imageLoadingCache.memoryCache.size}');
     return cacheStats.join('\n');
   }
 }
