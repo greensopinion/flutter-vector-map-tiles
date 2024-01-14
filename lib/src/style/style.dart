@@ -98,15 +98,22 @@ class StyleReader {
   Future<Map<String, VectorTileProvider>> _readProviderByName(
       Map sources) async {
     final providers = <String, VectorTileProvider>{};
-    final sourceEntries = sources.entries
-        .where((s) => s.value['type'] == 'vector' && s.value['url'] is String)
-        .toList();
+    final sourceEntries = sources.entries.toList();
     for (final entry in sourceEntries) {
-      var entryUrl = entry.value['url'] as String;
-      final sourceUrl = StyleUriMapper(key: apiKey).mapSource(uri, entryUrl);
-      final source = await compute(jsonDecode, await _httpGet(sourceUrl));
-      if (source is! Map) {
-        throw _invalidStyle(sourceUrl);
+      final type = TileProviderType.values
+          .where((e) => e.name == entry.value['type'])
+          .firstOrNull;
+      if (type == null) continue;
+      dynamic source;
+      var entryUrl = entry.value['url'] as String?;
+      if (entryUrl != null) {
+        final sourceUrl = StyleUriMapper(key: apiKey).mapSource(uri, entryUrl);
+        source = await compute(jsonDecode, await _httpGet(sourceUrl));
+        if (source is! Map) {
+          throw _invalidStyle(sourceUrl);
+        }
+      } else {
+        source = entry.value;
       }
       final entryTiles = source['tiles'];
       final maxzoom = source['maxzoom'] as int? ?? 14;
@@ -115,7 +122,10 @@ class StyleReader {
         final tileUri = entryTiles[0] as String;
         final tileUrl = StyleUriMapper(key: apiKey).mapTiles(tileUri);
         providers[entry.key] = NetworkVectorTileProvider(
-            urlTemplate: tileUrl, maximumZoom: maxzoom, minimumZoom: minzoom);
+            type: type,
+            urlTemplate: tileUrl,
+            maximumZoom: maxzoom,
+            minimumZoom: minzoom);
       }
     }
     if (providers.isEmpty) {

@@ -61,7 +61,7 @@ class SlippyMapTranslator {
   TileTranslation _translate(TileIdentity tile, int targetZoom) {
     final zoomDifference = tile.z - targetZoom;
     if (zoomDifference == 0) {
-      return TileTranslation(tile, tile, 1, 0, 0);
+      return TileTranslation.identity(tile);
     }
     final divisor = pow(2, zoomDifference).toInt();
     final translatedX = tile.x ~/ divisor;

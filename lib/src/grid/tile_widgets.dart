@@ -6,6 +6,7 @@ import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 import '../../vector_map_tiles.dart';
 import '../cache/text_cache.dart';
 import '../stream/tile_supplier.dart';
+import '../stream/tile_supplier_raster.dart';
 import '../tile_viewport.dart';
 import 'grid_vector_tile.dart';
 import 'slippy_map_translator.dart';
@@ -27,6 +28,7 @@ class TileWidgets extends ChangeNotifier {
   final SpriteStyle? _sprites;
   final Future<ui.Image> Function()? _spriteAtlasProvider;
   final TileProvider _tileProvider;
+  final RasterTileProvider _rasterTileProvider;
   final TextCache _textCache;
   final bool paintBackground;
   final bool showTileDebugInfo;
@@ -43,6 +45,7 @@ class TileWidgets extends ChangeNotifier {
       this._sprites,
       this._spriteAtlasProvider,
       this._tileProvider,
+      this._rasterTileProvider,
       this._textCache,
       this.maxSubstitutionDifference,
       this.tileZoomSubstitutionOffset,
@@ -85,6 +88,7 @@ class TileWidgets extends ChangeNotifier {
       if (model == null) {
         model = VectorTileModel(
             _tileProvider,
+            _rasterTileProvider,
             _theme,
             _symbolTheme,
             _sprites,

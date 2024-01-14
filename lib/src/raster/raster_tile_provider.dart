@@ -7,6 +7,7 @@ import '../cache/caches.dart';
 import '../stream/caches_tile_provider.dart';
 import '../stream/delay_provider.dart';
 import '../stream/tile_processor.dart';
+import '../stream/tile_supplier_raster.dart';
 import '../stream/tileset_executor_preprocessor.dart';
 import '../stream/tileset_ui_preprocessor.dart';
 import '../stream/translating_tile_provider.dart';
@@ -18,6 +19,7 @@ TileProvider createRasterTileProvider(
     Theme theme,
     SpriteStyle? sprites,
     Caches caches,
+    RasterTileProvider rasterTileProvider,
     Executor executor,
     TileOffset tileOffset,
     Duration tileDelay,
@@ -37,6 +39,7 @@ TileProvider createRasterTileProvider(
               sprites,
               caches.atlasImageCache?.retrieve,
               tileSupplier,
+              rasterTileProvider,
               tileOffset,
               StorageImageCache(theme, caches.storageCache),
               concurrency)

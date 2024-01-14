@@ -7,7 +7,7 @@ class TileProviders {
   /// a source in the theme
   final Map<String, VectorTileProvider> tileProviderBySource;
 
-  TileProviders(this.tileProviderBySource);
+  const TileProviders(this.tileProviderBySource);
 
   VectorTileProvider get(String source) {
     final provider = tileProviderBySource[source];

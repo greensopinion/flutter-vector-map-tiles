@@ -6,6 +6,7 @@ import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 import '../../vector_map_tiles.dart';
 import 'atlas_image_cache.dart';
 import 'byte_storage.dart';
+import 'image_loading_cache.dart';
 import 'memory_cache.dart';
 import 'storage_cache.dart';
 import 'text_cache.dart';
@@ -21,6 +22,7 @@ class Caches {
   late final TextCache textCache;
   late final List<String> providerSources;
   late final AtlasImageCache? atlasImageCache;
+  late final ImageLoadingCache imageLoadingCache;
 
   Caches(
       {required TileProviders providers,
@@ -34,17 +36,26 @@ class Caches {
       required int maxTextCacheSize,
       required Future<Directory> Function() cacheStorage}) {
     _storage = ByteStorage(pather: cacheStorage);
-    providerSources = providers.tileProviderBySource.keys.toList();
+    final vectorProviders = providers.tileProviderBySource.entries
+        .where((e) => e.value.type == TileProviderType.vector);
+    providerSources = vectorProviders.map((e) => e.key).toList();
     storageCache = StorageCache(_storage, ttl, maxSizeInBytes);
     memoryVectorTileCache = MemoryCache(maxSizeBytes: memoryTileCacheMaxSize);
     memoryTileDataCache =
         MemoryTileDataCache(maxSize: memoryTileDataCacheMaxSize);
-    vectorTileCache = VectorTileLoadingCache(storageCache,
-        memoryVectorTileCache, memoryTileDataCache, providers, executor, theme);
+    vectorTileCache = VectorTileLoadingCache(
+        storageCache,
+        memoryVectorTileCache,
+        memoryTileDataCache,
+        TileProviders(Map.fromEntries(vectorProviders)),
+        executor,
+        theme);
     textCache = TextCache(maxSize: maxTextCacheSize);
     atlasImageCache = sprites == null
         ? null
         : AtlasImageCache(theme, sprites.atlasProvider, storageCache);
+    imageLoadingCache =
+        ImageLoadingCache(delegate: storageCache, providers: providers);
   }
 
   Future<void> applyConstraints() => storageCache.applyConstraints();
