@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart' hide Theme;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_map/flutter_map.dart';
 import 'style/style.dart';
 import 'vector_tile_layer_mode.dart';
@@ -98,7 +99,7 @@ class VectorTileLayer extends StatelessWidget {
   static const defaultMaxTileSubstitutionDifference = 2;
 
   /// The default [concurrency]
-  static const defaultConcurrency = 4;
+  static const defaultConcurrency = kIsWeb ? 0 : 4;
 
   /// The tile offset, defaults to [TileOffset.DEFAULT].
   /// See [TileOffset.mapbox].

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:executor_lib/executor_lib.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../vector_map_tiles.dart';
@@ -14,7 +15,6 @@ import 'vector_tile_loading_cache.dart';
 
 class Caches {
   final Executor executor;
-  late final ByteStorage _storage;
   late final StorageCache storageCache;
   late final VectorTileLoadingCache vectorTileCache;
   late final MemoryCache memoryVectorTileCache;
@@ -24,22 +24,27 @@ class Caches {
   late final AtlasImageCache? atlasImageCache;
   late final ImageLoadingCache imageLoadingCache;
 
-  Caches(
-      {required TileProviders providers,
-      required this.executor,
-      required Theme theme,
-      required SpriteStyle? sprites,
-      required Duration ttl,
-      required int memoryTileCacheMaxSize,
-      required int memoryTileDataCacheMaxSize,
-      required int maxSizeInBytes,
-      required int maxTextCacheSize,
-      required Future<Directory> Function() cacheStorage}) {
-    _storage = ByteStorage(pather: cacheStorage);
+  Caches({
+    required TileProviders providers,
+    required this.executor,
+    required Theme theme,
+    required SpriteStyle? sprites,
+    required Duration ttl,
+    required int memoryTileCacheMaxSize,
+    required int memoryTileDataCacheMaxSize,
+    required int maxSizeInBytes,
+    required int maxTextCacheSize,
+    required Future<Directory> Function() cacheStorage,
+  }) {
     final vectorProviders = providers.tileProviderBySource.entries
         .where((e) => e.value.type == TileProviderType.vector);
     providerSources = vectorProviders.map((e) => e.key).toList();
-    storageCache = StorageCache(_storage, ttl, maxSizeInBytes);
+    storageCache = StorageCache(
+      kIsWeb
+          ? InMemoryByteStorage(maxSizeInBytes: maxSizeInBytes, ttl: ttl)
+          : FileSystemByteStorage(
+              pather: cacheStorage, maxSizeInBytes: maxSizeInBytes, ttl: ttl),
+    );
     memoryVectorTileCache = MemoryCache(maxSizeBytes: memoryTileCacheMaxSize);
     memoryTileDataCache =
         MemoryTileDataCache(maxSize: memoryTileDataCacheMaxSize);
