@@ -2,15 +2,15 @@ import 'dart:io';
 
 import 'package:flutter/material.dart' hide Theme;
 import 'package:flutter_map/flutter_map.dart';
-import 'style/style.dart';
-import 'vector_tile_layer_mode.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import 'extensions.dart';
 import 'grid/grid_layer.dart';
 import 'options.dart';
+import 'style/style.dart';
 import 'tile_offset.dart';
 import 'tile_providers.dart';
+import 'vector_tile_layer_mode.dart';
 import 'vector_tile_provider.dart';
 
 /// A widget for a vector tile layer, to be used as a child

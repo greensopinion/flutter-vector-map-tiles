@@ -1,8 +1,8 @@
 import 'dart:typed_data';
 
-import 'package:vector_map_tiles/src/cache/memory_cache.dart';
-import 'package:vector_map_tiles/src/tile_identity.dart';
-import 'package:vector_map_tiles/src/vector_tile_provider.dart';
+import '../cache/memory_cache.dart';
+import '../tile_identity.dart';
+import '../vector_tile_provider.dart';
 
 class MemoryCacheVectorTileProvider extends VectorTileProvider {
   final VectorTileProvider delegate;
