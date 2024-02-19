@@ -1,8 +1,8 @@
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
+import '../style/style.dart';
 import 'tile_layer_model.dart';
 import 'tile_model.dart';
-import '../style/style.dart';
 
 class TileLayerComposer {
   List<TileLayerModel> compose(

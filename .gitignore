@@ -78,3 +78,5 @@ build/
 
 coverage/
 example/lib/local_*
+
+pubspec.lock

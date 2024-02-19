@@ -1,3 +1,7 @@
+## 7.1.1
+
+* refactoring
+
 ## 7.1.0
 
 * support vector theme raster layers
