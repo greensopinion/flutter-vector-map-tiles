@@ -1,6 +1,7 @@
-## 7.1.1
+## 7.3.0
 
 * refactoring
+* expose `ProviderException`
 
 ## 7.1.0
 
