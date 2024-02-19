@@ -3,12 +3,12 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:executor_lib/executor_lib.dart';
-import '../tile_identity.dart';
-import '../tile_providers.dart';
-import '../vector_tile_provider.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../provider_exception.dart';
+import '../tile_identity.dart';
+import '../tile_providers.dart';
+import '../vector_tile_provider.dart';
 import 'memory_cache.dart';
 import 'storage_cache.dart';
 

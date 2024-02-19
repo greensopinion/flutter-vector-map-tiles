@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:executor_lib/executor_lib.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_map/flutter_map.dart';
 
@@ -6,11 +9,23 @@ class FutureTileProvider extends TileProvider {
           TileCoordinates coords, TileLayer options, bool Function() cancelled)
       loader;
 
+  @override
+  bool get supportsCancelLoading => true;
+
   FutureTileProvider({required this.loader});
 
   @override
   ImageProvider getImage(TileCoordinates coordinates, TileLayer options) =>
-      _FutureImageProvider(loader, coordinates, options);
+      getImageWithCancelLoadingSupport(
+          coordinates, options, Completer().future);
+
+  @override
+  ImageProvider getImageWithCancelLoadingSupport(
+    TileCoordinates coordinates,
+    TileLayer options,
+    Future<void> cancelLoading,
+  ) =>
+      _FutureImageProvider(loader, coordinates, options, cancelLoading);
 }
 
 class _FutureImageProvider extends ImageProvider<_FutureImageProvider> {
@@ -19,8 +34,10 @@ class _FutureImageProvider extends ImageProvider<_FutureImageProvider> {
       loader;
   final TileCoordinates coords;
   final TileLayer options;
+  final Future<void> cancelLoading;
 
-  _FutureImageProvider(this.loader, this.coords, this.options);
+  _FutureImageProvider(
+      this.loader, this.coords, this.options, this.cancelLoading);
 
   @override
   Future<_FutureImageProvider> obtainKey(ImageConfiguration configuration) {
@@ -42,11 +59,15 @@ class _FutureImageProvider extends ImageProvider<_FutureImageProvider> {
   ImageStreamCompleter _load(_FutureImageProvider key) {
     final cancellation = _CancellationState();
     final completer = _ImageStreamCompleter();
+    unawaited(cancelLoading.whenComplete(cancellation.cancel));
     completer.addOnLastListenerRemovedCallback(cancellation.cancel);
     _loadImage(cancellation.isCancelled).then((imageInfo) {
       completer.quietlySetImage(imageInfo);
     }, onError: (Object error, StackTrace stack) {
-      completer.reportError(exception: error, stack: stack);
+      completer.reportError(
+          exception: error,
+          stack: stack,
+          silent: error is CancellationException);
     });
     return completer;
   }

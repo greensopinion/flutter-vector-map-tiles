@@ -1,3 +1,7 @@
+## 7.3.1
+
+* support cancellation in raster tile provider
+
 ## 7.3.0
 
 * refactoring
