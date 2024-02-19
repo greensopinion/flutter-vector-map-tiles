@@ -13,7 +13,7 @@ import '../provider_exception.dart';
 /// Instances of [PmTilesArchive] should
 /// be long-lived to reduce network calls, and [PmTilesArchive.close] must be called
 /// to release resources when it is no longer needed.
-class PmTilesProvider extends VectorTileProvider {
+class PmTilesVectorTileProvider extends VectorTileProvider {
   PmTilesArchive archive;
   @override
   final TileProviderType type;
@@ -23,7 +23,7 @@ class PmTilesProvider extends VectorTileProvider {
   @override
   final int minimumZoom;
 
-  PmTilesProvider(
+  PmTilesVectorTileProvider(
       {required this.archive,
       required this.type,
       required this.minimumZoom,
