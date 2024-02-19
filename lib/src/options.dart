@@ -2,11 +2,11 @@ import 'dart:io';
 
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
+import 'style/style.dart';
 import 'tile_offset.dart';
 import 'tile_providers.dart';
 import 'vector_tile_layer.dart' as vmt;
 import 'vector_tile_layer_mode.dart';
-import 'style/style.dart';
 
 class VectorTileLayerOptions {
   final TileProviders tileProviders;
