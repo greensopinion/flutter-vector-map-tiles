@@ -12,7 +12,7 @@ import '../provider_exception.dart';
 ///
 /// Instances of [PmTilesArchive] should
 /// be long-lived to reduce network calls, and [PmTilesArchive.close] must be called
-/// do release resources when it is no longer needed.
+/// to release resources when it is no longer needed.
 class PmTilesProvider extends VectorTileProvider {
   PmTilesArchive archive;
   @override
