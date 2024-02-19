@@ -5,6 +5,7 @@ import 'package:http/http.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
+import '../provider/network_vector_tile_provider.dart';
 import '../tile_providers.dart';
 import '../vector_tile_provider.dart';
 import 'uri_mapper.dart';

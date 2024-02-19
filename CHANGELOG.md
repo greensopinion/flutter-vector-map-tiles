@@ -1,3 +1,7 @@
+## 7.2.0
+
+* added `PmTilesProvider` for pmtiles format archives
+
 ## 7.1.0
 
 * support vector theme raster layers
