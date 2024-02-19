@@ -83,6 +83,13 @@ VectorTileProvider _tileProvider() => NetworkVectorTileProvider(
 
 ```
 
+### Tile Providers for other tile sources
+
+| Format                                                    | Description                                                                         | Package                                                                       |
+|-----------------------------------------------------------|-------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|
+| [PMTiles](https://docs.protomaps.com/pmtiles/)            | A binary file format to bundle tiles and use them from a web or file system source. | [vector_map_tiles_pmtiles](https://pub.dev/packages/vector_map_tiles_pmtiles) |
+| [MBTiles](https://docs.mapbox.com/help/glossary/mbtiles/) | A commonly used file format to bundle tiles into a SQLite database.                 | [vector_map_tiles_mbtiles](https://pub.dev/packages/vector_map_tiles_mbtiles) |
+
 ## More Examples
 
 A more complete example showing use of this library is available [in the examples repository `flutter-vector-map-tiles-examples`](https://github.com/greensopinion/flutter-vector-map-tiles-examples). The examples include use with multiple themes, tile providers, contours, hillshade and network-loaded styles.
