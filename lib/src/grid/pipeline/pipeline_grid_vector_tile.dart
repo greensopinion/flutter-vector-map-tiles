@@ -64,7 +64,7 @@ class PipelineGridVectorTileState extends State<GridVectorTile> {
 
   void _modelChanged() {
     if (widget.model.hasChangedWithin(
-            rotationThreshold: 0.1, zoomScaleThreshold: 1.0) ||
+            rotationThreshold: 0.0001, zoomScaleThreshold: 1.0) ||
         widget.model.hasChanged()) {
       _debounce.update();
     }

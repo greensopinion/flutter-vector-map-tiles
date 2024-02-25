@@ -5,6 +5,7 @@ import '../../cache/text_cache.dart';
 import '../grid_tile_positioner.dart';
 import '../slippy_map_translator.dart';
 import '../tile_model.dart';
+import '../tile_zoom.dart';
 
 class PipelineStageLayer extends StatefulWidget {
   final PipelineStage stage;
@@ -24,7 +25,13 @@ class PipelineStageLayer extends StatefulWidget {
   State<StatefulWidget> createState() => _PipelineStageLayer();
 }
 
+class _PaintState {
+  TileState lastPaintedState = TileState.undefined();
+}
+
 class _PipelineStageLayer extends State<PipelineStageLayer> {
+  final _paintState = _PaintState();
+
   @override
   void initState() {
     super.initState();
@@ -44,7 +51,7 @@ class _PipelineStageLayer extends State<PipelineStageLayer> {
         child: CustomPaint(
             key:
                 Key('tile-paint-${widget.model.tile.key()}-${widget.stage.id}'),
-            painter: _PipelineStagePainter(layer: widget),
+            painter: _PipelineStagePainter(layer: widget, state: _paintState),
             isComplex: true,
             willChange: false));
   }
@@ -58,8 +65,9 @@ class _PipelineStageLayer extends State<PipelineStageLayer> {
 
 class _PipelineStagePainter extends CustomPainter {
   final PipelineStageLayer layer;
+  final _PaintState state;
 
-  _PipelineStagePainter({required this.layer});
+  _PipelineStagePainter({required this.layer, required this.state});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -86,8 +94,11 @@ class _PipelineStagePainter extends CustomPainter {
             layer.textCache, const DefaultTextPainterProvider())));
 
     canvas.restore();
+    state.lastPaintedState = tileState;
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true; //FIXME
+  bool shouldRepaint(covariant CustomPainter oldDelegate) =>
+      state.lastPaintedState != layer.model.stateProvider.provide() &&
+      layer.stage.layerTypes.contains(ThemeLayerType.symbol);
 }
