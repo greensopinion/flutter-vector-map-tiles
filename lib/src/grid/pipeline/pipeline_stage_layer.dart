@@ -2,6 +2,7 @@ import 'package:flutter/material.dart' hide Theme;
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../cache/text_cache.dart';
+import '../../tile_identity.dart';
 import '../grid_tile_positioner.dart';
 import '../slippy_map_translator.dart';
 import '../tile_model.dart';
@@ -26,7 +27,9 @@ class PipelineStageLayer extends StatefulWidget {
 }
 
 class _PaintState {
-  TileState lastPaintedState = TileState.undefined();
+  TileState tileState = TileState.undefined();
+  TileTranslation tileTranslation =
+      TileTranslation.identity(TileIdentity(0, 0, 0));
 }
 
 class _PipelineStageLayer extends State<PipelineStageLayer> {
@@ -94,11 +97,13 @@ class _PipelineStagePainter extends CustomPainter {
             layer.textCache, const DefaultTextPainterProvider())));
 
     canvas.restore();
-    state.lastPaintedState = tileState;
+    state.tileState = tileState;
+    state.tileTranslation = translation;
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) =>
-      state.lastPaintedState != layer.model.stateProvider.provide() &&
-      layer.stage.layerTypes.contains(ThemeLayerType.symbol);
+      state.tileTranslation != layer.model.translation ||
+      (state.tileState != layer.model.stateProvider.provide() &&
+          layer.stage.layerTypes.contains(ThemeLayerType.symbol));
 }
