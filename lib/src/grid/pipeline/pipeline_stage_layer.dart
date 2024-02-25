@@ -60,7 +60,8 @@ class _PipelineStageLayer extends State<PipelineStageLayer> {
   }
 
   void _changed() {
-    if (widget.stage.layerTypes.contains(ThemeLayerType.symbol)) {
+    if (_paintState.tileTranslation != widget.model.translation ||
+        widget.stage.layerTypes.contains(ThemeLayerType.symbol)) {
       setState(() {});
     }
   }
