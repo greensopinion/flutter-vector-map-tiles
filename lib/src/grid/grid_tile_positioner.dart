@@ -93,13 +93,14 @@ class TilePositioningState {
   TilePositioningState(this.zoomScale, MapCamera mapCamera, double zoom) {
     final pixelOrigin = mapCamera
         .getNewPixelOrigin(mapCamera.center, mapCamera.zoom)
-        .round()
         .toDoublePoint();
     origin = mapCamera.project(mapCamera.unproject(pixelOrigin, zoom), zoom);
     translate = (origin * zoomScale) - pixelOrigin;
   }
 }
 
+// rounding size is required for Flutter to cache paint and rasterized tiles
+// when panning at fractional zoom levels, easily checked with debugRepaintRainbowEnabled
 double _roundSize(double dimension) {
   double factor = 1000;
   return (dimension * factor).roundToDouble() / factor;
