@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart' as material;
+import 'package:flutter/material.dart' hide Theme;
 import 'package:flutter/widgets.dart';
 
 import '../cache/text_cache.dart';
+import 'pipeline/pipeline_grid_vector_tile.dart';
 import 'tile/delay_painter.dart';
 import 'tile/disposable_state.dart';
 import 'tile/symbols.dart';
@@ -12,7 +13,7 @@ import 'tile/tile_painter.dart';
 import 'tile_layer_model.dart';
 import 'tile_model.dart';
 
-class GridVectorTile extends material.StatefulWidget {
+class GridVectorTile extends StatefulWidget {
   final VectorTileModel model;
   final TextCache textCache;
 
@@ -21,8 +22,8 @@ class GridVectorTile extends material.StatefulWidget {
       : super(key: key);
 
   @override
-  material.State<material.StatefulWidget> createState() =>
-      _GridVectorTileState();
+  State<StatefulWidget> createState() => //_GridVectorTileState();
+      PipelineGridVectorTileState();
 }
 
 class _GridVectorTileState extends DisposableState<GridVectorTile> {
@@ -99,13 +100,13 @@ class _GridVectorTileState extends DisposableState<GridVectorTile> {
   }
 }
 
-class _GridVectorTileLayer extends material.StatefulWidget {
+class _GridVectorTileLayer extends StatefulWidget {
   final TileLayerModel model;
 
   const _GridVectorTileLayer({super.key, required this.model});
 
   @override
-  material.State<material.StatefulWidget> createState() {
+  State<StatefulWidget> createState() {
     return _GridVectorTileLayerState();
   }
 }
@@ -123,7 +124,7 @@ class _GridVectorTileLayerState extends State<_GridVectorTileLayer> {
   }
 
   @override
-  material.Widget build(material.BuildContext context) {
+  Widget build(BuildContext context) {
     return RepaintBoundary(
         key: Key('tileLayerBoundary${widget.model.id}'),
         child: CustomPaint(painter: _painter));

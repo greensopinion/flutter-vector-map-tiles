@@ -98,14 +98,16 @@ class _MyHomePageState extends State<MyHomePage> {
         options: MapOptions(
             initialCenter: style.center ?? const LatLng(49.246292, -123.116226),
             initialZoom: style.zoom ?? 10,
-            maxZoom: 22,
+            maxZoom: 20,
             backgroundColor: material.Theme.of(context).canvasColor),
         children: [
           VectorTileLayer(
               tileProviders: style.providers,
               theme: style.theme,
               sprites: style.sprites,
-              maximumZoom: 22,
+              maximumZoom: 20,
+              delaySymbols: false,
+              textCacheMaxSize: 200,
               tileOffset: TileOffset.mapbox,
               layerMode: VectorTileLayerMode.vector)
         ],

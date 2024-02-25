@@ -119,7 +119,25 @@ class VectorTileModel extends ChangeNotifier {
 
   bool hasChanged() =>
       lastRenderedState != stateProvider.provide() ||
-      lastRenderedTile != translation?.translated;
+      (translation?.translated != null &&
+          lastRenderedTile != translation?.translated);
+
+  bool hasChangedWithin(
+      {required double zoomScaleThreshold, required double rotationThreshold}) {
+    final translated = translation?.translated;
+    if (translated != null && lastRenderedTile != translated) {
+      return true;
+    }
+    final state = stateProvider.provide();
+    if (state.zoom != lastRenderedState.zoom ||
+        state.zoomDetail != lastRenderedState.zoomDetail) {
+      return true;
+    }
+    return (state.zoomScale - lastRenderedState.zoomScale).abs() >=
+            zoomScaleThreshold ||
+        (state.rotation - lastRenderedState.rotation).abs() >=
+            rotationThreshold;
+  }
 
   @override
   void notifyListeners() {

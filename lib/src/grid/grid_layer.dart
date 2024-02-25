@@ -61,16 +61,19 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
 
   Theme get theme =>
       _theme ??
-      (_theme = widget.options.layerMode == VectorTileLayerMode.raster
-          ? widget.options.theme
-          : widget.options.theme.copyWith(
-              types: ThemeLayerType.values
-                  .where((it) => it != ThemeLayerType.symbol)
-                  .toSet()));
-  Theme get symbolTheme =>
+      (_theme = widget.options.delaySymbols
+          ? widget.options.layerMode == VectorTileLayerMode.raster
+              ? widget.options.theme
+              : widget.options.theme.copyWith(
+                  types: ThemeLayerType.values
+                      .where((it) => it != ThemeLayerType.symbol)
+                      .toSet())
+          : widget.options.theme);
+  Theme? get symbolTheme =>
       _symbolTheme ??
-      (_symbolTheme =
-          widget.options.theme.copyWith(types: {ThemeLayerType.symbol}));
+      (_symbolTheme = widget.options.delaySymbols
+          ? widget.options.theme.copyWith(types: {ThemeLayerType.symbol})
+          : null);
 
   @override
   void initState() {

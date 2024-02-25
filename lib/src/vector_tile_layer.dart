@@ -116,6 +116,9 @@ class VectorTileLayer extends StatelessWidget {
   /// this function.
   final Future<Directory> Function()? cacheFolder;
 
+  /// Indicates that symbols should be delayed, which can reduce jank
+  final bool delaySymbols;
+
   VectorTileLayer(
       {super.key,
       required this.tileProviders,
@@ -136,7 +139,8 @@ class VectorTileLayer extends StatelessWidget {
       this.layerMode = VectorTileLayerMode.raster,
       this.maximumZoom,
       this.tileDelay = const Duration(milliseconds: 0),
-      this.cacheFolder}) {
+      this.cacheFolder,
+      this.delaySymbols = true}) {
     assert(concurrency >= 0 && concurrency <= 100);
     final providers = theme.tileSources
         .map((source) => tileProviders.tileProviderBySource[source])

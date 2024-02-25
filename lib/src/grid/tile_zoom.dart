@@ -28,6 +28,10 @@ class TileState {
 
   @override
   int get hashCode => Object.hash(zoom, zoomDetail, zoomScale, rotation);
+
+  @override
+  String toString() =>
+      'zoom=$zoom,zoomDetail=$zoomDetail,zoomScale=$zoomScale,rotation=$rotation';
 }
 
 typedef ZoomScaleFunction = double Function(int tileZoom);
