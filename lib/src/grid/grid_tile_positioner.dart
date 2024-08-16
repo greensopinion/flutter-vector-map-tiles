@@ -106,7 +106,6 @@ double _roundSize(double dimension) {
 }
 
 extension _DoublePointExtension on Point<double> {
-  Point<double> scaleBy(Point<num> other) {
-    return Point<double>(x * other.x, y * other.y);
-  }
+  Point<double> scaleBy(Point<num> other) =>
+      Point<double>(x * other.x, y * other.y);
 }
