@@ -1,3 +1,7 @@
+## 8.0.0
+
+* update `flutter_map` to version 7.0.2
+
 ## 7.3.1
 
 * support cancellation in raster tile provider
