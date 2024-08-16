@@ -104,3 +104,9 @@ double _roundSize(double dimension) {
   double factor = 1000;
   return (dimension * factor).roundToDouble() / factor;
 }
+
+extension _DoublePointExtension on Point<double> {
+  Point<double> scaleBy(Point<num> other) {
+    return Point<double>(x * other.x, y * other.y);
+  }
+}
