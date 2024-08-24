@@ -38,14 +38,16 @@ class StyleReader {
   final String uri;
   final String? apiKey;
   final Logger logger;
+  final Map<String, String>? httpHeaders;
 
-  StyleReader({required this.uri, this.apiKey, Logger? logger})
+  StyleReader(
+      {required this.uri, this.apiKey, Logger? logger, this.httpHeaders})
       : logger = logger ?? const Logger.noop();
 
   Future<Style> read() async {
     final uriMapper = StyleUriMapper(key: apiKey);
     final url = uriMapper.map(uri);
-    final styleText = await _httpGet(url);
+    final styleText = await _httpGet(url, httpHeaders);
     final style = await compute(jsonDecode, styleText);
     if (style is! Map<String, dynamic>) {
       throw _invalidStyle(url);
@@ -75,14 +77,14 @@ class StyleReader {
       for (final spriteUri in spriteUris) {
         dynamic spritesJson;
         try {
-          final spritesJsonText = await _httpGet(spriteUri.json);
+          final spritesJsonText = await _httpGet(spriteUri.json, httpHeaders);
           spritesJson = await compute(jsonDecode, spritesJsonText);
         } catch (e) {
           logger.log(() => 'error reading sprite uri: ${spriteUri.json}');
           continue;
         }
         sprites = SpriteStyle(
-            atlasProvider: () => _loadBinary(spriteUri.image),
+            atlasProvider: () => _loadBinary(spriteUri.image, httpHeaders),
             index: SpriteIndexReader(logger: logger).read(spritesJson));
         break;
       }
@@ -109,7 +111,8 @@ class StyleReader {
       var entryUrl = entry.value['url'] as String?;
       if (entryUrl != null) {
         final sourceUrl = StyleUriMapper(key: apiKey).mapSource(uri, entryUrl);
-        source = await compute(jsonDecode, await _httpGet(sourceUrl));
+        source =
+            await compute(jsonDecode, await _httpGet(sourceUrl, httpHeaders));
         if (source is! Map) {
           throw _invalidStyle(sourceUrl);
         }
@@ -126,7 +129,8 @@ class StyleReader {
             type: type,
             urlTemplate: tileUrl,
             maximumZoom: maxzoom,
-            minimumZoom: minzoom);
+            minimumZoom: minzoom,
+            httpHeaders: httpHeaders);
       }
     }
     if (providers.isEmpty) {
@@ -139,8 +143,8 @@ class StyleReader {
 String _invalidStyle(String url) =>
     'Uri does not appear to be a valid style: $url';
 
-Future<String> _httpGet(String url) async {
-  final response = await get(Uri.parse(url));
+Future<String> _httpGet(String url, Map<String, String>? httpHeaders) async {
+  final response = await get(Uri.parse(url), headers: httpHeaders);
   if (response.statusCode == 200) {
     return response.body;
   } else {
@@ -148,8 +152,9 @@ Future<String> _httpGet(String url) async {
   }
 }
 
-Future<Uint8List> _loadBinary(String url) async {
-  final response = await get(Uri.parse(url));
+Future<Uint8List> _loadBinary(
+    String url, Map<String, String>? httpHeaders) async {
+  final response = await get(Uri.parse(url), headers: httpHeaders);
   if (response.statusCode == 200) {
     return response.bodyBytes;
   } else {
