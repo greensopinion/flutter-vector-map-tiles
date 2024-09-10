@@ -69,6 +69,8 @@ class NetworkVectorTileProvider extends VectorTileProvider {
   }
 
   _isRetryable(int statusCode) => statusCode == 503 || statusCode == 408;
+
+  String get urlTemplate => _urlProvider.urlTemplate;
 }
 
 class _UrlProvider {

@@ -3,6 +3,7 @@ library vector_map_tiles;
 export 'src/provider/memory_vector_tile_provider.dart';
 export 'src/provider/network_vector_tile_provider.dart';
 export 'src/provider_exception.dart' show ProviderException, Retryable;
+export 'src/style/serializer.dart';
 export 'src/style/style.dart';
 export 'src/theme_extensions.dart';
 export 'src/tile_identity.dart';
