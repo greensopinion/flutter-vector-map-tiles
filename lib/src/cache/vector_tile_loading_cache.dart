@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:executor_lib/executor_lib.dart';
+import 'package:vector_map_tiles/src/cache/storage_cache_abstract.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../provider_exception.dart';
@@ -10,13 +11,12 @@ import '../tile_identity.dart';
 import '../tile_providers.dart';
 import '../vector_tile_provider.dart';
 import 'memory_cache.dart';
-import 'storage_cache.dart';
 
 class VectorTileLoadingCache {
   final Theme _theme;
   final MemoryTileDataCache _tileDataCache;
   final MemoryCache _memoryCache;
-  final StorageCache _delegate;
+  final AbstractStorageCache _delegate;
   final TileProviders _providers;
   final Map<String, Future<Uint8List?>> _byteFuturesByKey = {};
   final Map<String, Future<Uint8List?>> _cacheByteFuturesByKey = {};

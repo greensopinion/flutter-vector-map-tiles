@@ -3,15 +3,15 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:executor_lib/executor_lib.dart';
+import 'package:vector_map_tiles/src/cache/storage_cache_abstract.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import 'extensions.dart';
-import 'storage_cache.dart';
 
 class AtlasImageCache {
   final Theme _theme;
   final Future<Uint8List> Function() _atlasProvider;
-  final StorageCache _delegate;
+  final AbstractStorageCache _delegate;
   bool _disposed = false;
   Image? _image;
   Completer<Image>? _loading;

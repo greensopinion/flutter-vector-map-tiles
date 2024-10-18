@@ -1,12 +1,13 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:vector_map_tiles/src/cache/storage_cache_abstract.dart';
+
 import '../../vector_map_tiles.dart';
 import 'cache.dart';
-import 'storage_cache.dart';
 
 class ImageLoadingCache {
-  final StorageCache delegate;
+  final AbstractStorageCache delegate;
   final TileProviders providers;
   final _keyToFuture = <String, Future<Uint8List>>{};
   final memoryCache =
