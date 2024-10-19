@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:test/test.dart';
-import 'package:vector_map_tiles/src/cache/byte_storage.dart';
-import 'package:vector_map_tiles/src/cache/storage_cache.dart';
+import 'package:vector_map_tiles/src/cache/byte_storage_mobile.dart';
+import 'package:vector_map_tiles/src/cache/storage_cache_mobile.dart';
 
 void main() {
   Directory? folder;

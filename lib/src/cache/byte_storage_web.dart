@@ -1,95 +1,96 @@
 import 'dart:typed_data';
-import 'dart:html';
-import 'dart:js' as js;
-import 'package:idb_shim/idb.dart';
+
+import 'package:idb_shim/idb_browser.dart';
+
 import 'byte_storage_abstract.dart';
 
 class ByteStorage implements AbstractByteStorage<String, bool> {
-  static const String _cacheName = 'vector_map_cache';
+  static const int _version = 1;
   static const String _dbName = 'VectorMapCacheDB';
-  static const String _storeName = 'cache_metadata';
-  Database? _db;
+  static const String _storeName = 'cache_files_and_metadata';
+  static const String _path = 'path';
+  static const String _creationDate = 'creation_date';
+  static const String _size = 'size';
+  static const String _contents = 'contents';
+  static const String _keyPath = 'filePath';
 
-  ByteStorage() {
-    _initializeDatabase();
-  }
-
-  Future<void> _initializeDatabase() async {
-    final request = window.indexedDB!.open(_dbName, version: 1);
-
-    request.onUpgradeNeeded.listen((event) {
-      final db = (event.target as Database);
-      db.createObjectStore(_storeName, keyPath: 'path');
-    });
-
-    request.onSuccess.listen((event) {
-      _db = (request.result as Database);
-    });
-
-    request.onError.listen((event) {
-      print('Error opening IndexedDB: ${request.error}');
-    });
+  Future<Database> _openDb() async {
+    final idbFactory = getIdbFactory();
+    if( idbFactory == null ){
+      throw Exception('getIdbFactory() failed');
+    }
+    return idbFactory.open(
+      _dbName,
+      version: _version,
+      onUpgradeNeeded: (e)
+      => e.database.createObjectStore(_storeName, keyPath: _keyPath),
+    );
   }
 
   @override
   Future<void> write(String path, Uint8List bytes) async {
-    final cache = await js.context.callMethod('caches', ['open', _cacheName]);
-    final blob = js.context.callMethod('Blob', [js.JsObject.jsify(bytes)]);
-    await cache.callMethod('put', [path, blob]);
-
+    final db = await _openDb();
     final now = DateTime.now().millisecondsSinceEpoch;
-    final transaction = _db!.transaction(_storeName, 'readwrite');
+    final transaction = db.transaction(_storeName, idbModeReadWrite);
     final objectStore = transaction.objectStore(_storeName);
-    objectStore.put({'path': path, 'creation_date': now});
+    objectStore.put({_keyPath: path, _creationDate: now, _size: bytes.length, _contents: bytes});
     await transaction.completed;
   }
 
   @override
   Future<Uint8List?> read(String path) async {
-    final cache = await js.context.callMethod('caches', ['match', path]);
-    if (cache != null) {
-      return cache.callMethod('arrayBuffer');
+    final db = await _openDb();
+    final txn = db.transaction(_storeName, idbModeReadOnly);
+    final store = txn.objectStore(_storeName);
+    final object = await store.getObject(path) as Map?;
+    await txn.completed;
+    if( object == null ){
+      throw Exception('file not found: $path');
     }
-    return null;
+    return object['contents'] as Uint8List;
   }
 
   @override
   Future<void> delete(String path) async {
-    final cache = await js.context.callMethod('caches', ['open', _cacheName]);
-    await cache.callMethod('delete', [path]);
-
-    final transaction = _db!.transaction(_storeName, 'readwrite');
-    final objectStore = transaction.objectStore(_storeName);
-    objectStore.delete(path);
-    await transaction.completed;
+    final db = await _openDb();
+    final txn = db.transaction(_storeName, idbModeReadWrite);
+    final store = txn.objectStore(_storeName);
+    await store.delete(path);
+    await txn.completed;
   }
 
   @override
   Future<String?> storageDirectory() async {
-    return _cacheName;
+    return _storeName;
   }
 
   @override
   Future<bool?> fileOf(String path) async {
-    final cache = await js.context.callMethod('caches', ['match', path]);
-    return cache != null;
+    final db = await _openDb();
+    final txn = db.transaction(_storeName, idbModeReadOnly);
+    final store = txn.objectStore(_storeName);
+    final object = await store.getObject(path);
+    await txn.completed;
+    return object != null;
   }
 
   Future<int?> getCreationDate(String path) async {
-    final transaction = _db!.transaction(_storeName, 'readonly');
+    final db = await _openDb();
+    final transaction = db.transaction(_storeName, 'readonly');
     final objectStore = transaction.objectStore(_storeName);
     final request = objectStore.getObject(path);
 
     return request.then((value) {
       if (value != null) {
-        return (value as Map)['creation_date'] as int?;
+        return (value as Map)[_creationDate] as int?;
       }
       return null;
     });
   }
 
   Future<List<String>> getAllKeys() async {
-    final transaction = _db!.transaction(_storeName, 'readonly');
+    final db = await _openDb();
+    final transaction = db.transaction(_storeName, 'readonly');
     final objectStore = transaction.objectStore(_storeName);
     final request = objectStore.getAllKeys();
 
@@ -98,11 +99,16 @@ class ByteStorage implements AbstractByteStorage<String, bool> {
 
   /// Get the file size of a given path.
   Future<int?> getFileSize(String path) async {
-    final cache = await js.context.callMethod('caches', ['match', path]);
-    if (cache != null) {
-      final blob = await cache.callMethod('blob');
-      return blob.size as int;
-    }
-    return null;
+    final db = await _openDb();
+    final transaction = db.transaction(_storeName, 'readonly');
+    final objectStore = transaction.objectStore(_storeName);
+    final request = objectStore.getObject(path);
+
+    return request.then((value) {
+      if (value != null) {
+        return (value as Map)[_size] as int?;
+      }
+      return null;
+    });
   }
 }

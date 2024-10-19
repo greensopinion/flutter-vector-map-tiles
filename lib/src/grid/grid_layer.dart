@@ -204,7 +204,8 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
         memoryTileDataCacheMaxSize: widget.options.memoryTileDataCacheMaxSize,
         maxSizeInBytes: widget.options.fileCacheMaximumSizeInBytes,
         maxTextCacheSize: widget.options.textCacheMaxSize,
-        cacheStorage: widget.options.cacheFolder ?? cacheStorageResolver);
+        cacheStorage: (widget.options.cacheFolder ?? cacheStorageResolver) as dynamic
+    );
     _tileSupplier = TranslatingTileProvider(DelayProvider(
             CachesTileProvider(
                 _caches,

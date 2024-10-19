@@ -1,14 +1,14 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:vector_map_tiles/src/cache/storage_cache_abstract.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../vector_map_tiles.dart';
-import '../cache/storage_cache.dart';
 
 class StorageImageCache {
   late final String themeKey;
-  final StorageCache delegate;
+  final AbstractStorageCache delegate;
 
   StorageImageCache(Theme theme, this.delegate) {
     themeKey = '${theme.id}-v${theme.version}'
