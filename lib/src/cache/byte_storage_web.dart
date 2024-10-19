@@ -7,8 +7,7 @@ import 'byte_storage_abstract.dart';
 class ByteStorage implements AbstractByteStorage<String, bool> {
   static const int _version = 1;
   static const String _dbName = 'VectorMapCacheDB';
-  static const String _storeName = 'cache_files_and_metadata';
-  static const String _path = 'path';
+  static const String storeName = 'cache_files_and_metadata';
   static const String _creationDate = 'creation_date';
   static const String _size = 'size';
   static const String _contents = 'contents';
@@ -23,7 +22,7 @@ class ByteStorage implements AbstractByteStorage<String, bool> {
       _dbName,
       version: _version,
       onUpgradeNeeded: (e)
-      => e.database.createObjectStore(_storeName, keyPath: _keyPath),
+      => e.database.createObjectStore(storeName, keyPath: _keyPath),
     );
   }
 
@@ -31,8 +30,8 @@ class ByteStorage implements AbstractByteStorage<String, bool> {
   Future<void> write(String path, Uint8List bytes) async {
     final db = await _openDb();
     final now = DateTime.now().millisecondsSinceEpoch;
-    final transaction = db.transaction(_storeName, idbModeReadWrite);
-    final objectStore = transaction.objectStore(_storeName);
+    final transaction = db.transaction(storeName, idbModeReadWrite);
+    final objectStore = transaction.objectStore(storeName);
     objectStore.put({_keyPath: path, _creationDate: now, _size: bytes.length, _contents: bytes});
     await transaction.completed;
   }
@@ -40,8 +39,8 @@ class ByteStorage implements AbstractByteStorage<String, bool> {
   @override
   Future<Uint8List?> read(String path) async {
     final db = await _openDb();
-    final txn = db.transaction(_storeName, idbModeReadOnly);
-    final store = txn.objectStore(_storeName);
+    final txn = db.transaction(storeName, idbModeReadOnly);
+    final store = txn.objectStore(storeName);
     final object = await store.getObject(path) as Map?;
     await txn.completed;
     if( object == null ){
@@ -53,22 +52,22 @@ class ByteStorage implements AbstractByteStorage<String, bool> {
   @override
   Future<void> delete(String path) async {
     final db = await _openDb();
-    final txn = db.transaction(_storeName, idbModeReadWrite);
-    final store = txn.objectStore(_storeName);
+    final txn = db.transaction(storeName, idbModeReadWrite);
+    final store = txn.objectStore(storeName);
     await store.delete(path);
     await txn.completed;
   }
 
   @override
   Future<String?> storageDirectory() async {
-    return _storeName;
+    return storeName;
   }
 
   @override
   Future<bool?> fileOf(String path) async {
     final db = await _openDb();
-    final txn = db.transaction(_storeName, idbModeReadOnly);
-    final store = txn.objectStore(_storeName);
+    final txn = db.transaction(storeName, idbModeReadOnly);
+    final store = txn.objectStore(storeName);
     final object = await store.getObject(path);
     await txn.completed;
     return object != null;
@@ -76,8 +75,8 @@ class ByteStorage implements AbstractByteStorage<String, bool> {
 
   Future<int?> getCreationDate(String path) async {
     final db = await _openDb();
-    final transaction = db.transaction(_storeName, 'readonly');
-    final objectStore = transaction.objectStore(_storeName);
+    final transaction = db.transaction(storeName, 'readonly');
+    final objectStore = transaction.objectStore(storeName);
     final request = objectStore.getObject(path);
 
     return request.then((value) {
@@ -90,8 +89,8 @@ class ByteStorage implements AbstractByteStorage<String, bool> {
 
   Future<List<String>> getAllKeys() async {
     final db = await _openDb();
-    final transaction = db.transaction(_storeName, 'readonly');
-    final objectStore = transaction.objectStore(_storeName);
+    final transaction = db.transaction(storeName, 'readonly');
+    final objectStore = transaction.objectStore(storeName);
     final request = objectStore.getAllKeys();
 
     return request.then((keys) => keys.cast<String>());
@@ -100,8 +99,8 @@ class ByteStorage implements AbstractByteStorage<String, bool> {
   /// Get the file size of a given path.
   Future<int?> getFileSize(String path) async {
     final db = await _openDb();
-    final transaction = db.transaction(_storeName, 'readonly');
-    final objectStore = transaction.objectStore(_storeName);
+    final transaction = db.transaction(storeName, 'readonly');
+    final objectStore = transaction.objectStore(storeName);
     final request = objectStore.getObject(path);
 
     return request.then((value) {
