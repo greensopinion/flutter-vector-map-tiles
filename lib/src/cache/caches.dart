@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:executor_lib/executor_lib.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
@@ -34,8 +32,8 @@ class Caches {
       required int memoryTileDataCacheMaxSize,
       required int maxSizeInBytes,
       required int maxTextCacheSize,
-      required Future<Directory> Function() cacheStorage}) {
-    _storage = ByteStorage(pather: cacheStorage);
+      required ByteStorage cacheStorage}) {
+    _storage = cacheStorage;
     final vectorProviders = providers.tileProviderBySource.entries
         .where((e) => e.value.type == TileProviderType.vector);
     providerSources = vectorProviders.map((e) => e.key).toList();

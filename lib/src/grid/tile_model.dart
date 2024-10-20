@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'dart:io';
 import 'dart:math';
 import 'dart:ui' as ui;
 
@@ -8,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../vector_map_tiles.dart';
+import '../io/io.dart';
 import '../profiler.dart';
 import '../stream/tile_supplier.dart';
 import '../stream/tile_supplier_raster.dart';

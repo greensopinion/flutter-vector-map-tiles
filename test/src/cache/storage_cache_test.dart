@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:test/test.dart';
-import 'package:vector_map_tiles/src/cache/byte_storage.dart';
+import 'package:vector_map_tiles/src/cache/byte_storage_io.dart';
 import 'package:vector_map_tiles/src/cache/storage_cache.dart';
 
 void main() {
@@ -25,7 +25,7 @@ void main() {
   StorageCache newCache(
           {Duration ttl = const Duration(minutes: 1),
           int maxSize = 1024 * 10}) =>
-      StorageCache(ByteStorage(pather: () async => folder!), ttl, maxSize);
+      StorageCache(IoByteStorage(pather: () async => folder!), ttl, maxSize);
 
   test('caches an entry', () async {
     final cache = newCache();
