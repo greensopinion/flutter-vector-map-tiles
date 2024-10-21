@@ -78,7 +78,7 @@ class IoByteStorage extends ByteStorage {
           .asyncMap(_toEntry)
           .where((e) => e.value.type == FileSystemEntityType.file)
           .map((f) => ByteStorageEntry(
-              path: f.key.path,
+              path: f.key.path.split(RegExp(r'/|\\')).last,
               size: f.value.size,
               modified: f.value.modified,
               accessed: f.value.accessed))
