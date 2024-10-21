@@ -1,3 +1,7 @@
+## 9.0.0-beta.1
+
+* Added web support
+
 ## 8.0.0
 
 * update `flutter_map` to version 7.0.2
