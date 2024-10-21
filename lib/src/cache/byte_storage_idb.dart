@@ -12,28 +12,41 @@ class IdbByteStorage extends ByteStorage {
   static const _size = 'size';
   static const _modified = 'modified';
 
+  int _referenceCount = 0;
+  Future<Database>? _database;
+
   Future<Database> _openDatabase() {
-    final factory = getIdbFactory();
-    if (factory == null) {
-      throw 'Unsupported';
+    var database = _database;
+    if (database == null) {
+      final factory = getIdbFactory();
+      if (factory == null) {
+        throw 'Unsupported';
+      }
+      database = factory.open(_databaseName,
+          version: _version,
+          onUpgradeNeeded: (e) => e.database.createObjectStore(_storeName));
+      _database = database;
     }
-    return factory.open(_databaseName,
-        version: _version,
-        onUpgradeNeeded: (e) => e.database.createObjectStore(_storeName));
+    return database;
   }
 
   Future<T> _withDb<T>(Future<T> Function(ObjectStore) command,
       {required _Mode mode}) async {
-    final db = await _openDatabase();
+    Database? database;
+    ++_referenceCount;
     try {
-      final tranasaction = db.transaction(
+      database = await _openDatabase();
+      final tranasaction = database.transaction(
           _storeName, mode == _Mode.read ? idbModeReadOnly : idbModeReadWrite);
       final store = tranasaction.objectStore(_storeName);
       final v = command(store);
       await tranasaction.completed;
       return v;
     } finally {
-      db.close();
+      if (--_referenceCount == 0) {
+        _database = null;
+        database?.close();
+      }
     }
   }
 
