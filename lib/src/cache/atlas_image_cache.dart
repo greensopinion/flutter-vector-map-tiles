@@ -54,12 +54,29 @@ class AtlasImageCache {
   Future<Image> _load() async {
     final key = _key();
     var bytes = await _delegate.retrieve(key);
+    if (_disposed) {
+      return Future.error(CancellationException());
+    }
     if (bytes == null) {
       bytes = await _atlasProvider();
+      if (_disposed) {
+        return Future.error(CancellationException());
+      }
       await _delegate.put(key, bytes);
     }
+    if (_disposed) {
+      return Future.error(CancellationException());
+    }
     final codec = await instantiateImageCodec(bytes);
+    if (_disposed) {
+      codec.dispose();
+      return Future.error(CancellationException());
+    }
     final frame = await codec.getNextFrame();
+    if (_disposed) {
+      frame.image.dispose();
+      return Future.error(CancellationException());
+    }
     return frame.image;
   }
 
