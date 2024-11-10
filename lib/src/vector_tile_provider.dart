@@ -2,7 +2,15 @@ import 'dart:typed_data';
 
 import 'tile_identity.dart';
 
-enum TileProviderType { vector, raster }
+enum TileProviderType {
+  vector,
+  raster,
+
+  /// corresponds to type `raster-dem`
+  /// providers of this type should return DEM tiles in PNG format
+// ignore: constant_identifier_names
+  raster_dem
+}
 
 abstract class VectorTileProvider {
   /// provides a tile as a `pbf` or `mvt` format for [type] of [TileProviderType.vector]

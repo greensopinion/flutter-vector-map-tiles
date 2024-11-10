@@ -117,6 +117,15 @@ Tiles from [mapbox](https://www.mapbox.com/)
 Other combinations of theme/provider may work too.
 
 Some tile providers offer tiles with more detail that are intended to be drawn at a higher zoom level. For example, Mapbox provdies tiles tiles that render at 512px instead of the default 256px ([Mapbox docs](https://docs.mapbox.com/help/glossary/zoom-level/#tile-size)). Set `VectorTileLayerOptions.tileOffset` with these providers. 
+
+## Elevation Contours from DEM (Beta)
+
+Elevation contour lines are available by adding a `raster-dem` tile source. 
+See the example:
+* [creating a DEM tile source](https://github.com/greensopinion/flutter-vector-map-tiles-examples/blob/main/lib/examples/contours_from_terrarium_dem.dart#L24)
+* [add contour lines to the theme](https://github.com/greensopinion/flutter-vector-map-tiles-examples/blob/main/lib/examples/light_custom_theme.dart#L132-L173)
+* [add elevation labels to the theme](https://github.com/greensopinion/flutter-vector-map-tiles-examples/blob/main/lib/examples/light_custom_theme.dart#L1166-L1190)
+
 ## Attribution
 
 Examples provided in `vector_map_tiles` make use of Mapbox and Stadia Maps, both of which require attribution.

@@ -103,8 +103,9 @@ class StyleReader {
     final providers = <String, VectorTileProvider>{};
     final sourceEntries = sources.entries.toList();
     for (final entry in sourceEntries) {
-      final type = TileProviderType.values
-          .where((e) => e.name == entry.value['type'])
+      final sourceType = entry.value['type'];
+      var type = TileProviderType.values
+          .where((e) => e.name.replaceAll('_', '-') == sourceType)
           .firstOrNull;
       if (type == null) continue;
       dynamic source;
