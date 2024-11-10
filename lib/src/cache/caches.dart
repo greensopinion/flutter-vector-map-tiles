@@ -1,10 +1,10 @@
 import 'package:executor_lib/executor_lib.dart';
-import '../provider/caching_vector_tile_provider.dart';
-import '../provider/raster_dem_tile_provider.dart';
 import 'package:vector_tile_dem/vector_tile_dem.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../vector_map_tiles.dart';
+import '../provider/caching_vector_tile_provider.dart';
+import '../provider/raster_dem_tile_provider.dart';
 import 'atlas_image_cache.dart';
 import 'byte_storage.dart';
 import 'image_loading_cache.dart';

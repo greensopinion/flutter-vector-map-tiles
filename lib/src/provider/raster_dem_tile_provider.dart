@@ -1,10 +1,10 @@
 import 'dart:typed_data';
 
 import 'package:executor_lib/executor_lib.dart';
+import 'package:vector_tile_dem/vector_tile_dem.dart';
 
 import '../tile_identity.dart';
 import '../vector_tile_provider.dart';
-import 'package:vector_tile_dem/vector_tile_dem.dart';
 
 class RasterDemVectorTileProvider extends VectorTileProvider {
   final VectorTileProvider delegate;

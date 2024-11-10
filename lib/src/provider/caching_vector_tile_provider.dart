@@ -1,8 +1,7 @@
 import 'dart:typed_data';
 
-import 'package:vector_map_tiles/src/cache/storage_cache.dart';
-import 'package:vector_map_tiles/src/tile_identity.dart';
-
+import '../cache/storage_cache.dart';
+import '../tile_identity.dart';
 import '../vector_tile_provider.dart';
 
 class CachingVectorTileProvider extends VectorTileProvider {
