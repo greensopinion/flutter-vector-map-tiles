@@ -1,6 +1,10 @@
+## 9.0.0-beta.2
+
+* Added support for sources of type [`raster-dem`](https://docs.mapbox.com/style-spec/reference/sources/) to produce contour lines. This feature is beta and could change.
+
 ## 9.0.0-beta.1
 
-* Added web support
+* Added web support. This feature is beta and could change.
 
 ## 8.0.0
 
