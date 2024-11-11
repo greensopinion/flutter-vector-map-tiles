@@ -53,7 +53,7 @@ class CachesTileProvider extends TileProvider {
   Future<Map<String, TileData?>> _retrieve(TileRequest request,
       {required bool localOnly}) async {
     Map<String, Future<TileData?>> futureBySource = {};
-    for (final source in _caches.providerSources) {
+    for (final source in request.tileSources) {
       futureBySource[source] = _caches.vectorTileCache.retrieve(
           source, request.tileId,
           cachedOnly: localOnly, cancelled: request.cancelled);

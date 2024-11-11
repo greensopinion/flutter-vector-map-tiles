@@ -18,6 +18,7 @@ import 'storage_image_cache.dart';
 
 class TileLoader {
   final Theme _theme;
+  late final Set<String> _themeSources;
   final SpriteStyle? _sprites;
   final Future<Image> Function()? _spriteAtlas;
   final TranslatingTileProvider _provider;
@@ -37,6 +38,7 @@ class TileLoader {
       this._tileOffset,
       this._imageCache,
       this._concurrency) {
+    _themeSources = _theme.tileSources;
     _jobQueue = ConcurrencyExecutor(
         delegate: ImmediateExecutor(),
         concurrencyLimit: _concurrency * 2,
@@ -75,6 +77,7 @@ class TileLoader {
     var translation = translator.translate(requestedTile);
     final originalRequest = TileRequest(
         tileId: requestedTile,
+        tileSources: _themeSources,
         zoom: requestedTile.z.toDouble(),
         zoomDetail: requestedTile.z.toDouble(),
         cancelled: cancelled);

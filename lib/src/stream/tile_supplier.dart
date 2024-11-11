@@ -10,6 +10,7 @@ abstract class CancellableTileRequest {}
 
 class TileRequest extends CancellableTileRequest {
   final TileIdentity tileId;
+  final Set<String> tileSources;
   final CancellationCallback _cancelled;
   final double zoom;
   final double zoomDetail;
@@ -17,6 +18,7 @@ class TileRequest extends CancellableTileRequest {
 
   TileRequest(
       {required this.tileId,
+      required this.tileSources,
       required this.zoom,
       required this.zoomDetail,
       this.clip,

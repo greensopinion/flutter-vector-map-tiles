@@ -1,8 +1,7 @@
 import 'dart:typed_data';
 
+import '../../vector_map_tiles.dart';
 import '../cache/storage_cache.dart';
-import '../tile_identity.dart';
-import '../vector_tile_provider.dart';
 
 class CachingVectorTileProvider extends VectorTileProvider {
   final StorageCache cache;
@@ -18,6 +17,8 @@ class CachingVectorTileProvider extends VectorTileProvider {
 
   @override
   int get minimumZoom => delegate.minimumZoom;
+  @override
+  TileOffset get tileOffset => delegate.tileOffset;
 
   @override
   Future<Uint8List> provide(TileIdentity tile) async {

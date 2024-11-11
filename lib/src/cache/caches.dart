@@ -45,7 +45,7 @@ class Caches {
     memoryVectorTileCache = MemoryCache(maxSizeBytes: memoryTileCacheMaxSize);
     memoryTileDataCache =
         MemoryTileDataCache(maxSize: memoryTileDataCacheMaxSize);
-    final tileProviders = _createTileProviders(vectorProviders);
+    final tileProviders = _createTileProviders(theme, vectorProviders);
     vectorTileCache = VectorTileLoadingCache(
         storageCache,
         memoryVectorTileCache,
@@ -88,10 +88,13 @@ class Caches {
     return cacheStats.join('\n');
   }
 
-  TileProviders _createTileProviders(
-          Iterable<MapEntry<String, VectorTileProvider>> vectorProviders) =>
-      TileProviders(Map.fromEntries(vectorProviders
-          .map((e) => MapEntry(e.key, _toVector(e.key, e.value)))));
+  TileProviders _createTileProviders(Theme theme,
+      Iterable<MapEntry<String, VectorTileProvider>> vectorProviders) {
+    final sources = theme.tileSources;
+    return TileProviders(Map.fromEntries(vectorProviders
+        .where((e) => sources.contains(e.key))
+        .map((e) => MapEntry(e.key, _toVector(e.key, e.value)))));
+  }
 
   VectorTileProvider _toVector(String name, VectorTileProvider provider) {
     if (provider.type == TileProviderType.raster_dem) {

@@ -75,7 +75,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
   @override
   void initState() {
     super.initState();
-    _executor = newExecutor(concurrency: widget.options.concurrency);
+    _executor = PoolExecutor(concurrency: widget.options.concurrency);
     _createCaches();
     Future.delayed(const Duration(seconds: 3), () {
       _caches.applyConstraints();
@@ -229,6 +229,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
       1,
       (widget.mapCamera.zoom + widget.options.tileOffset.zoomOffset)
           .floorToDouble());
+
   double _rotation() => widget.mapCamera.rotationRad;
 }
 

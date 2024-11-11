@@ -251,6 +251,7 @@ class _VectorTileModelLoader {
     final zoom = model.stateProvider.provide();
     return TileRequest(
         tileId: model.tile.normalize(),
+        tileSources: model.theme.tileSources,
         zoom: zoom.zoom,
         zoomDetail: zoom.zoomDetail,
         cancelled: () => model.disposed);

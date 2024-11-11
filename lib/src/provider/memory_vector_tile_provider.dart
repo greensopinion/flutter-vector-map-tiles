@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import '../cache/memory_cache.dart';
 import '../tile_identity.dart';
+import '../tile_offset.dart';
 import '../vector_tile_provider.dart';
 
 class MemoryCacheVectorTileProvider extends VectorTileProvider {
@@ -13,6 +14,8 @@ class MemoryCacheVectorTileProvider extends VectorTileProvider {
 
   @override
   int get minimumZoom => delegate.minimumZoom;
+  @override
+  TileOffset get tileOffset => delegate.tileOffset;
 
   MemoryCacheVectorTileProvider(
       {required this.delegate, required int maxSizeBytes}) {

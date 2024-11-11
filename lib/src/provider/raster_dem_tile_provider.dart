@@ -4,6 +4,7 @@ import 'package:executor_lib/executor_lib.dart';
 import 'package:vector_tile_dem/vector_tile_dem.dart';
 
 import '../tile_identity.dart';
+import '../tile_offset.dart';
 import '../vector_tile_provider.dart';
 
 class RasterDemVectorTileProvider extends VectorTileProvider {
@@ -17,6 +18,8 @@ class RasterDemVectorTileProvider extends VectorTileProvider {
   int get maximumZoom => delegate.maximumZoom;
   @override
   int get minimumZoom => delegate.minimumZoom;
+  @override
+  TileOffset get tileOffset => delegate.tileOffset;
 
   @override
   Future<Uint8List> provide(TileIdentity tile) async {

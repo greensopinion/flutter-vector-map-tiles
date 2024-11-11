@@ -22,6 +22,7 @@ TileRequest createTranslatedRequest(TileRequest request,
       final clip = Rectangle(dx, dy, sizeWithBuffer, sizeWithBuffer);
       return TileRequest(
           tileId: tileId,
+          tileSources: request.tileSources,
           zoom: request.zoom,
           zoomDetail: request.zoomDetail,
           clip: clip,

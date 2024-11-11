@@ -3,9 +3,7 @@ import 'dart:typed_data';
 import 'package:http/http.dart';
 import 'package:http/retry.dart';
 
-import '../provider_exception.dart';
-import '../tile_identity.dart';
-import '../vector_tile_provider.dart';
+import '../../vector_map_tiles.dart';
 
 class NetworkVectorTileProvider extends VectorTileProvider {
   @override
@@ -18,6 +16,8 @@ class NetworkVectorTileProvider extends VectorTileProvider {
 
   @override
   final int minimumZoom;
+  @override
+  TileOffset tileOffset;
 
   /// [urlTemplate] the URL template, e.g. `'https://tiles.stadiamaps.com/data/openmaptiles/{z}/{x}/{y}.pbf?api_key=$apiKey'`
   /// [httpHeaders] HTTP headers to include in requests, suitable for passing
@@ -30,6 +30,7 @@ class NetworkVectorTileProvider extends VectorTileProvider {
       {required String urlTemplate,
       this.type = TileProviderType.vector,
       this.httpHeaders,
+      this.tileOffset = TileOffset.DEFAULT,
       this.maximumZoom = 16,
       this.minimumZoom = 1})
       : _urlProvider = _UrlProvider(urlTemplate);

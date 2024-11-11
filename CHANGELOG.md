@@ -1,3 +1,7 @@
+## 9.0.0-beta.3
+
+* Reduce data usage for contour lines.
+
 ## 9.0.0-beta.2
 
 * Added support for sources of type [`raster-dem`](https://docs.mapbox.com/style-spec/reference/sources/) to produce contour lines. This feature is beta and could change.

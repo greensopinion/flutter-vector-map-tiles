@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'tile_identity.dart';
+import '../vector_map_tiles.dart';
 
 enum TileProviderType {
   vector,
@@ -17,9 +17,16 @@ abstract class VectorTileProvider {
   /// or `png` for [TileProviderType.raster]
   Future<Uint8List> provide(TileIdentity tile);
 
+  /// the maximum zoom supported by this provider
   int get maximumZoom;
 
+  /// the minimum zoom supported by this provider
   int get minimumZoom;
+
+  /// the offset to use with this tile provider, can be used to reduce data
+  /// overhead of specific providers in a theme. This value is combined with
+  /// [VectorTileLayer.tileOffset].
+  TileOffset get tileOffset;
 
   TileProviderType get type => TileProviderType.vector;
 }
