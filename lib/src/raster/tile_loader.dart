@@ -24,11 +24,11 @@ class TileLoader {
   final Future<Image> Function()? _spriteAtlas;
   final TileProvider _provider;
   final RasterTileProvider _rasterTileProvider;
-  final StorageImageCache _imageCache;
+  final StorageImageCache imageCache;
   final TileOffset _tileOffset;
   final int _concurrency;
   final _scale = 2.0;
-  late final ConcurrencyExecutor _jobQueue;
+  late final Executor _jobQueue;
 
   TileLoader(
       this._theme,
@@ -37,31 +37,31 @@ class TileLoader {
       this._provider,
       this._rasterTileProvider,
       this._tileOffset,
-      this._imageCache,
-      this._concurrency) {
+      this.imageCache,
+      this._concurrency,
+      {Executor? executor}) {
     _themeSources = _theme.tileSources;
     _sourcesKey = _theme.tileSources.toList().sorted().join(',');
-    _jobQueue = ConcurrencyExecutor(
-        delegate: ImmediateExecutor(),
-        concurrencyLimit: _concurrency * 2,
-        maxQueueSize: _maxOutstandingJobs);
+    _jobQueue = executor ??
+        ConcurrencyExecutor(
+            delegate: ImmediateExecutor(),
+            concurrencyLimit: _concurrency * 2,
+            maxQueueSize: _maxOutstandingJobs);
   }
 
-  Future<ImageInfo> loadTile(TileCoordinates coords, TileLayer options,
+  Future<ImageInfo> loadTile(TileCoordinates coords, double tileSize,
       bool Function() cancelled) async {
-    final requestedTile =
-        TileIdentity(coords.z.toInt(), coords.x.toInt(), coords.y.toInt());
+    final requestedTile = coords.toTileIdentity();
     var requestZoom = requestedTile.z;
     if (_tileOffset.zoomOffset < 0) {
       requestZoom = max(
           1, min(requestZoom + _tileOffset.zoomOffset, _provider.maximumZoom));
     }
-    final cached = await _imageCache.retrieve(requestedTile);
+    final cached = await imageCache.retrieve(requestedTile);
     if (cached != null) {
       return ImageInfo(image: cached, scale: _scale);
     }
-    final job =
-        _TileJob(requestedTile, requestZoom, options.tileSize, cancelled);
+    final job = _TileJob(requestedTile, requestZoom, tileSize, cancelled);
     return _jobQueue.submit(Job<_TileJob, ImageInfo>(
         'render $requestedTile', _renderJob, job,
         deduplicationKey: 'render $requestedTile ${_theme.id}/$_sourcesKey'));
@@ -131,7 +131,7 @@ class TileLoader {
   Future<void> _cache(TileIdentity tile, Image image) async {
     Image cloned = image.clone();
     try {
-      await _imageCache.put(tile, cloned);
+      await imageCache.put(tile, cloned);
     } catch (_) {
       // nothing to do
     } finally {

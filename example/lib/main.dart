@@ -82,17 +82,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: children)));
   }
 
-// alternates:
-//   Mapbox - mapbox://styles/mapbox/streets-v12?access_token={key}
-//   Maptiler - https://api.maptiler.com/maps/outdoor/style.json?key={key}
-//   Stadia Maps - https://tiles.stadiamaps.com/styles/outdoors.json?api_key={key}
-  Future<Style> _readStyle() => StyleReader(
-          uri: 'mapbox://styles/mapbox/streets-v12?access_token={key}',
-          // ignore: undefined_identifier
-          apiKey: mapboxApiKey,
-          logger: const Logger.console())
-      .read();
-
   Widget _map(Style style) => FlutterMap(
         mapController: _controller,
         options: MapOptions(
@@ -101,13 +90,15 @@ class _MyHomePageState extends State<MyHomePage> {
             maxZoom: 22,
             backgroundColor: material.Theme.of(context).canvasColor),
         children: [
-          VectorTileLayer(
-              tileProviders: style.providers,
-              theme: style.theme,
-              sprites: style.sprites,
-              maximumZoom: 22,
-              tileOffset: TileOffset.mapbox,
-              layerMode: VectorTileLayerMode.vector)
+          RasterTileLayer(
+              entrypoint: _renderEntrypoint, entrypointParamters: {}),
+          // VectorTileLayer(
+          //     tileProviders: style.providers,
+          //     theme: style.theme,
+          //     sprites: style.sprites,
+          //     maximumZoom: 22,
+          //     tileOffset: TileOffset.mapbox,
+          //     layerMode: VectorTileLayerMode.vector)
         ],
       );
 
@@ -119,4 +110,20 @@ class _MyHomePageState extends State<MyHomePage> {
             return Text(
                 'Zoom: ${_controller.camera.zoom.toStringAsFixed(2)} Center: ${_controller.camera.center.latitude.toStringAsFixed(4)},${_controller.camera.center.longitude.toStringAsFixed(4)}');
           }));
+}
+
+// alternates:
+//   Mapbox - mapbox://styles/mapbox/streets-v12?access_token={key}
+//   Maptiler - https://api.maptiler.com/maps/outdoor/style.json?key={key}
+//   Stadia Maps - https://tiles.stadiamaps.com/styles/outdoors.json?api_key={key}
+Future<Style> _readStyle() => StyleReader(
+        uri: 'https://tiles.stadiamaps.com/styles/outdoors.json?api_key={key}',
+        // ignore: undefined_identifier
+        apiKey: stadiaMapsApiKey,
+        logger: const Logger.console())
+    .read();
+
+@pragma('vm:entry-point')
+void _renderEntrypoint(dynamic message) {
+  renderTileEntrypoint(initialMessage: message, style: _readStyle);
 }

@@ -10,10 +10,13 @@ class StorageImageCache {
   late final String themeKey;
   final StorageCache delegate;
 
-  StorageImageCache(Theme theme, this.delegate) {
-    themeKey = '${theme.id}-v${theme.version}'
-        .replaceAll(RegExp(r'[^a-zA-Z0-9.-]'), '-');
-  }
+  StorageImageCache.withKey({required this.themeKey, required this.delegate});
+
+  factory StorageImageCache(Theme theme, StorageCache delegate) =>
+      StorageImageCache.withKey(
+          themeKey: '${theme.id}-v${theme.version}'
+              .replaceAll(RegExp(r'[^a-zA-Z0-9.-]'), '-'),
+          delegate: delegate);
 
   Future<Image?> retrieve(TileIdentity tile) async {
     String key = _key(tile);

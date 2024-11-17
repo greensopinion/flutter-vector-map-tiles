@@ -13,12 +13,13 @@ class TileProcessor {
   TileProcessor(this._executor);
 
   Future<Tile> process(TileRequest request, String source, TileData tileData,
-      CancellationCallback cancelled) {
+      CancellationCallback cancelled) async {
     final key =
         'process $source ${request.tileId.key()} clip=${request.clip} ${request.tileSources.toList().sorted().join(',')}';
-    return _executor.submit(Job<_Request, Tile>(
+    final response = await _executor.submit(Job(
         key, _processTile, _Request(tileData, request.clip),
         cancelled: cancelled, deduplicationKey: key));
+    return response as Tile;
   }
 }
 
@@ -29,7 +30,8 @@ class _Request {
   _Request(this.tileData, this.clip);
 }
 
-FutureOr<Tile> _processTile(_Request request) {
+FutureOr _processTile(dynamicRequest) {
+  final request = dynamicRequest as _Request;
   var tileData = request.tileData;
   if (request.clip != null) {
     final clipper = TileClip(bounds: request.clip!);
