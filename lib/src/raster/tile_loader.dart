@@ -86,8 +86,8 @@ class TileLoader {
 
     final spriteAtlas = await _spriteAtlas?.call();
     final tileResponseFuture = _provider.provide(translatedRequest);
-    final rasterTile =
-        await _rasterTileProvider.retrieve(requestedTile.normalize());
+    final rasterTile = await _rasterTileProvider
+        .retrieve(requestedTile.normalize(), skipMissing: true);
     try {
       final tileResponse = await tileResponseFuture;
       final tileset = tileResponse.tileset;
