@@ -1,3 +1,4 @@
+import 'package:dart_ui_isolate/dart_ui_isolate.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart' as material show Theme;
 import 'package:flutter_map/flutter_map.dart';
@@ -127,3 +128,6 @@ Future<Style> _readStyle() => StyleReader(
 void _renderEntrypoint(dynamic message) {
   renderTileEntrypoint(initialMessage: message, style: _readStyle);
 }
+
+@pragma('vm:entry-point')
+void _flutterIsolateEntryPoint() => DartUiIsolate.macosIsolateInitialize();
