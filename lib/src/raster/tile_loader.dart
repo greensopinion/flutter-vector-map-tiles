@@ -21,7 +21,6 @@ class TileLoader {
   late final Set<String> _themeSources;
   late String _sourcesKey;
   final SpriteStyle? _sprites;
-  final Future<Image> Function()? _spriteAtlas;
   final TileProvider _provider;
   final RasterTileProvider _rasterTileProvider;
   final StorageImageCache imageCache;
@@ -29,17 +28,19 @@ class TileLoader {
   final int _concurrency;
   final _scale = 2.0;
   late final Executor _jobQueue;
+  late final _FaultTolerantImageLoader _spriteLoader;
 
   TileLoader(
       this._theme,
       this._sprites,
-      this._spriteAtlas,
+      Future<Image> Function()? spriteAtlas,
       this._provider,
       this._rasterTileProvider,
       this._tileOffset,
       this.imageCache,
       this._concurrency,
       {Executor? executor}) {
+    _spriteLoader = _FaultTolerantImageLoader(spriteAtlas);
     _themeSources = _theme.tileSources;
     _sourcesKey = _theme.tileSources.toList().sorted().join(',');
     _jobQueue = executor ??
@@ -81,7 +82,7 @@ class TileLoader {
         zoom: requestedTile.z.toDouble(),
         zoomDetail: requestedTile.z.toDouble(),
         cancelled: cancelled);
-    final spriteAtlas = await _spriteAtlas?.call();
+    final spriteAtlas = await _spriteLoader.retrieve();
     final tileResponseFuture = _provider.provide(tileRequest);
     final rasterTile = await _rasterTileProvider
         .retrieve(requestedTile.normalize(), skipMissing: true);
@@ -137,6 +138,33 @@ class TileLoader {
     } finally {
       cloned.dispose();
     }
+  }
+}
+
+class _FaultTolerantImageLoader {
+  final Future<Image> Function()? load;
+  Future<Image>? _future;
+  bool _attempted = false;
+
+  _FaultTolerantImageLoader(this.load);
+
+  Future<Image?> retrieve() async {
+    if (_attempted) {
+      return _future ?? Future.value(null);
+    }
+    var future = _future;
+    if (future == null) {
+      _attempted = true;
+      future = load?.call();
+      _future = future;
+    }
+    try {
+      return await future;
+    } catch (e) {
+      _future = null;
+      const Logger.console().warn(() => '$e');
+    }
+    return null;
   }
 }
 
