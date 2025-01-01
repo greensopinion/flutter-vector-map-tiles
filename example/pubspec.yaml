@@ -24,7 +24,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  vector_tile_renderer: ^5.2.0
+  vector_tile_renderer: ^6.0.0
     #path: ../../vector_tile_renderer
   vector_map_tiles:
     path: ../
