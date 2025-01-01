@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../cache/text_cache.dart';
+import '../../rendering/tile_renderer.dart';
 import '../../tile_identity.dart';
 import '../grid_tile_positioner.dart';
 import 'symbols.dart';
@@ -40,29 +41,18 @@ class VectorTilePainter extends CustomPainter {
       return;
     }
     ++options.paintCount;
-    final tileSizer = GridTileSizer(translation, tileState.zoomScale, size);
-    canvas.save();
-    canvas.clipRect(Offset.zero & size);
-    tileSizer.apply(canvas);
-
-    final tileClip = tileSizer.tileClip(size, tileSizer.effectiveScale);
-    Renderer(theme: options.theme, painterProvider: _cachingPainterProvider)
-        .render(
-            canvas,
-            TileSource(
-                tileset: model.tileset!,
-                rasterTileset:
-                    (model.rasterTileset ?? const RasterTileset(tiles: {})),
-                spriteAtlas: model.spriteImage,
-                spriteIndex: model.sprites?.index),
-            clip: tileClip,
-            zoomScaleFactor: tileSizer.effectiveScale,
-            zoom: tileState.zoomDetail,
-            rotation: tileState.rotation);
+    final renderer = TileRenderer(
+        theme: options.theme,
+        textPainterProvider: _cachingPainterProvider,
+        tileState: tileState,
+        translation: translation,
+        tileset: model.tileset!,
+        rasterTileset: model.rasterTileset,
+        spriteImage: model.spriteImage,
+        sprites: model.sprites);
+    renderer.render(canvas, size);
     _lastPainted = _PaintMode.vector;
     _lastPaintedId = translation.translated;
-
-    canvas.restore();
     model.rendered();
     _maybeUpdateLabels();
   }
