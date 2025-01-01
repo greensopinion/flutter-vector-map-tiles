@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:executor_lib/executor_lib.dart';
@@ -11,7 +10,6 @@ import '../io/io.dart';
 import '../profiler.dart';
 import '../stream/tile_supplier.dart';
 import '../stream/tile_supplier_raster.dart';
-import '../stream/translated_tile_request.dart';
 import 'slippy_map_translator.dart';
 import 'tile_layer_composer.dart';
 import 'tile_layer_model.dart';
@@ -190,40 +188,9 @@ class _VectorTileModelLoader {
 
   void startLoading() async {
     final spriteImage = await model.spriteAtlasProvider?.call();
-    final originalTile = model.tile.normalize();
-    final maxZoom = model.tileProvider.maximumZoom;
-    var originalLoaded = false;
-    final int startZoom =
-        max(1, min(originalTile.z, maxZoom) - model.tileZoomSubstitutionOffset);
-    for (int z = startZoom; z >= max(startZoom - 10, 1); --z) {
-      final request = createTranslatedRequest(_newRequest(), maximumZoom: z);
-      final localTile = await model.tileProvider
-          .provideLocalCopy(request)
-          .swallowCancellation();
-      if (model.disposed) {
-        break;
-      }
-      if (localTile != null && localTile.tileset != null) {
-        var rasterTileset = const RasterTileset(tiles: {});
-        originalLoaded = z == originalTile.z;
-        if (localTile.tileset != null) {
-          rasterTileset = await model.rasterTileProvider
-              .retrieve(model.tile, skipMissing: true);
-        }
-        model._receiveTile(localTile, rasterTileset, spriteImage);
-        if (model.hasData) {
-          break;
-        }
-      }
-    }
-    if (!originalLoaded && !model.disposed) {
+    if (!model.disposed) {
       try {
         var request = _newRequest();
-        if (model.tileZoomSubstitutionOffset > 0 && originalTile.z > 0) {
-          request = createTranslatedRequest(request,
-              maximumZoom:
-                  max(0, originalTile.z - model.tileZoomSubstitutionOffset));
-        }
         final loading = model.tileProvider.provide(request);
         final rasterTileset = await model.rasterTileProvider
             .retrieve(model.tile, skipMissing: true);

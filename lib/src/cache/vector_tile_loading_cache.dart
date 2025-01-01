@@ -84,8 +84,8 @@ class VectorTileLoadingCache {
         translation = translator.translate(tile);
       }
       loaded = true;
-      future = _loadBytes(provider, key,
-          translation == null ? tile : translation.translated, cachedOnly);
+      final tileToLoad = translation == null ? tile : translation.translated;
+      future = _loadBytes(provider, key, tileToLoad, cachedOnly);
       if (cachedOnly) {
         _cacheByteFuturesByKey[key] = future;
       } else {
@@ -113,9 +113,16 @@ class VectorTileLoadingCache {
       return null;
     }
     final name = '$key/${_theme.id}';
-    final tileData = await _executor.submit(Job(name, _createTile,
-        _ThemeTile(themeId: _theme.id, bytes: bytes, translation: translation),
-        cancelled: cancelled, deduplicationKey: name));
+    final tileData = await _executor.submit(Job(
+        name,
+        _createTile,
+        _ThemeTile(
+            source: source,
+            themeId: _theme.id,
+            bytes: bytes,
+            translation: translation),
+        cancelled: cancelled,
+        deduplicationKey: name));
     _tileDataCache.put(key, tileData);
     return tileData;
   }
@@ -136,12 +143,16 @@ class VectorTileLoadingCache {
 }
 
 class _ThemeTile {
+  final String source;
   final String themeId;
   final Uint8List bytes;
   final TileTranslation? translation;
 
   _ThemeTile(
-      {required this.themeId, required this.bytes, required this.translation});
+      {required this.source,
+      required this.themeId,
+      required this.bytes,
+      required this.translation});
 }
 
 final _themeById = <String, Theme>{};
