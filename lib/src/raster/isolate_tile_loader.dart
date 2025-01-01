@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:executor_lib/executor_lib.dart';
 import 'package:flutter/painting.dart';
@@ -46,7 +47,7 @@ class IsolateTileLoader {
     cache = StorageCache(
         IoByteStorage(pather: cacheStorageResolver), ttl, maxSizeInBytes);
     _executor = PoolExecutor(
-        concurrency: 4,
+        concurrency: max(4, min(10, Platform.numberOfProcessors)),
         executorFactory: () => ConcurrencyExecutor(
             concurrencyLimit: 2,
             maxQueueSize: 1000,
