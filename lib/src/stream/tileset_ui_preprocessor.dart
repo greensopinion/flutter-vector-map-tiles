@@ -5,6 +5,7 @@ import 'package:executor_lib/executor_lib.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../vector_map_tiles.dart';
+import '../extensions.dart';
 
 class TilesetUiPreprocessor {
   final TilesetPreprocessor _preprocessor;
@@ -14,7 +15,8 @@ class TilesetUiPreprocessor {
 
   Future<Tileset> preprocess(TileIdentity identity, Tileset tileset,
       Rectangle<double>? clip, int zoom, CancellationCallback cancelled) async {
-    final deduplicationKey = 'preprocess ui: $identity clip=$clip zoom=$zoom';
+    final deduplicationKey =
+        'preprocess ui: $identity clip=$clip zoom=$zoom sources=${tileset.tiles.keys.toList().sorted().join(',')}';
     return await _executor.submit(Job(
         deduplicationKey, _preprocessTile, _TilesetAndZoom(tileset, zoom),
         cancelled: cancelled, deduplicationKey: deduplicationKey));
