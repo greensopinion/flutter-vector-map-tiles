@@ -8,6 +8,7 @@ import 'package:flutter_map/flutter_map.dart' hide TileProvider;
 import 'package:vector_tile_renderer/vector_tile_renderer.dart' hide TileLayer;
 
 import '../../vector_map_tiles.dart';
+import '../extensions.dart';
 import '../grid/slippy_map_translator.dart';
 import '../grid/tile_zoom.dart';
 import '../rendering/tile_renderer.dart';
@@ -18,6 +19,7 @@ import 'storage_image_cache.dart';
 class TileLoader {
   final Theme _theme;
   late final Set<String> _themeSources;
+  late String _sourcesKey;
   final SpriteStyle? _sprites;
   final Future<Image> Function()? _spriteAtlas;
   final TileProvider _provider;
@@ -38,6 +40,7 @@ class TileLoader {
       this._imageCache,
       this._concurrency) {
     _themeSources = _theme.tileSources;
+    _sourcesKey = _theme.tileSources.toList().sorted().join(',');
     _jobQueue = ConcurrencyExecutor(
         delegate: ImmediateExecutor(),
         concurrencyLimit: _concurrency * 2,
@@ -61,7 +64,7 @@ class TileLoader {
         _TileJob(requestedTile, requestZoom, options.tileSize, cancelled);
     return _jobQueue.submit(Job<_TileJob, ImageInfo>(
         'render $requestedTile', _renderJob, job,
-        deduplicationKey: 'render $requestedTile'));
+        deduplicationKey: 'render $requestedTile ${_theme.id}/$_sourcesKey'));
   }
 
   Future<ImageInfo> _renderJob(job) => _renderTile(
