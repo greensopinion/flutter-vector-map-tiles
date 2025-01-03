@@ -19,9 +19,10 @@ dependencies:
   vector_tile_dem: ^0.0.2
     #path: ../vector_tile_dem
   async: ^2.8.2
-  executor_lib: ^1.1.1
+  executor_lib: ^1.1.2
     #path: ../executor_lib
   idb_shim: ^2.6.1+7
+  dart_ui_isolate: ^1.1.1
 
 dev_dependencies:
   flutter_lints: ^4.0.0

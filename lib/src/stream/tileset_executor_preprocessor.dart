@@ -38,7 +38,7 @@ class TilesetExecutorPreprocessor {
     final preprocessed = await _executor.submit(Job(deduplicationKey,
         _preprocessTile, _TilesetAndZoom(_preprocessor.theme.id, tileset, zoom),
         cancelled: cancelled, deduplicationKey: deduplicationKey));
-    return preprocessed;
+    return preprocessed as Tileset;
   }
 }
 
@@ -56,6 +56,8 @@ Future<void> _setupPreprocessor(TilesetPreprocessor preprocessor) async {
   _preprocessorByThemeId[preprocessor.theme.id] = preprocessor;
 }
 
-Tileset _preprocessTile(_TilesetAndZoom it) =>
-    _preprocessorByThemeId[it.themeId]!
-        .preprocess(it.tileset, zoom: it.zoom.toDouble());
+_preprocessTile(tilesetAndZoom) {
+  final it = tilesetAndZoom as _TilesetAndZoom;
+  return _preprocessorByThemeId[it.themeId]!
+      .preprocess(it.tileset, zoom: it.zoom.toDouble());
+}
