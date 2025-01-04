@@ -101,7 +101,7 @@ class TileLoader {
           tileState: TileState(
               zoom: requestedTile.z.toDouble(),
               zoomDetail: requestedTile.z.toDouble(),
-              zoomScale: _scale,
+              zoomScale: 0.0,
               rotation: 0.0),
           translation: translation,
           tileset: tileset,
@@ -116,7 +116,8 @@ class TileLoader {
       }
       final recorder = PictureRecorder();
       final canvas = Canvas(recorder, rect);
-      renderer.render(canvas, size);
+      canvas.scale(_scale);
+      renderer.render(canvas, size / _scale);
 
       final picture = recorder.endRecording();
       final image =

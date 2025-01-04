@@ -70,8 +70,9 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
                   .toSet()));
   Theme get symbolTheme =>
       _symbolTheme ??
-      (_symbolTheme =
-          widget.options.theme.copyWith(types: {ThemeLayerType.symbol}));
+      (_symbolTheme = widget.options.theme.copyWith(
+          id: '${widget.options.theme.id}-symbols',
+          types: {ThemeLayerType.symbol}));
 
   @override
   void initState() {
