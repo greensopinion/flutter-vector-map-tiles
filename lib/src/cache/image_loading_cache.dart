@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:vector_map_tiles/src/raster/images.dart';
+
 import '../../vector_map_tiles.dart';
 import 'cache.dart';
 import 'storage_cache.dart';
@@ -33,9 +35,7 @@ class ImageLoadingCache {
           key, () => providers.get(source).provide(tile));
     }
     try {
-      final codec = await instantiateImageCodec(bytes);
-      final frame = await codec.getNextFrame();
-      final image = frame.image;
+      final image = await imageFrom(bytes: bytes);
       memoryCache.put(key, image);
       if (!cached) {
         await _putQuietly(key, image);
