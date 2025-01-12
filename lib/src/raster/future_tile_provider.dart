@@ -64,10 +64,9 @@ class _FutureImageProvider extends ImageProvider<_FutureImageProvider> {
     _loadImage(cancellation.isCancelled).then((imageInfo) {
       completer.quietlySetImage(imageInfo);
     }, onError: (Object error, StackTrace stack) {
-      completer.reportError(
-          exception: error,
-          stack: stack,
-          silent: error is CancellationException);
+      if (error is! CancellationException) {
+        completer.reportError(exception: error, stack: stack);
+      }
     });
     return completer;
   }
