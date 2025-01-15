@@ -9,10 +9,12 @@ class FutureTileProvider extends TileProvider {
           TileCoordinates coords, TileLayer options, bool Function() cancelled)
       loader;
 
+  final void Function()? disposer;
+
   @override
   bool get supportsCancelLoading => true;
 
-  FutureTileProvider({required this.loader});
+  FutureTileProvider({required this.loader, this.disposer});
 
   @override
   ImageProvider getImage(TileCoordinates coordinates, TileLayer options) =>
@@ -26,6 +28,11 @@ class FutureTileProvider extends TileProvider {
     Future<void> cancelLoading,
   ) =>
       _FutureImageProvider(loader, coordinates, options, cancelLoading);
+
+  @override
+  void dispose() {
+    disposer?.call();
+  }
 }
 
 class _FutureImageProvider extends ImageProvider<_FutureImageProvider> {

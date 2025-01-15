@@ -168,7 +168,8 @@ Future<void> _setupTheme(Theme theme) async {
   _themeById[theme.id] = theme;
 }
 
-TileData _createTile(_ThemeTile themeTile) {
+_createTile(dynamicThemeTile) {
+  final themeTile = dynamicThemeTile as _ThemeTile;
   var tileData =
       TileFactory(_themeById[themeTile.themeId]!, const Logger.noop())
           .createTileData(VectorTileReader().read(themeTile.bytes));

@@ -43,16 +43,37 @@ class IoByteStorage extends ByteStorage {
     if (!await file.parent.exists()) {
       await file.parent.create(recursive: true);
     }
-    await file.writeAsBytes(bytes);
+    return await _locked(file,
+        mode: FileMode.writeOnly, operation: (a) => a.writeFrom(bytes));
   }
 
   @override
   Future<Uint8List?> read(String path) async {
     final file = await fileOf(path);
-    if (await file.exists()) {
-      return file.readAsBytes();
+    try {
+      return await _locked(file,
+          mode: FileMode.read, operation: (a) => a.read(1024 * 1024 * 100));
+    } on PathNotFoundException catch (_) {
+      // ignore
     }
     return null;
+  }
+
+  Future<R> _locked<R>(File file,
+      {required FileMode mode,
+      required Future<R> Function(RandomAccessFile) operation}) async {
+    final access = await file.open(mode: mode);
+    try {
+      await access
+          .lock(mode == FileMode.read ? FileLock.shared : FileLock.exclusive);
+      try {
+        return await operation(access);
+      } finally {
+        await access.unlock();
+      }
+    } finally {
+      await access.close();
+    }
   }
 
   @override

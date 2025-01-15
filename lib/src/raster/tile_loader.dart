@@ -21,47 +21,48 @@ class TileLoader {
   late final Set<String> _themeSources;
   late String _sourcesKey;
   final SpriteStyle? _sprites;
-  final Future<Image> Function()? _spriteAtlas;
   final TileProvider _provider;
   final RasterTileProvider _rasterTileProvider;
-  final StorageImageCache _imageCache;
+  final StorageImageCache imageCache;
   final TileOffset _tileOffset;
   final int _concurrency;
   final _scale = 2.0;
-  late final ConcurrencyExecutor _jobQueue;
+  late final Executor _jobQueue;
+  late final _FaultTolerantImageLoader _spriteLoader;
 
   TileLoader(
       this._theme,
       this._sprites,
-      this._spriteAtlas,
+      Future<Image> Function()? spriteAtlas,
       this._provider,
       this._rasterTileProvider,
       this._tileOffset,
-      this._imageCache,
-      this._concurrency) {
+      this.imageCache,
+      this._concurrency,
+      {Executor? executor}) {
+    _spriteLoader = _FaultTolerantImageLoader(spriteAtlas);
     _themeSources = _theme.tileSources;
     _sourcesKey = _theme.tileSources.toList().sorted().join(',');
-    _jobQueue = ConcurrencyExecutor(
-        delegate: ImmediateExecutor(),
-        concurrencyLimit: _concurrency * 2,
-        maxQueueSize: _maxOutstandingJobs);
+    _jobQueue = executor ??
+        ConcurrencyExecutor(
+            delegate: ImmediateExecutor(),
+            concurrencyLimit: _concurrency * 2,
+            maxQueueSize: _maxOutstandingJobs);
   }
 
-  Future<ImageInfo> loadTile(TileCoordinates coords, TileLayer options,
+  Future<ImageInfo> loadTile(TileCoordinates coords, double tileSize,
       bool Function() cancelled) async {
-    final requestedTile =
-        TileIdentity(coords.z.toInt(), coords.x.toInt(), coords.y.toInt());
+    final requestedTile = coords.toTileIdentity();
     var requestZoom = requestedTile.z;
     if (_tileOffset.zoomOffset < 0) {
       requestZoom = max(
           1, min(requestZoom + _tileOffset.zoomOffset, _provider.maximumZoom));
     }
-    final cached = await _imageCache.retrieve(requestedTile);
+    final cached = await imageCache.retrieve(requestedTile);
     if (cached != null) {
       return ImageInfo(image: cached, scale: _scale);
     }
-    final job =
-        _TileJob(requestedTile, requestZoom, options.tileSize, cancelled);
+    final job = _TileJob(requestedTile, requestZoom, tileSize, cancelled);
     return _jobQueue.submit(Job<_TileJob, ImageInfo>(
         'render $requestedTile', _renderJob, job,
         deduplicationKey: 'render $requestedTile ${_theme.id}/$_sourcesKey'));
@@ -81,7 +82,7 @@ class TileLoader {
         zoom: requestedTile.z.toDouble(),
         zoomDetail: requestedTile.z.toDouble(),
         cancelled: cancelled);
-    final spriteAtlas = await _spriteAtlas?.call();
+    final spriteAtlas = await _spriteLoader.retrieve();
     final tileResponseFuture = _provider.provide(tileRequest);
     final rasterTile = await _rasterTileProvider
         .retrieve(requestedTile.normalize(), skipMissing: true);
@@ -132,12 +133,39 @@ class TileLoader {
   Future<void> _cache(TileIdentity tile, Image image) async {
     Image cloned = image.clone();
     try {
-      await _imageCache.put(tile, cloned);
+      await imageCache.put(tile, cloned);
     } catch (_) {
       // nothing to do
     } finally {
       cloned.dispose();
     }
+  }
+}
+
+class _FaultTolerantImageLoader {
+  final Future<Image> Function()? load;
+  Future<Image>? _future;
+  bool _attempted = false;
+
+  _FaultTolerantImageLoader(this.load);
+
+  Future<Image?> retrieve() async {
+    if (_attempted) {
+      return _future ?? Future.value(null);
+    }
+    var future = _future;
+    if (future == null) {
+      _attempted = true;
+      future = load?.call();
+      _future = future;
+    }
+    try {
+      return await future;
+    } catch (e) {
+      _future = null;
+      const Logger.console().warn(() => '$e');
+    }
+    return null;
   }
 }
 
