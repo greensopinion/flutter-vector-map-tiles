@@ -44,12 +44,12 @@ class StyleReader {
   /// the style
   ///
   /// Defaults to a standard [NetworkVectorTileProvider].
-  final NetworkVectorTileProvider Function({
+  final NetworkVectorTileProvider Function(
     TileProviderType? type,
     String urlTemplate,
     int minimumZoom,
     int maximumZoom,
-  })? constructTileProvider;
+  )? constructTileProvider;
 
   StyleReader({
     required this.uri,
@@ -141,19 +141,15 @@ class StyleReader {
       if (entryTiles is List && entryTiles.isNotEmpty) {
         final tileUri = entryTiles[0] as String;
         final tileUrl = StyleUriMapper(key: apiKey).mapTiles(tileUri);
-        providers[entry.key] = constructTileProvider?.call(
-              type: type,
-              urlTemplate: tileUrl,
-              minimumZoom: minzoom,
-              maximumZoom: maxzoom,
-            ) ??
-            NetworkVectorTileProvider(
-              type: type,
-              urlTemplate: tileUrl,
-              maximumZoom: maxzoom,
-              minimumZoom: minzoom,
-              httpHeaders: httpHeaders,
-            );
+        providers[entry.key] =
+            constructTileProvider?.call(type, tileUrl, minzoom, maxzoom) ??
+                NetworkVectorTileProvider(
+                  type: type,
+                  urlTemplate: tileUrl,
+                  maximumZoom: maxzoom,
+                  minimumZoom: minzoom,
+                  httpHeaders: httpHeaders,
+                );
       }
     }
     if (providers.isEmpty) {
