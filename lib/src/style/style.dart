@@ -40,9 +40,24 @@ class StyleReader {
   final Logger logger;
   final Map<String, String>? httpHeaders;
 
-  StyleReader(
-      {required this.uri, this.apiKey, Logger? logger, this.httpHeaders})
-      : logger = logger ?? const Logger.noop();
+  /// Callback to construct a vector tile provider given parameters read from
+  /// the style
+  ///
+  /// Defaults to a standard [NetworkVectorTileProvider].
+  final NetworkVectorTileProvider Function({
+    TileProviderType? type,
+    String urlTemplate,
+    int minimumZoom,
+    int maximumZoom,
+  })? constructTileProvider;
+
+  StyleReader({
+    required this.uri,
+    this.apiKey,
+    Logger? logger,
+    this.httpHeaders,
+    this.constructTileProvider,
+  }) : logger = logger ?? const Logger.noop();
 
   Future<Style> read() async {
     final uriMapper = StyleUriMapper(key: apiKey);
@@ -126,12 +141,19 @@ class StyleReader {
       if (entryTiles is List && entryTiles.isNotEmpty) {
         final tileUri = entryTiles[0] as String;
         final tileUrl = StyleUriMapper(key: apiKey).mapTiles(tileUri);
-        providers[entry.key] = NetworkVectorTileProvider(
-            type: type,
-            urlTemplate: tileUrl,
-            maximumZoom: maxzoom,
-            minimumZoom: minzoom,
-            httpHeaders: httpHeaders);
+        providers[entry.key] = constructTileProvider?.call(
+              type: type,
+              urlTemplate: tileUrl,
+              minimumZoom: minzoom,
+              maximumZoom: maxzoom,
+            ) ??
+            NetworkVectorTileProvider(
+              type: type,
+              urlTemplate: tileUrl,
+              maximumZoom: maxzoom,
+              minimumZoom: minzoom,
+              httpHeaders: httpHeaders,
+            );
       }
     }
     if (providers.isEmpty) {
