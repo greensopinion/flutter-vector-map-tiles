@@ -6,16 +6,18 @@ import 'package:http/retry.dart';
 import '../../vector_map_tiles.dart';
 
 class NetworkVectorTileProvider extends VectorTileProvider {
+  final String urlTemplate;
+  final Map<String, String>? httpHeaders;
+
   @override
   final TileProviderType type;
-  final _UrlProvider _urlProvider;
-  final Map<String, String>? httpHeaders;
 
   @override
   final int maximumZoom;
 
   @override
   final int minimumZoom;
+
   @override
   TileOffset tileOffset;
 
@@ -26,19 +28,19 @@ class NetworkVectorTileProvider extends VectorTileProvider {
   ///  confused with the maximum zoom of the map widget. The map widget will
   ///  automatically use vector tiles from lower zoom levels once the maximum
   ///  supported by this provider is reached.
-  NetworkVectorTileProvider(
-      {required String urlTemplate,
-      this.type = TileProviderType.vector,
-      this.httpHeaders,
-      this.tileOffset = TileOffset.DEFAULT,
-      this.maximumZoom = 16,
-      this.minimumZoom = 1})
-      : _urlProvider = _UrlProvider(urlTemplate);
+  NetworkVectorTileProvider({
+    required this.urlTemplate,
+    this.type = TileProviderType.vector,
+    this.httpHeaders,
+    this.tileOffset = TileOffset.DEFAULT,
+    this.maximumZoom = 16,
+    this.minimumZoom = 1,
+  });
 
   @override
   Future<Uint8List> provide(TileIdentity tile) async {
     _checkTile(tile);
-    final uri = Uri.parse(_urlProvider.url(tile));
+    final uri = Uri.parse(generateTileUrl(tile));
     final client = RetryClient(Client());
     try {
       final response = await client.get(uri, headers: httpHeaders);
@@ -60,6 +62,22 @@ class NetworkVectorTileProvider extends VectorTileProvider {
     }
   }
 
+  String generateTileUrl(TileIdentity identity) {
+    return urlTemplate.replaceAllMapped(RegExp(r'\{(x|y|z)\}'), (match) {
+      switch (match.group(1)) {
+        case 'x':
+          return identity.x.toString();
+        case 'y':
+          return identity.y.toString();
+        case 'z':
+          return identity.z.toString();
+        default:
+          throw Exception(
+              'unexpected url template: $urlTemplate - token ${match.group(1)} is not supported');
+      }
+    });
+  }
+
   void _checkTile(TileIdentity tile) {
     if (tile.z > maximumZoom || tile.z < minimumZoom || !tile.isValid()) {
       throw ProviderException(
@@ -70,26 +88,4 @@ class NetworkVectorTileProvider extends VectorTileProvider {
   }
 
   _isRetryable(int statusCode) => statusCode == 503 || statusCode == 408;
-}
-
-class _UrlProvider {
-  final String urlTemplate;
-
-  _UrlProvider(this.urlTemplate);
-
-  String url(TileIdentity identity) {
-    return urlTemplate.replaceAllMapped(RegExp(r'\{(x|y|z)\}'), (match) {
-      switch (match.group(1)) {
-        case 'x':
-          return identity.x.toInt().toString();
-        case 'y':
-          return identity.y.toInt().toString();
-        case 'z':
-          return identity.z.toInt().toString();
-        default:
-          throw Exception(
-              'unexpected url template: $urlTemplate - token ${match.group(1)} is not supported');
-      }
-    });
-  }
 }
