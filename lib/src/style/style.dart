@@ -43,8 +43,8 @@ class StyleReader {
   /// Callback to construct a vector tile provider given parameters read from
   /// the style
   ///
-  /// Defaults to a standard [NetworkVectorTileProvider].
-  final NetworkVectorTileProvider Function(
+  /// Defaults to a standard [VectorTileProvider].
+  final VectorTileProvider Function(
     TileProviderType? type,
     String urlTemplate,
     int minimumZoom,
