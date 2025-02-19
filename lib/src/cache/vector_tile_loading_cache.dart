@@ -5,6 +5,9 @@ import 'dart:typed_data';
 import 'package:executor_lib/executor_lib.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
+import '../extensions.dart';
+import '../grid/constants.dart';
+import '../grid/slippy_map_translator.dart';
 import '../provider_exception.dart';
 import '../tile_identity.dart';
 import '../tile_providers.dart';
@@ -14,6 +17,7 @@ import 'storage_cache.dart';
 
 class VectorTileLoadingCache {
   final Theme _theme;
+  late final String _sourcesKey;
   final MemoryTileDataCache _tileDataCache;
   final MemoryCache _memoryCache;
   final StorageCache _delegate;
@@ -29,7 +33,8 @@ class VectorTileLoadingCache {
       this._providers, this._executor, this._theme) {
     maximumZoom = _providers.tileProviderBySource.values
         .map((e) => e.maximumZoom)
-        .reduce(min);
+        .reduce(max);
+    _sourcesKey = _theme.tileSources.toList().sorted().join(',');
     _initialize();
   }
 
@@ -39,8 +44,7 @@ class VectorTileLoadingCache {
     if (!_ready) {
       await _readyCompleter.future;
     }
-    final key = _toKey(source, tile);
-    return await _loadTile(source, key, tile, cancelled, cachedOnly);
+    return await _loadTile(source, tile, cancelled, cachedOnly);
   }
 
   void _initialize() async {
@@ -56,26 +60,43 @@ class VectorTileLoadingCache {
   String _toKey(String source, TileIdentity id) =>
       '${id.z}_${id.x}_${id.y}_$source.pbf';
 
-  Future<TileData?> _loadTile(String source, String key, TileIdentity tile,
+  Future<TileData?> _loadTile(String source, TileIdentity tile,
       CancellationCallback cancelled, bool cachedOnly) async {
-    final cached = _tileDataCache.get(key);
+    final tileKey = _toKey(source, tile);
+    final cached = _tileDataCache.get(tileKey);
     if (cached != null) {
       return cached;
     }
-    var future =
-        cachedOnly ? _cacheByteFuturesByKey[key] : _byteFuturesByKey[key];
+    var future = cachedOnly
+        ? _cacheByteFuturesByKey[tileKey]
+        : _byteFuturesByKey[tileKey];
     var loaded = false;
+    TileTranslation? translation;
+    var dataKey = tileKey;
     if (future == null) {
-      final provider = _providers.get(source);
-      if (tile.z < provider.minimumZoom) {
+      final provider = _providers.tileProviderBySource[source];
+      if (provider == null || tile.z < provider.minimumZoom) {
         return _emptyTile();
       }
+      final desiredZoom = min(
+          max(tile.z + provider.tileOffset.zoomOffset, provider.minimumZoom),
+          provider.maximumZoom);
+      if (desiredZoom > tile.z) {
+        return _emptyTile();
+      }
+      var tileToLoad = tile;
+      if (tile.z != desiredZoom) {
+        final translator = SlippyMapTranslator(desiredZoom);
+        translation = translator.translate(tile);
+        tileToLoad = translation.translated;
+        dataKey = _toKey(source, tileToLoad);
+      }
       loaded = true;
-      future = _loadBytes(provider, key, tile, cachedOnly);
+      future = _loadBytes(provider, dataKey, tileToLoad, cachedOnly);
       if (cachedOnly) {
-        _cacheByteFuturesByKey[key] = future;
+        _cacheByteFuturesByKey[dataKey] = future;
       } else {
-        _byteFuturesByKey[key] = future;
+        _byteFuturesByKey[dataKey] = future;
       }
     }
     Uint8List? bytes;
@@ -89,20 +110,27 @@ class VectorTileLoadingCache {
     } finally {
       if (loaded) {
         if (cachedOnly) {
-          _cacheByteFuturesByKey.remove(key);
+          _cacheByteFuturesByKey.remove(dataKey);
         } else {
-          _byteFuturesByKey.remove(key);
+          _byteFuturesByKey.remove(dataKey);
         }
       }
     }
     if (bytes == null) {
       return null;
     }
-    final name = '$key/${_theme.id}';
+    final name = '$tileKey/${_theme.id}/$_sourcesKey';
     final tileData = await _executor.submit(Job(
-        name, _createTile, _ThemeTile(themeId: _theme.id, bytes: bytes),
-        cancelled: cancelled, deduplicationKey: name));
-    _tileDataCache.put(key, tileData);
+        name,
+        _createTile,
+        _ThemeTile(
+            source: source,
+            themeId: _theme.id,
+            bytes: bytes,
+            translation: translation),
+        cancelled: cancelled,
+        deduplicationKey: name));
+    _tileDataCache.put(tileKey, tileData);
     return tileData;
   }
 
@@ -122,10 +150,16 @@ class VectorTileLoadingCache {
 }
 
 class _ThemeTile {
+  final String source;
   final String themeId;
   final Uint8List bytes;
+  final TileTranslation? translation;
 
-  _ThemeTile({required this.themeId, required this.bytes});
+  _ThemeTile(
+      {required this.source,
+      required this.themeId,
+      required this.bytes,
+      required this.translation});
 }
 
 final _themeById = <String, Theme>{};
@@ -134,6 +168,23 @@ Future<void> _setupTheme(Theme theme) async {
   _themeById[theme.id] = theme;
 }
 
-TileData _createTile(_ThemeTile themeTile) =>
-    TileFactory(_themeById[themeTile.themeId]!, const Logger.noop())
-        .createTileData(VectorTileReader().read(themeTile.bytes));
+TileData _createTile(_ThemeTile themeTile) {
+  var tileData =
+      TileFactory(_themeById[themeTile.themeId]!, const Logger.noop())
+          .createTileData(VectorTileReader().read(themeTile.bytes));
+  final translation = themeTile.translation;
+  if (translation != null && tileData.layers.isNotEmpty) {
+    final clipSize = tileSize.x / translation.fraction;
+    final dx = (translation.xOffset * clipSize);
+    final dy = (translation.yOffset * clipSize);
+    final clip = Rectangle(dx, dy, clipSize, clipSize);
+    var transformed = TileClip(bounds: clip).clip(tileData);
+    if (clip.left > 0.0 || clip.top > 0.0 || translation.fraction != 1.0) {
+      transformed = TileTranslate(clip.topLeft * -1,
+              scale: translation.fraction.toDouble())
+          .translate(transformed);
+    }
+    tileData = transformed;
+  }
+  return tileData;
+}

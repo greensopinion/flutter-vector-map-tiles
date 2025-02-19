@@ -3,21 +3,22 @@ import 'dart:math';
 
 import 'package:executor_lib/executor_lib.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map/flutter_map.dart' as fm;
+import 'package:flutter_map/flutter_map.dart' hide TileProvider;
 import 'package:latlong2/latlong.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart' hide TileLayer;
 
-import '../cache/cache_storage_function.dart';
+import '../cache/byte_storage_factory.dart';
 import '../cache/caches.dart';
 import '../options.dart';
 import '../raster/raster_tile_provider.dart';
 import '../stream/caches_tile_provider.dart';
 import '../stream/delay_provider.dart';
 import '../stream/tile_processor.dart';
+import '../stream/tile_supplier.dart';
 import '../stream/tile_supplier_raster.dart';
 import '../stream/tileset_executor_preprocessor.dart';
 import '../stream/tileset_ui_preprocessor.dart';
-import '../stream/translating_tile_provider.dart';
 import '../style/style.dart';
 import '../tile_identity.dart';
 import '../tile_offset.dart';
@@ -46,7 +47,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
     with WidgetsBindingObserver {
   late Executor _executor;
   late Caches _caches;
-  late TranslatingTileProvider _tileSupplier;
+  late TileProvider _tileSupplier;
   late RasterTileProvider _rasterTileProvider;
   late final _cacheStats = ScheduledDebounce(_printCacheStats,
       delay: const Duration(seconds: 1),
@@ -57,7 +58,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
   StreamSubscription<void>? _subscription;
   Theme? _theme;
   Theme? _symbolTheme;
-  TileProvider? _tileProvider;
+  fm.TileProvider? _tileProvider;
 
   Theme get theme =>
       _theme ??
@@ -69,13 +70,14 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
                   .toSet()));
   Theme get symbolTheme =>
       _symbolTheme ??
-      (_symbolTheme =
-          widget.options.theme.copyWith(types: {ThemeLayerType.symbol}));
+      (_symbolTheme = widget.options.theme.copyWith(
+          id: '${widget.options.theme.id}-symbols',
+          types: {ThemeLayerType.symbol}));
 
   @override
   void initState() {
     super.initState();
-    _executor = newExecutor(concurrency: widget.options.concurrency);
+    _executor = PoolExecutor(concurrency: widget.options.concurrency);
     _createCaches();
     Future.delayed(const Duration(seconds: 3), () {
       _caches.applyConstraints();
@@ -204,8 +206,8 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
         memoryTileDataCacheMaxSize: widget.options.memoryTileDataCacheMaxSize,
         maxSizeInBytes: widget.options.fileCacheMaximumSizeInBytes,
         maxTextCacheSize: widget.options.textCacheMaxSize,
-        cacheStorage: widget.options.cacheFolder ?? cacheStorageResolver);
-    _tileSupplier = TranslatingTileProvider(DelayProvider(
+        cacheStorage: createByteStorage(widget.options.cacheFolder));
+    _tileSupplier = DelayProvider(
             CachesTileProvider(
                 _caches,
                 TileProcessor(_executor),
@@ -214,7 +216,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
                 TilesetUiPreprocessor(TilesetPreprocessor(widget.options.theme,
                     initializeGeometry: true))),
             widget.options.tileDelay)
-        .orDelegate());
+        .orDelegate();
     _rasterTileProvider = RasterTileProvider(
         providers: widget.options.tileProviders,
         cache: _caches.imageLoadingCache);
@@ -229,6 +231,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
       1,
       (widget.mapCamera.zoom + widget.options.tileOffset.zoomOffset)
           .floorToDouble());
+
   double _rotation() => widget.mapCamera.rotationRad;
 }
 
@@ -264,7 +267,7 @@ class _VectorTileLayer extends StatefulWidget {
   final _LayerOptions options;
   final MapCamera mapState;
   final Stream<void> stream;
-  final TranslatingTileProvider tileProvider;
+  final TileProvider tileProvider;
   final RasterTileProvider rasterTileProvider;
 
   const _VectorTileLayer(Key key, this.options, this.mapState, this.stream,

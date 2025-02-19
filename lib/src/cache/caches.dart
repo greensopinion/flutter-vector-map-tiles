@@ -1,9 +1,10 @@
-import 'dart:io';
-
 import 'package:executor_lib/executor_lib.dart';
+import 'package:vector_tile_dem/vector_tile_dem.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../vector_map_tiles.dart';
+import '../provider/caching_vector_tile_provider.dart';
+import '../provider/raster_dem_tile_provider.dart';
 import 'atlas_image_cache.dart';
 import 'byte_storage.dart';
 import 'image_loading_cache.dart';
@@ -34,20 +35,22 @@ class Caches {
       required int memoryTileDataCacheMaxSize,
       required int maxSizeInBytes,
       required int maxTextCacheSize,
-      required Future<Directory> Function() cacheStorage}) {
-    _storage = ByteStorage(pather: cacheStorage);
-    final vectorProviders = providers.tileProviderBySource.entries
-        .where((e) => e.value.type == TileProviderType.vector);
+      required ByteStorage cacheStorage}) {
+    _storage = cacheStorage;
+    final vectorProviders = providers.tileProviderBySource.entries.where((e) =>
+        e.value.type == TileProviderType.vector ||
+        e.value.type == TileProviderType.raster_dem);
     providerSources = vectorProviders.map((e) => e.key).toList();
     storageCache = StorageCache(_storage, ttl, maxSizeInBytes);
     memoryVectorTileCache = MemoryCache(maxSizeBytes: memoryTileCacheMaxSize);
     memoryTileDataCache =
         MemoryTileDataCache(maxSize: memoryTileDataCacheMaxSize);
+    final tileProviders = _createTileProviders(theme, vectorProviders);
     vectorTileCache = VectorTileLoadingCache(
         storageCache,
         memoryVectorTileCache,
         memoryTileDataCache,
-        TileProviders(Map.fromEntries(vectorProviders)),
+        tileProviders,
         executor,
         theme);
     textCache = TextCache(maxSize: maxTextCacheSize);
@@ -83,6 +86,32 @@ class Caches {
     cacheStats.add(
         'Image cache hit ratio:             ${imageLoadingCache.memoryCache.hitRatio.asPct()}% size: ${imageLoadingCache.memoryCache.size}');
     return cacheStats.join('\n');
+  }
+
+  TileProviders _createTileProviders(Theme theme,
+      Iterable<MapEntry<String, VectorTileProvider>> vectorProviders) {
+    final sources = theme.tileSources;
+    return TileProviders(Map.fromEntries(vectorProviders
+        .where((e) => sources.contains(e.key))
+        .map((e) => MapEntry(e.key, _toVector(e.key, e.value)))));
+  }
+
+  VectorTileProvider _toVector(String name, VectorTileProvider provider) {
+    if (provider.type == TileProviderType.raster_dem) {
+      return RasterDemVectorTileProvider(
+          executor: executor,
+          delegate: CachingVectorTileProvider(
+              cache: storageCache,
+              cacheKey: (tile) => '$name-dem-${tile.z}-${tile.x}-${tile.y}.png',
+              delegate: provider),
+          options: ({required int zoom}) {
+            if (zoom < 12) {
+              return ContourOptions();
+            }
+            return ContourOptions(minorLevel: 20, majorLevel: 100);
+          });
+    }
+    return provider;
   }
 }
 

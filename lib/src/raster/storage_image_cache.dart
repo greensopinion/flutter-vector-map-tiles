@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:vector_map_tiles/src/raster/images.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../vector_map_tiles.dart';
@@ -21,9 +22,7 @@ class StorageImageCache {
     if (cached != null) {
       final bytes = Uint8List.fromList(cached);
       try {
-        final codec = await instantiateImageCodec(bytes);
-        final frame = await codec.getNextFrame();
-        return frame.image;
+        return await imageFrom(bytes: bytes);
       } catch (error, stack) {
         // in case the byte data is invalid, discard and remove the cached value
         // ignore: avoid_print

@@ -16,7 +16,7 @@ class RasterTileProvider {
         _cache = cache;
 
   Future<RasterTileset> retrieve(TileIdentity tile,
-      {bool skipMissing = false}) async {
+      {bool skipMissing = true}) async {
     final rasterProviders = _providers.tileProviderBySource.entries
         .where((e) => e.value.type == TileProviderType.raster);
     final tileFutureByKey = rasterProviders
@@ -28,8 +28,9 @@ class RasterTileProvider {
         if (tile != null) {
           tileBySource[futureEntry.key] = tile;
         }
-      } catch (_) {
-        if (!skipMissing) {
+      } catch (e) {
+        final skippable = (e is ProviderException) && e.statusCode == 404;
+        if (!skippable || !skipMissing) {
           RasterTileset(tiles: tileBySource).dispose();
           rethrow;
         }

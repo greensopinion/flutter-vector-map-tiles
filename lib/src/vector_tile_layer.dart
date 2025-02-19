@@ -1,11 +1,10 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart' hide Theme;
 import 'package:flutter_map/flutter_map.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import 'extensions.dart';
 import 'grid/grid_layer.dart';
+import 'io/io.dart';
 import 'options.dart';
 import 'style/style.dart';
 import 'tile_offset.dart';

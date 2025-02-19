@@ -4,23 +4,25 @@ import 'dart:ui';
 
 import 'package:executor_lib/executor_lib.dart';
 import 'package:flutter/widgets.dart' hide Image;
-import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map/flutter_map.dart' hide TileProvider;
 import 'package:vector_tile_renderer/vector_tile_renderer.dart' hide TileLayer;
 
 import '../../vector_map_tiles.dart';
-import '../grid/grid_tile_positioner.dart';
+import '../extensions.dart';
 import '../grid/slippy_map_translator.dart';
+import '../grid/tile_zoom.dart';
+import '../rendering/tile_renderer.dart';
 import '../stream/tile_supplier.dart';
 import '../stream/tile_supplier_raster.dart';
-import '../stream/translated_tile_request.dart';
-import '../stream/translating_tile_provider.dart';
 import 'storage_image_cache.dart';
 
 class TileLoader {
   final Theme _theme;
+  late final Set<String> _themeSources;
+  late String _sourcesKey;
   final SpriteStyle? _sprites;
   final Future<Image> Function()? _spriteAtlas;
-  final TranslatingTileProvider _provider;
+  final TileProvider _provider;
   final RasterTileProvider _rasterTileProvider;
   final StorageImageCache _imageCache;
   final TileOffset _tileOffset;
@@ -37,6 +39,8 @@ class TileLoader {
       this._tileOffset,
       this._imageCache,
       this._concurrency) {
+    _themeSources = _theme.tileSources;
+    _sourcesKey = _theme.tileSources.toList().sorted().join(',');
     _jobQueue = ConcurrencyExecutor(
         delegate: ImmediateExecutor(),
         concurrencyLimit: _concurrency * 2,
@@ -60,7 +64,7 @@ class TileLoader {
         _TileJob(requestedTile, requestZoom, options.tileSize, cancelled);
     return _jobQueue.submit(Job<_TileJob, ImageInfo>(
         'render $requestedTile', _renderJob, job,
-        deduplicationKey: 'render $requestedTile'));
+        deduplicationKey: 'render $requestedTile ${_theme.id}/$_sourcesKey'));
   }
 
   Future<ImageInfo> _renderJob(job) => _renderTile(
@@ -71,67 +75,53 @@ class TileLoader {
     if (cancelled()) {
       throw CancellationException();
     }
-    final translator = SlippyMapTranslator(_provider.maximumZoom);
-    var translation = translator.translate(requestedTile);
-    final originalRequest = TileRequest(
+    final tileRequest = TileRequest(
         tileId: requestedTile,
+        tileSources: _themeSources,
         zoom: requestedTile.z.toDouble(),
         zoomDetail: requestedTile.z.toDouble(),
         cancelled: cancelled);
-    final translatedRequest =
-        createTranslatedRequest(originalRequest, maximumZoom: requestZoom);
-
     final spriteAtlas = await _spriteAtlas?.call();
-    final tileResponseFuture = _provider.provide(translatedRequest);
-    final rasterTile =
-        await _rasterTileProvider.retrieve(requestedTile.normalize());
+    final tileResponseFuture = _provider.provide(tileRequest);
+    final rasterTile = await _rasterTileProvider
+        .retrieve(requestedTile.normalize(), skipMissing: true);
     try {
       final tileResponse = await tileResponseFuture;
       final tileset = tileResponse.tileset;
       if (tileset == null) {
         throw 'No tile: $requestedTile';
       }
-      if (tileResponse.identity.z != translation.original.z) {
-        translation = translator.specificZoomTranslation(requestedTile,
-            zoom: tileResponse.identity.z);
-      }
+      final translator = SlippyMapTranslator(_provider.maximumZoom);
+      final translation = translator.specificZoomTranslation(requestedTile,
+          zoom: tileResponse.identity.z);
 
-      final size = tileSize * _scale;
-      final tileSizer = GridTileSizer(translation, _scale, Size.square(size));
+      final renderer = TileRenderer(
+          theme: _theme,
+          textPainterProvider: const DefaultTextPainterProvider(),
+          tileState: TileState(
+              zoom: requestedTile.z.toDouble(),
+              zoomDetail: requestedTile.z.toDouble(),
+              zoomScale: 0.0,
+              rotation: 0.0),
+          translation: translation,
+          tileset: tileset,
+          rasterTileset: rasterTile,
+          spriteImage: spriteAtlas,
+          sprites: _sprites);
 
-      final rect = Rect.fromLTRB(0, 0, size, size);
-
+      final size = Size.square(tileSize * _scale);
+      final rect = Offset.zero & size;
       if (cancelled()) {
         throw CancellationException();
       }
-
       final recorder = PictureRecorder();
       final canvas = Canvas(recorder, rect);
-      canvas.clipRect(rect);
-      double zoomScaleFactor;
-      if (tileSizer.effectiveScale == 1.0) {
-        canvas.scale(_scale, _scale);
-        zoomScaleFactor = _scale;
-      } else {
-        tileSizer.apply(canvas);
-        zoomScaleFactor = tileSizer.effectiveScale / _scale;
-      }
-      final tileClip =
-          tileSizer.tileClip(Size.square(size), tileSizer.effectiveScale);
-
-      final tile = TileSource(
-          tileset: tileResponse.tileset!,
-          rasterTileset: rasterTile,
-          spriteAtlas: spriteAtlas,
-          spriteIndex: _sprites?.index);
-      Renderer(theme: _theme).render(canvas, tile,
-          zoomScaleFactor: zoomScaleFactor,
-          zoom: requestedTile.z.toDouble(),
-          rotation: 0.0,
-          clip: tileClip);
+      canvas.scale(_scale);
+      renderer.render(canvas, size / _scale);
 
       final picture = recorder.endRecording();
-      final image = await picture.toImage(size.toInt(), size.toInt());
+      final image =
+          await picture.toImage(size.width.toInt(), size.height.toInt());
       await _cache(translation.original, image);
       return ImageInfo(image: image, scale: _scale);
     } finally {

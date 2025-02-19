@@ -85,30 +85,31 @@ abstract class BaseStyleReader {
   }
 
   Future<TileProviders> getTileProviders(
-      String? url, Map<String, dynamic> style) async {
+      String? uri, Map<String, dynamic> style) async {
     final sources = style['sources'];
     if (sources is! Map) {
       throw _invalidStyle(url);
     }
 
-    final providerByName = await _readProviderByName(sources);
+    final providerByName = await _readProviderByName(uri, sources);
 
     return TileProviders(providerByName);
   }
 
-  Future<Map<String, VectorTileProvider>> _readProviderByName(
+  Future<Map<String, VectorTileProvider>> _readProviderByName(String? uri,
       Map sources) async {
     final providers = <String, VectorTileProvider>{};
     final sourceEntries = sources.entries.toList();
     for (final entry in sourceEntries) {
-      final type = TileProviderType.values
-          .where((e) => e.name == entry.value['type'])
+      final sourceType = entry.value['type'];
+      var type = TileProviderType.values
+          .where((e) => e.name.replaceAll('_', '-') == sourceType)
           .firstOrNull;
       if (type == null) continue;
       dynamic source;
       var entryUrl = entry.value['url'] as String?;
       if (entryUrl != null) {
-        final sourceUrl = StyleUriMapper(key: apiKey).mapSource(null, entryUrl);
+        final sourceUrl = StyleUriMapper(key: apiKey).mapSource(uri, entryUrl);
         source =
             await compute(jsonDecode, await _httpGet(sourceUrl, httpHeaders));
         if (source is! Map) {
@@ -164,7 +165,7 @@ class StyleReader extends BaseStyleReader {
 
     return Style(
         theme: ThemeReader(logger: logger).read(style),
-        providers: await getTileProviders(url, style),
+        providers: await getTileProviders(uri, style),
         sprites: await getSprite(uri, style, uriMapper),
         name: getName(style),
         center: centerPoint,

@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:executor_lib/executor_lib.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
+import '../extensions.dart';
 import 'tile_supplier.dart';
 
 class TileProcessor {
@@ -13,7 +14,8 @@ class TileProcessor {
 
   Future<Tile> process(TileRequest request, String source, TileData tileData,
       CancellationCallback cancelled) {
-    final key = 'process $source ${request.tileId.key()} clip=${request.clip}';
+    final key =
+        'process $source ${request.tileId.key()} clip=${request.clip} ${request.tileSources.toList().sorted().join(',')}';
     return _executor.submit(Job<_Request, Tile>(
         key, _processTile, _Request(tileData, request.clip),
         cancelled: cancelled, deduplicationKey: key));

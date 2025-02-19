@@ -10,7 +10,6 @@ import '../stream/tile_processor.dart';
 import '../stream/tile_supplier_raster.dart';
 import '../stream/tileset_executor_preprocessor.dart';
 import '../stream/tileset_ui_preprocessor.dart';
-import '../stream/translating_tile_provider.dart';
 import 'future_tile_provider.dart';
 import 'storage_image_cache.dart';
 import 'tile_loader.dart';
@@ -24,7 +23,21 @@ TileProvider createRasterTileProvider(
     TileOffset tileOffset,
     Duration tileDelay,
     int concurrency) {
-  final tileSupplier = TranslatingTileProvider(DelayProvider(
+  final loader = createTileLoader(theme, sprites, caches, rasterTileProvider,
+      executor, tileOffset, tileDelay, concurrency);
+  return FutureTileProvider(loader: loader.loadTile);
+}
+
+TileLoader createTileLoader(
+    Theme theme,
+    SpriteStyle? sprites,
+    Caches caches,
+    RasterTileProvider rasterTileProvider,
+    Executor executor,
+    TileOffset tileOffset,
+    Duration tileDelay,
+    int concurrency) {
+  final tileSupplier = DelayProvider(
           CachesTileProvider(
               caches,
               TileProcessor(executor),
@@ -32,16 +45,14 @@ TileProvider createRasterTileProvider(
               TilesetUiPreprocessor(
                   TilesetPreprocessor(theme, initializeGeometry: true))),
           tileDelay)
-      .orDelegate());
-  return FutureTileProvider(
-      loader: TileLoader(
-              theme,
-              sprites,
-              caches.atlasImageCache?.retrieve,
-              tileSupplier,
-              rasterTileProvider,
-              tileOffset,
-              StorageImageCache(theme, caches.storageCache),
-              concurrency)
-          .loadTile);
+      .orDelegate();
+  return TileLoader(
+      theme,
+      sprites,
+      caches.atlasImageCache?.retrieve,
+      tileSupplier,
+      rasterTileProvider,
+      tileOffset,
+      StorageImageCache(theme, caches.storageCache),
+      concurrency);
 }

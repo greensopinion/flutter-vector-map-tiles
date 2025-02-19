@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:executor_lib/executor_lib.dart';
+import 'package:vector_map_tiles/src/raster/images.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import 'extensions.dart';
@@ -58,9 +59,7 @@ class AtlasImageCache {
       bytes = await _atlasProvider();
       await _delegate.put(key, bytes);
     }
-    final codec = await instantiateImageCodec(bytes);
-    final frame = await codec.getNextFrame();
-    return frame.image;
+    return await imageFrom(bytes: bytes);
   }
 
   String _key() =>
