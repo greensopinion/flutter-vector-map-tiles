@@ -71,7 +71,9 @@ class _MyHomePageState extends State<MyHomePage> {
       children.add(const Center(child: CircularProgressIndicator()));
     } else {
       children.add(Flexible(child: _map(_style!)));
-      children.add(Row(mainAxisAlignment: MainAxisAlignment.center, children: [_statusText()]));
+      children.add(Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [_statusText()]));
     }
     return Scaffold(
         appBar: AppBar(
