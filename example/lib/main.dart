@@ -100,6 +100,7 @@ class _MyHomePageState extends State<MyHomePage> {
   // Alternative to fetching the style remotely.
   // Style was downloaded from https://github.com/openmaptiles/maptiler-basic-gl-style
   // Replace with your custom style.
+  // ignore: unused_element
   Future<Style> _readStyleFromAssets() async {
     final data = await rootBundle.loadString('assets/style.json');
     final styleJson = jsonDecode(data);
