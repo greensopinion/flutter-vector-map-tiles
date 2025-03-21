@@ -1,9 +1,13 @@
-import 'package:flutter/material.dart';
+import 'dart:convert';
+
 import 'package:flutter/material.dart' as material show Theme;
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:vector_map_tiles/vector_map_tiles.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart' hide TileLayer;
+
 // ignore: uri_does_not_exist
 import 'api_key.dart';
 
@@ -67,9 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
       children.add(const Center(child: CircularProgressIndicator()));
     } else {
       children.add(Flexible(child: _map(_style!)));
-      children.add(Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [_statusText()]));
+      children.add(Row(mainAxisAlignment: MainAxisAlignment.center, children: [_statusText()]));
     }
     return Scaffold(
         appBar: AppBar(
@@ -92,6 +94,21 @@ class _MyHomePageState extends State<MyHomePage> {
           apiKey: mapboxApiKey,
           logger: const Logger.console())
       .read();
+
+  // Alternative to fetching the style remotely.
+  // Style was downloaded from https://github.com/openmaptiles/maptiler-basic-gl-style
+  // Replace with your custom style.
+  Future<Style> _readStyleFromAssets() async {
+    final data = await rootBundle.loadString('assets/style.json');
+    final styleJson = jsonDecode(data);
+
+    return LocalStyleReader(
+            styleJson: styleJson,
+            // ignore: undefined_identifier
+            apiKey: maptilerApiKey,
+            logger: const Logger.console())
+        .read();
+  }
 
   Widget _map(Style style) => FlutterMap(
         mapController: _controller,
