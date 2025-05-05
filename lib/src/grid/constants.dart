@@ -1,4 +1,4 @@
-import 'dart:math';
+import 'dart:ui';
 
 const _tileSize = 256.0;
-const tileSize = Point<double>(_tileSize, _tileSize);
+const tileSize = Size(_tileSize, _tileSize);
