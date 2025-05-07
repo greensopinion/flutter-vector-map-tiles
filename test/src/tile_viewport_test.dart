@@ -1,14 +1,15 @@
-import 'dart:math';
+import 'dart:ui';
 
-import 'package:flutter_map/flutter_map.dart';
 import 'package:test/test.dart';
 import 'package:vector_map_tiles/src/tile_identity.dart';
 import 'package:vector_map_tiles/src/tile_viewport.dart';
 
 void main() {
   group('overlaps:', () {
-    final viewport =
-        TileViewport(2, Bounds(const Point(1, 1), const Point(2, 2)));
+    final viewport = TileViewport(
+      2,
+      const Rect.fromLTRB(1.0, 1.0, 3.0, 3.0),
+    );
 
     test('when tile is at same zoom', () {
       expect(viewport.overlaps(TileIdentity(2, 0, 0)), false);
@@ -31,8 +32,10 @@ void main() {
     });
 
     test('when tile is larger', () {
-      final viewport =
-          TileViewport(3, Bounds(const Point(3, 2), const Point(4, 4)));
+      final viewport = TileViewport(
+        3,
+        const Rect.fromLTRB(3.0, 2.0, 5.0, 5.0),
+      );
 
       expect(viewport.overlaps(TileIdentity(0, 0, 0)), true);
 
@@ -54,18 +57,18 @@ void main() {
       test('larger tile zoom', () {
         final larger = TileIdentity(11, 325, 703);
         final viewport = TileViewport(
-            12,
-            Bounds<int>(
-              const Point(649, 1404),
-              const Point(651, 1408),
-            ));
+          12,
+          const Rect.fromLTRB(649.0, 1404.0, 652.0, 1409.0),
+        );
         expect(viewport.overlaps(larger), true);
       });
     });
 
     test('when tile is smaller', () {
-      final viewport =
-          TileViewport(2, Bounds(const Point(1, 1), const Point(2, 2)));
+      final viewport = TileViewport(
+        2,
+        const Rect.fromLTRB(1.0, 1.0, 3.0, 3.0),
+      );
       for (int x = 0; x < 2; ++x) {
         for (int y = 0; y < 8; ++y) {
           expect(viewport.overlaps(TileIdentity(3, x, y)), false,

@@ -32,11 +32,14 @@ class GridTilePositioner {
   }
 
   Offset _tileOffset(TileIdentity tile) {
+    final tileOffset = Offset(
+      tile.x.toDouble() * tileSize.width,
+      tile.y.toDouble() * tileSize.height,
+    );
+
     final tilePosition =
-        ((tile.toDoublePoint().scaleBy(tileSize) - state.origin) *
-                state.zoomScale) +
-            state.translate;
-    return Offset(tilePosition.x.toDouble(), tilePosition.y.toDouble());
+        (tileOffset - state.origin) * state.zoomScale + state.translate;
+    return tilePosition;
   }
 }
 
@@ -58,7 +61,7 @@ class GridTileSizer {
       effectiveScale = effectiveScale * translation.fraction.toDouble();
     }
     if (effectiveScale != 1.0) {
-      final referenceDimension = tileSize.x / translation.fraction;
+      final referenceDimension = tileSize.width / translation.fraction;
       final scaledSize = effectiveScale * referenceDimension;
       final maxDimension = max(size.width, size.height);
       if (scaledSize < maxDimension) {
@@ -87,15 +90,19 @@ class GridTileSizer {
 
 class TilePositioningState {
   final double zoomScale;
-  late final Point<double> origin;
-  late final Point<double> translate;
+  late final Offset origin;
+  late final Offset translate;
 
   TilePositioningState(this.zoomScale, MapCamera mapCamera, double zoom) {
-    final pixelOrigin = mapCamera
-        .getNewPixelOrigin(mapCamera.center, mapCamera.zoom)
-        .round()
-        .toDoublePoint();
-    origin = mapCamera.project(mapCamera.unproject(pixelOrigin, zoom), zoom);
+    final pixelOriginPoint =
+        mapCamera.getNewPixelOrigin(mapCamera.center, mapCamera.zoom);
+
+    final pixelOrigin = Offset(
+      pixelOriginPoint.dx.roundToDouble(),
+      pixelOriginPoint.dy.roundToDouble(),
+    );
+    origin = mapCamera.projectAtZoom(
+        mapCamera.unprojectAtZoom(pixelOrigin, zoom), zoom);
     translate = (origin * zoomScale) - pixelOrigin;
   }
 }
@@ -103,9 +110,4 @@ class TilePositioningState {
 double _roundSize(double dimension) {
   double factor = 1000;
   return (dimension * factor).roundToDouble() / factor;
-}
-
-extension _DoublePointExtension on Point<double> {
-  Point<double> scaleBy(Point<num> other) =>
-      Point<double>(x * other.x, y * other.y);
 }

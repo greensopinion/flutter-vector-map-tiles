@@ -3,9 +3,9 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:executor_lib/executor_lib.dart';
-import 'package:vector_map_tiles/src/raster/images.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
+import '../raster/images.dart';
 import 'extensions.dart';
 import 'storage_cache.dart';
 

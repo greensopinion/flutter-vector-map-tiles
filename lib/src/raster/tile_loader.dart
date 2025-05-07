@@ -60,8 +60,8 @@ class TileLoader {
     if (cached != null) {
       return ImageInfo(image: cached, scale: _scale);
     }
-    final job =
-        _TileJob(requestedTile, requestZoom, options.tileSize, cancelled);
+    final job = _TileJob(requestedTile, requestZoom,
+        options.tileDimension.toDouble(), cancelled);
     return _jobQueue.submit(Job<_TileJob, ImageInfo>(
         'render $requestedTile', _renderJob, job,
         deduplicationKey: 'render $requestedTile ${_theme.id}/$_sourcesKey'));

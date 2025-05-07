@@ -68,6 +68,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
               types: ThemeLayerType.values
                   .where((it) => it != ThemeLayerType.symbol)
                   .toSet()));
+
   Theme get symbolTheme =>
       _symbolTheme ??
       (_symbolTheme = widget.options.theme.copyWith(
@@ -249,6 +250,7 @@ class _LayerOptions {
   final double Function() mapZoom;
   final double Function() rotation;
   final Caches caches;
+
   _LayerOptions(this.providers, this.theme,
       {this.symbolTheme,
       this.sprites,
@@ -288,9 +290,12 @@ class _VectorTileLayerState extends DisposableState<_VectorTileLayer> {
   MapCamera get _mapCamera => widget.mapState;
 
   double get _zoom => widget.options.mapZoom();
+
   double get _detailZoom =>
       widget.options.mapZoom() - widget.options.tileOffset.zoomOffset;
+
   double get _clampedZoom => max(1.0, _zoom.floorToDouble());
+
   double get _rotation => widget.options.rotation();
 
   @override
@@ -390,29 +395,55 @@ class _VectorTileLayerState extends DisposableState<_VectorTileLayer> {
     _tileWidgets.update(tileViewport, tiles);
   }
 
-  Bounds _tiledPixelBounds() {
+  Rect _tiledPixelBounds() {
     final zoom = _mapCamera.zoom;
     final scale = _mapCamera.getZoomScale(zoom, _clampedZoom);
-    final centerPoint = _mapCamera.project(_mapCamera.center, _clampedZoom);
-    final halfSize = _mapCamera.size / (scale * 2);
+    final center =
+        _mapCamera.projectAtZoom(_mapCamera.center, _clampedZoom); // Offset
+    final halfSize = _mapCamera.size / (scale * 2); // Size
 
-    return Bounds(centerPoint - halfSize, centerPoint + halfSize);
+    final halfSizeOffset = Offset(halfSize.width, halfSize.height);
+    final topLeft = center - halfSizeOffset;
+    final bottomRight = center + halfSizeOffset;
+
+    return Rect.fromLTRB(
+        topLeft.dx, topLeft.dy, bottomRight.dx, bottomRight.dy);
   }
 
-  TileViewport _pixelBoundsToTileViewport(Bounds pixelBounds) {
+  TileViewport _pixelBoundsToTileViewport(Rect pixelBounds) {
     final zoom = _clampedZoom.toInt();
-    final a = pixelBounds.min.unscaleBy(tileSize).floor();
-    final b = pixelBounds.max.unscaleBy(tileSize).ceil() - const Point(1, 1);
-    final topLeft = Point<int>(a.x.toInt(), a.y.toInt());
-    final bottomRight = Point<int>(b.x.toInt(), b.y.toInt());
-    return TileViewport(zoom, Bounds<int>(topLeft, bottomRight));
+    final topLeft = Offset(
+      (pixelBounds.left / tileSize.width).floorToDouble(),
+      (pixelBounds.top / tileSize.height).floorToDouble(),
+    );
+    final bottomRight = Offset(
+      (pixelBounds.right / tileSize.width).ceilToDouble() - 1,
+      (pixelBounds.bottom / tileSize.height).ceilToDouble() - 1,
+    );
+    final tileRect = Rect.fromLTRB(
+      topLeft.dx,
+      topLeft.dy,
+      bottomRight.dx,
+      bottomRight.dy,
+    );
+
+    return TileViewport(
+      zoom,
+      tileRect,
+    );
   }
 
   List<TileIdentity> _expand(TileViewport viewport) {
-    final bounds = viewport.bounds;
+    final rect = viewport.bounds;
     final tiles = <TileIdentity>[];
-    for (int x = bounds.min.x; x <= bounds.max.x; ++x) {
-      for (int y = bounds.min.y; y <= bounds.max.y; ++y) {
+
+    final minX = rect.left.floor();
+    final maxX = rect.right.ceil();
+    final minY = rect.top.floor();
+    final maxY = rect.bottom.ceil();
+
+    for (int x = minX; x <= maxX; ++x) {
+      for (int y = minY; y <= maxY; ++y) {
         if (x >= 0 && y >= 0) {
           final tile = TileIdentity(viewport.zoom, x, y);
           if (tile.isValid()) {
@@ -462,26 +493,26 @@ class _ZoomScaler {
 class _MapState {
   final double zoom;
   final double rotation;
-  final Point pixelOrigin;
+  final Offset pixelOrigin;
   final LatLng center;
-  final Point<double> size;
+  final Size size;
   final LatLngBounds bounds;
-  final Bounds pixelBounds;
+  final Rect pixelBounds;
 
   _MapState(this.zoom, this.rotation, this.pixelOrigin, this.center, this.size,
       this.bounds, this.pixelBounds);
 
   @override
-  operator ==(other) =>
+  bool operator ==(Object other) =>
+      identical(this, other) ||
       other is _MapState &&
-      zoom == other.zoom &&
-      pixelOrigin == other.pixelOrigin &&
-      center == other.center &&
-      size == other.size &&
-      bounds == other.bounds &&
-      pixelBounds.min == other.pixelBounds.min &&
-      pixelBounds.max == other.pixelBounds.max &&
-      rotation == other.rotation;
+          zoom == other.zoom &&
+          pixelOrigin == other.pixelOrigin &&
+          center == other.center &&
+          size == other.size &&
+          bounds == other.bounds &&
+          pixelBounds == other.pixelBounds &&
+          rotation == other.rotation;
 
   @override
   int get hashCode => Object.hash(zoom, center, size);

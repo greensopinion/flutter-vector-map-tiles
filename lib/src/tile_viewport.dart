@@ -1,12 +1,11 @@
 import 'dart:math';
-
-import 'package:flutter_map/flutter_map.dart';
+import 'dart:ui';
 
 import '../vector_map_tiles.dart';
 
 class TileViewport {
   final int zoom;
-  final Bounds<int> bounds;
+  final Rect bounds;
 
   TileViewport(this.zoom, this.bounds);
 
@@ -14,27 +13,45 @@ class TileViewport {
   /// the given tile
   bool overlaps(TileIdentity tile) {
     if (tile.z == zoom) {
-      return bounds.contains(Point(tile.x, tile.y));
+      return bounds.contains(Offset(tile.x.toDouble(), tile.y.toDouble()));
     }
+
     final zoomDifference = zoom - tile.z;
-    final multiplier = pow(2, zoomDifference.abs()).toInt();
+    final multiplier = pow(2, zoomDifference.abs()).toDouble();
+
     if (zoomDifference > 0) {
-      // tile is bigger
-      final boundsTopLeft =
-          (bounds.topLeft.toDoublePoint() * (1 / multiplier)).floor();
-      final boundsBottomRight =
-          (bounds.bottomRight.toDoublePoint() * (1 / multiplier)).ceil();
-      final tilePoint = Point(tile.x, tile.y);
-      return Bounds(boundsTopLeft, boundsBottomRight)
-          .containsPartialBounds(Bounds(tilePoint, tilePoint));
+      final boundsTopLeft = Offset(
+        (bounds.left / multiplier).floorToDouble(),
+        (bounds.top / multiplier).floorToDouble(),
+      );
+      final boundsBottomRight = Offset(
+        (bounds.right / multiplier).ceilToDouble(),
+        (bounds.bottom / multiplier).ceilToDouble(),
+      );
+
+      final tilePoint = Offset(tile.x.toDouble(), tile.y.toDouble());
+      final tileRect = Rect.fromLTWH(tilePoint.dx, tilePoint.dy, 1, 1);
+      final scaledBounds = Rect.fromLTRB(
+        boundsTopLeft.dx,
+        boundsTopLeft.dy,
+        boundsBottomRight.dx,
+        boundsBottomRight.dy,
+      );
+      return scaledBounds.overlaps(tileRect);
     }
-    // tile is smaller
-    final tileZoomTopLeft = bounds.topLeft * multiplier;
-    if (tile.x >= tileZoomTopLeft.x && tile.y >= tileZoomTopLeft.y) {
-      final tileZoomBottomRight =
-          (bounds.bottomRight + const Point(1, 1)) * multiplier;
-      return tile.x < tileZoomBottomRight.x && tile.y < tileZoomBottomRight.y;
-    }
-    return false;
+    final scaledBoundsTopLeft = Offset(
+      bounds.left * multiplier,
+      bounds.top * multiplier,
+    );
+
+    final scaledBoundsBottomRight = Offset(
+      bounds.right * multiplier,
+      bounds.bottom * multiplier,
+    );
+
+    return tile.x >= scaledBoundsTopLeft.dx &&
+        tile.y >= scaledBoundsTopLeft.dy &&
+        tile.x < scaledBoundsBottomRight.dx &&
+        tile.y < scaledBoundsBottomRight.dy;
   }
 }

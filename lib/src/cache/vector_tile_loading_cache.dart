@@ -174,7 +174,7 @@ TileData _createTile(_ThemeTile themeTile) {
           .createTileData(VectorTileReader().read(themeTile.bytes));
   final translation = themeTile.translation;
   if (translation != null && tileData.layers.isNotEmpty) {
-    final clipSize = tileSize.x / translation.fraction;
+    final clipSize = tileSize.width / translation.fraction;
     final dx = (translation.xOffset * clipSize);
     final dy = (translation.yOffset * clipSize);
     final clip = Rectangle(dx, dy, clipSize, clipSize);
