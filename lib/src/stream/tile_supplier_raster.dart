@@ -29,7 +29,8 @@ class RasterTileProvider {
           tileBySource[futureEntry.key] = tile;
         }
       } catch (e) {
-        final skippable = (e is ProviderException) && e.statusCode == 404;
+        final skippable = (e is ProviderException) &&
+            (e.statusCode == 404 || e.statusCode == 204);
         if (!skippable || !skipMissing) {
           RasterTileset(tiles: tileBySource).dispose();
           rethrow;
