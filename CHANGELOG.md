@@ -1,3 +1,14 @@
+## 9.0.0-beta.8
+
+* udpate `flutter_map` dependency to 8.1.1
+* accept HTTP 204 for raster tiles
+* fix image codec leak
+* fix text size issue on raster tiles
+* improve support for multiple layers
+* add `FileVectorTileProvider`
+* fix rendering defect with multiple tile sources
+* skip missing raster tiles
+
 ## 9.0.0-beta.3
 
 * Reduce data usage for contour lines.
