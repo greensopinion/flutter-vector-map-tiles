@@ -15,10 +15,13 @@ class GridTilePositioner {
 
   Widget positionTile(TileIdentity tile, Widget tileWidget) {
     final offset = _tileOffset(tile);
-    final toRightPosition = _tileOffset(TileIdentity(tile.z, tile.x + 1, tile.y));
-    final toBottomPosition = _tileOffset(TileIdentity(tile.z, tile.x, tile.y + 1));
+    final toRightPosition =
+        _tileOffset(TileIdentity(tile.z, tile.x + 1, tile.y));
+    final toBottomPosition =
+        _tileOffset(TileIdentity(tile.z, tile.x, tile.y + 1));
     const tileOverlap = 0.5;
-    final p = Rect.fromLTRB(offset.dx, offset.dy, toRightPosition.dx + tileOverlap, toBottomPosition.dy + tileOverlap);
+    final p = Rect.fromLTRB(offset.dx, offset.dy,
+        toRightPosition.dx + tileOverlap, toBottomPosition.dy + tileOverlap);
     return Positioned(
         key: Key('PositionedGridTile_${tile.z}_${tile.x}_${tile.y}'),
         top: _roundSize(offset.dy),
@@ -34,7 +37,8 @@ class GridTilePositioner {
       tile.y.toDouble() * tileSize.height,
     );
 
-    final tilePosition = (tileOffset - state.origin) * state.zoomScale + state.translate;
+    final tilePosition =
+        (tileOffset - state.origin) * state.zoomScale + state.translate;
     return tilePosition;
   }
 }
@@ -77,8 +81,11 @@ class GridTileSizer {
     }
   }
 
-  Rect tileClip(Size size, double scale) =>
-      Rect.fromLTWH((-translationDelta.dx / scale).abs(), (-translationDelta.dy / scale).abs(), size.width / scale, size.height / scale);
+  Rect tileClip(Size size, double scale) => Rect.fromLTWH(
+      (-translationDelta.dx / scale).abs(),
+      (-translationDelta.dy / scale).abs(),
+      size.width / scale,
+      size.height / scale);
 }
 
 class TilePositioningState {
@@ -87,13 +94,15 @@ class TilePositioningState {
   late final Offset translate;
 
   TilePositioningState(this.zoomScale, MapCamera mapCamera, double zoom) {
-    final pixelOriginPoint = mapCamera.getNewPixelOrigin(mapCamera.center, mapCamera.zoom);
+    final pixelOriginPoint =
+        mapCamera.getNewPixelOrigin(mapCamera.center, mapCamera.zoom);
 
     final pixelOrigin = Offset(
       pixelOriginPoint.dx.roundToDouble(),
       pixelOriginPoint.dy.roundToDouble(),
     );
-    origin = mapCamera.projectAtZoom(mapCamera.unprojectAtZoom(pixelOrigin, zoom), zoom);
+    origin = mapCamera.projectAtZoom(
+        mapCamera.unprojectAtZoom(pixelOrigin, zoom), zoom);
     translate = (origin * zoomScale) - pixelOrigin;
   }
 }
@@ -104,5 +113,6 @@ double _roundSize(double dimension) {
 }
 
 extension _DoublePointExtension on Point<double> {
-  Point<double> scaleBy(Point<num> other) => Point<double>(x * other.x, y * other.y);
+  Point<double> scaleBy(Point<num> other) =>
+      Point<double>(x * other.x, y * other.y);
 }

@@ -73,27 +73,32 @@ void main() {
       );
       for (int x = 0; x < 2; ++x) {
         for (int y = 0; y < 8; ++y) {
-          expect(viewport.overlaps(TileIdentity(3, x, y)), false, reason: '$x,$y');
+          expect(viewport.overlaps(TileIdentity(3, x, y)), false,
+              reason: '$x,$y');
         }
       }
       for (int x = 6; x < 8; ++x) {
         for (int y = 0; y < 8; ++y) {
-          expect(viewport.overlaps(TileIdentity(3, x, y)), false, reason: '$x,$y');
+          expect(viewport.overlaps(TileIdentity(3, x, y)), false,
+              reason: '$x,$y');
         }
       }
       for (int x = 0; x < 8; ++x) {
         for (int y = 0; y < 2; ++y) {
-          expect(viewport.overlaps(TileIdentity(3, x, y)), false, reason: '$x,$y');
+          expect(viewport.overlaps(TileIdentity(3, x, y)), false,
+              reason: '$x,$y');
         }
       }
       for (int x = 0; x < 8; ++x) {
         for (int y = 6; y < 8; ++y) {
-          expect(viewport.overlaps(TileIdentity(3, x, y)), false, reason: '$x,$y');
+          expect(viewport.overlaps(TileIdentity(3, x, y)), false,
+              reason: '$x,$y');
         }
       }
       for (int x = 2; x < 6; ++x) {
         for (int y = 2; y < 6; ++y) {
-          expect(viewport.overlaps(TileIdentity(3, x, y)), true, reason: '$x,$y');
+          expect(viewport.overlaps(TileIdentity(3, x, y)), true,
+              reason: '$x,$y');
         }
       }
     });
