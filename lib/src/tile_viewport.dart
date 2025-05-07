@@ -1,8 +1,6 @@
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:flutter_map/flutter_map.dart';
-
 import '../vector_map_tiles.dart';
 
 class TileViewport {
