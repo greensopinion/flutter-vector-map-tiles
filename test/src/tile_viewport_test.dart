@@ -1,7 +1,5 @@
-import 'dart:math';
 import 'dart:ui';
 
-import 'package:flutter_map/flutter_map.dart';
 import 'package:test/test.dart';
 import 'package:vector_map_tiles/src/tile_identity.dart';
 import 'package:vector_map_tiles/src/tile_viewport.dart';
