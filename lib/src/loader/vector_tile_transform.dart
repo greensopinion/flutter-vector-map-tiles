@@ -83,7 +83,7 @@ class _TransformInput {
 }
 
 Tile _apply(_TransformInput input) {
-  final theme = _themeById[input.themeId]!;
+  final theme = themeById[input.themeId]!;
   final vectorTile = VectorTileReader().read(input.bytes);
   final tileData = TileFactory(
     theme,
@@ -95,8 +95,8 @@ Tile _apply(_TransformInput input) {
   return translated.toTile();
 }
 
-final _themeById = <String, Theme>{};
+final themeById = <String, Theme>{};
 
 Future<void> _setupTheme(Theme theme) async {
-  _themeById[theme.id] = theme;
+  themeById[theme.id] = theme;
 }

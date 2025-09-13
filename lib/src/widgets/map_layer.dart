@@ -7,6 +7,7 @@ import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../vector_map_tiles.dart';
 import '../loader/caching_tile_loader.dart';
+import '../loader/vector_tile_transform.dart';
 import '../model/map_properties.dart';
 import '../model/tile_data_model.dart';
 import 'abstract_map_layer_state.dart';
@@ -48,7 +49,7 @@ class MapLayerState extends AbstractMapLayerState<MapLayer> {
   @override
   Future<void> preRender(TileDataModel tile) async {
     final tileset = tile.tileset ?? Tileset({});
-    final jobArguments = (widget.mapProperties.theme, zoom, tileset);
+    final jobArguments = (widget.mapProperties.theme.id, zoom, tileset);
     final tilePrerendering = executor
         .submit(
           Job(
@@ -66,10 +67,11 @@ class MapLayerState extends AbstractMapLayerState<MapLayer> {
     await Future.wait([tilePrerendering, uiPrerendering]);
   }
 
-  static TransferableTypedData Function((Theme, double, Tileset) args) _preRender() {
+  static TransferableTypedData Function((String, double, Tileset) args) _preRender() {
     final preRenderer = TilesRenderer.getPreRenderer();
-    return ((Theme, double, Tileset) args) {
-      return TransferableTypedData.fromList([preRenderer.call(args.$1, args.$2, args.$3)]);
+    return ((String, double, Tileset) args) {
+      final theme = themeById[args.$1]!;
+      return TransferableTypedData.fromList([preRenderer.call(theme, args.$2, args.$3)]);
     };
   }
 
