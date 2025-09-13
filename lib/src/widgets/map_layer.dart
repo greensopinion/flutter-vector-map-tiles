@@ -53,7 +53,7 @@ class MapLayerState extends AbstractMapLayerState<MapLayer> {
         .submit(
           Job(
             "pre-render",
-            _preRender,
+            _preRender(),
             jobArguments,
             deduplicationKey:
                 "pre-render:${widget.mapProperties.theme.id}-${widget.mapProperties.theme.version}-$zoom-${tile.tile.key()}",
@@ -66,10 +66,13 @@ class MapLayerState extends AbstractMapLayerState<MapLayer> {
     await Future.wait([tilePrerendering, uiPrerendering]);
   }
 
-  static TransferableTypedData _preRender((Theme, double, Tileset) args) =>
-      TransferableTypedData.fromList([
-        TilesRenderer.preRender(args.$1, args.$2, args.$3),
-      ]);
+  static TransferableTypedData Function((Theme, double, Tileset) args) _preRender() {
+    final preRenderer = TilesRenderer.getPreRenderer();
+    return ((Theme, double, Tileset) args) {
+      return TransferableTypedData.fromList([preRenderer.call(args.$1, args.$2, args.$3)]);
+    };
+  }
+
 
   @override
   Widget build(BuildContext context) {
