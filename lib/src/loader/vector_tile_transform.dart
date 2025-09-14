@@ -3,6 +3,7 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:executor_lib/executor_lib.dart';
+import 'package:vector_map_tiles/src/loader/theme_repo.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../tile_translation.dart';
@@ -12,34 +13,13 @@ class VectorTileTransform {
   final Executor executor;
   final Theme theme;
   final double tileSize;
-  bool _isInitialized = false;
-  late final Future<bool> _initialized;
 
   VectorTileTransform({
     required this.executor,
     required this.theme,
     required this.tileSize,
   }) {
-    _initialize();
-  }
-
-  void _initialize() async {
-    final completer = Completer<bool>();
-    _initialized = completer.future;
-    final futures = executor.submitAll(
-      Job(
-        'setupTheme',
-        _setupTheme,
-        theme,
-        deduplicationKey:
-            'VectorTileTransform-setup-theme-${theme.id}-${theme.version}',
-      ),
-    );
-    for (final future in futures) {
-      await future;
-    }
-    _isInitialized = true;
-    completer.complete(true);
+    ThemeRepo.initialize(theme, executor);
   }
 
   Future<Tile> apply(
@@ -47,8 +27,9 @@ class VectorTileTransform {
     TileTranslation translation,
     bool Function() cancelled,
   ) async {
-    if (!_isInitialized) {
-      await _initialized;
+    final themeId = theme.id;
+    if (!ThemeRepo.isThemeReady(themeId)) {
+      await ThemeRepo.waitForTheme(themeId);
     }
     final deduplicationKey =
         '${theme.id}-${theme.version}-${translation.original.key()}-${translation.translated.key()}-${translation.xOffset}-${translation.yOffset}';
@@ -84,7 +65,7 @@ class _TransformInput {
 }
 
 Tile _apply(_TransformInput input) {
-  final theme = themeById[input.themeId]!;
+  final theme = ThemeRepo.themeById[input.themeId]!;
   final vectorTile = VectorTileReader().read(input.bytes.materialize().asUint8List());
   final tileData = TileFactory(
     theme,
@@ -96,8 +77,4 @@ Tile _apply(_TransformInput input) {
   return translated.toTile();
 }
 
-final themeById = <String, Theme>{};
 
-Future<void> _setupTheme(Theme theme) async {
-  themeById[theme.id] = theme;
-}
