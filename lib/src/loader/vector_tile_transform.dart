@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:executor_lib/executor_lib.dart';
@@ -58,7 +59,7 @@ class VectorTileTransform {
         _TransformInput(
           themeId: theme.id,
           tileSize: tileSize,
-          bytes: bytes,
+          bytes: TransferableTypedData.fromList([bytes]),
           translation: translation,
         ),
         cancelled: cancelled,
@@ -70,7 +71,7 @@ class VectorTileTransform {
 
 class _TransformInput {
   final String themeId;
-  final Uint8List bytes;
+  final TransferableTypedData bytes;
   final double tileSize;
   final TileTranslation translation;
 
@@ -84,7 +85,7 @@ class _TransformInput {
 
 Tile _apply(_TransformInput input) {
   final theme = themeById[input.themeId]!;
-  final vectorTile = VectorTileReader().read(input.bytes);
+  final vectorTile = VectorTileReader().read(input.bytes.materialize().asUint8List());
   final tileData = TileFactory(
     theme,
     const Logger.noop(),
