@@ -26,7 +26,7 @@ class TilePositioningDebugLayerState
         .map((m) => m.tilePosition)
         .toList();
     if (tilePositions.isEmpty) {
-      return Center(child: Text('No tiles to display'));
+      return const Center(child: Text('No tiles to display'));
     }
     return Stack(children: tilePositions.map(_toTile).toList());
   }
