@@ -43,7 +43,7 @@ abstract class AbstractMapLayerState<T extends AbstractMapLayer>
 
   void _updateTiles() {
     for (final tile in mapTiles.tileModels.where(
-      (model) => model.isLoaded && !model.isDisplayReady,
+      (model) => model.isLoaded && !model.isDisplayReady && !model.preRenderStarted
     )) {
       preRender(tile).then((_) {
         if (mounted) {
@@ -55,7 +55,9 @@ abstract class AbstractMapLayerState<T extends AbstractMapLayer>
     }
   }
 
-  Future<void> preRender(TileDataModel tile) => Future.sync(() {});
+  Future<void> preRender(TileDataModel tile) => Future.sync(() {
+    tile.preRenderStarted = true;
+  });
 
   void resetState() {
     mapTiles.dispose();

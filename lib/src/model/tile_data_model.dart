@@ -10,6 +10,7 @@ class TileDataModel {
   TilePosition tilePosition;
   bool isLoaded = false;
   bool isDisplayReady = false;
+  bool preRenderStarted = false;
   Tileset? tileset;
   RasterTileset? rasterTileset;
   Uint8List? renderData;
@@ -19,6 +20,7 @@ class TileDataModel {
   void dispose() {
     isLoaded = false;
     isDisplayReady = false;
+    preRenderStarted = false;
     rasterTileset?.dispose();
     rasterTileset = null;
     tileset = null;

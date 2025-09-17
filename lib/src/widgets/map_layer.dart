@@ -47,21 +47,23 @@ class MapLayerState extends AbstractMapLayerState<MapLayer> {
   }
 
   @override
-  Future<void> preRender(TileDataModel tile) async {
-    final tileset = tile.tileset ?? Tileset({});
-    final jobArguments = (widget.mapProperties.theme.id, zoom, tileset);
+  Future<void> preRender(TileDataModel tile) {
+    return super.preRender(tile).then((_) async {
+      final tileset = tile.tileset ?? Tileset({});
+      final jobArguments = (widget.mapProperties.theme.id, zoom, tileset);
 
-    await tilesRenderer.preRenderUi(zoom, tileset);
-    await executor.submit(
-      Job(
-        "pre-render",
-        _preRender(),
-        jobArguments,
-        deduplicationKey:
-        "pre-render:${widget.mapProperties.theme.id}-${widget.mapProperties.theme.version}-$zoom-${tile.tile.key()}",
-      ),
-    ).then((renderData) {
-      tile.renderData ??= renderData.materialize().asUint8List();
+      await tilesRenderer.preRenderUi(zoom, tileset);
+      await executor.submit(
+        Job(
+          "pre-render",
+          _preRender(),
+          jobArguments,
+          deduplicationKey:
+          "pre-render:${widget.mapProperties.theme.id}-${widget.mapProperties.theme.version}-$zoom-${tile.tile.key()}",
+        )
+      ).then((renderData) {
+        tile.renderData ??= renderData.materialize().asUint8List();
+      });
     });
   }
 
