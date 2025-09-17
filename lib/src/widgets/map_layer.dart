@@ -50,21 +50,19 @@ class MapLayerState extends AbstractMapLayerState<MapLayer> {
   Future<void> preRender(TileDataModel tile) async {
     final tileset = tile.tileset ?? Tileset({});
     final jobArguments = (widget.mapProperties.theme.id, zoom, tileset);
-    final tilePreRendering = executor
-        .submit(
-          Job(
-            "pre-render",
-            _preRender(),
-            jobArguments,
-            deduplicationKey:
-                "pre-render:${widget.mapProperties.theme.id}-${widget.mapProperties.theme.version}-$zoom-${tile.tile.key()}",
-          ),
-        )
-        .then((renderData) {
-          tile.renderData ??= renderData.materialize().asUint8List();
-        });
-    final uiPreRendering = tilesRenderer.preRenderUi(zoom, tileset);
-    await Future.wait([tilePreRendering, uiPreRendering]);
+
+    await tilesRenderer.preRenderUi(zoom, tileset);
+    await executor.submit(
+      Job(
+        "pre-render",
+        _preRender(),
+        jobArguments,
+        deduplicationKey:
+        "pre-render:${widget.mapProperties.theme.id}-${widget.mapProperties.theme.version}-$zoom-${tile.tile.key()}",
+      ),
+    ).then((renderData) {
+      tile.renderData ??= renderData.materialize().asUint8List();
+    });
   }
 
   static TransferableTypedData Function((String, double, Tileset) args) _preRender() {
