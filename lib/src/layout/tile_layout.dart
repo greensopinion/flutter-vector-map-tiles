@@ -31,7 +31,10 @@ class TileLayout {
 
     for (int tileX = minTileX; tileX <= maxTileX; tileX++) {
       for (int tileY = minTileY; tileY <= maxTileY; tileY++) {
-        tiles.add(TileIdentity(viewport.zoom, tileX, tileY));
+        final id = TileIdentity(viewport.zoom, tileX, tileY);
+        if (id.isValid()) {
+          tiles.add(id);
+        }
       }
     }
     return _positionTiles(mapState, zoomScaler, viewport.zoom, tiles);
