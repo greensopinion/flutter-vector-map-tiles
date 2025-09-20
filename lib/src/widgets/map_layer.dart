@@ -50,9 +50,10 @@ class MapLayerState extends AbstractMapLayerState<MapLayer> {
   Future<void> preRender(TileDataModel tile) {
     return super.preRender(tile).then((_) async {
       final tileset = tile.tileset ?? Tileset({});
-      final jobArguments = (widget.mapProperties.theme.id, zoom, tileset);
+      final tileID = tile.tile.key();
+      final jobArguments = (widget.mapProperties.theme.id, zoom, tileset, tileID);
 
-      await tilesRenderer.preRenderUi(zoom, tileset);
+      await tilesRenderer.preRenderUi(zoom, tileset, tileID);
       await executor.submit(
         Job(
           "pre-render",
@@ -62,16 +63,18 @@ class MapLayerState extends AbstractMapLayerState<MapLayer> {
           "pre-render:${widget.mapProperties.theme.id}-${widget.mapProperties.theme.version}-$zoom-${tile.tile.key()}",
         )
       ).then((renderData) {
-        tile.renderData ??= renderData.materialize().asUint8List();
+        try {
+          tile.renderData ??= renderData.materialize().asUint8List();
+        } catch (_) {}
       });
     });
   }
 
-  static TransferableTypedData Function((String, double, Tileset) args) _preRender() {
+  static TransferableTypedData Function((String, double, Tileset, String) args) _preRender() {
     final preRenderer = TilesRenderer.getPreRenderer();
-    return ((String, double, Tileset) args) {
+    return ((String, double, Tileset, String) args) {
       final theme = ThemeRepo.themeById[args.$1]!;
-      return TransferableTypedData.fromList([preRenderer.call(theme, args.$2, args.$3)]);
+      return TransferableTypedData.fromList([preRenderer.call(theme, args.$2, args.$3, args.$4)]);
     };
   }
 
