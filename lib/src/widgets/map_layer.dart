@@ -70,8 +70,8 @@ class MapLayerState extends AbstractMapLayerState<MapLayer> {
     });
   }
 
-  static TransferableTypedData Function((String, double, Tileset, String) args) _preRender() {
-    final preRenderer = TilesRenderer.getPreRenderer();
+  TransferableTypedData Function((String, double, Tileset, String) args) _preRender() {
+    final preRenderer = tilesRenderer.getPreRenderer();
     return ((String, double, Tileset, String) args) {
       final theme = ThemeRepo.themeById[args.$1]!;
       return TransferableTypedData.fromList([preRenderer.call(theme, args.$2, args.$3, args.$4)]);
