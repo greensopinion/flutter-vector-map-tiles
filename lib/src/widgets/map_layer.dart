@@ -91,7 +91,7 @@ class MapLayerState extends AbstractMapLayerState<MapLayer> {
     final uiTiles = tileModels
         .map((it) => it.toUiModel())
         .toList(growable: false);
-    tilesRenderer.update(zoom, uiTiles);
+    tilesRenderer.update(zoom, uiTiles, mapTiles.tileModels.map((it) => it.tile.key()));
 
     return CustomPaint(
       key: Key(
