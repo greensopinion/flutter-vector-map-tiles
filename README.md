@@ -45,6 +45,8 @@ flutter channel main && flutter upgrade
 
 Impeller must be enabled. Read on how to enable impeller [here](https://docs.flutter.dev/perf/impeller#availability).
 
+Flutter GPU must also be enabled via the Flutter GPU manifest setting. This can be done either via command line argument --enable-flutter-gpu or by adding the FLTEnableFlutterGPU key set to true on iOS / MacOS or io.flutter.embedding.android.EnableFlutterGPU metadata key to true on Android. This is already done in the example project for iOS and MacOS.
+
 ## Usage
 
 Read the map style:
