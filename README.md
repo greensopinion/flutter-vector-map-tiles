@@ -4,6 +4,14 @@ A plugin for [`flutter_map`](https://pub.dev/packages/flutter_map) that enables 
 
 Loads vector tiles from a source such as Mapbox or Stadia Maps, and renders them as a layer on a `flutter_map`.
 
+## flutter_gpu preview
+
+This version of vector_map_tiles has a new rendering backend which makes use of ``flutter_gpu`` to achieve better performance. 
+Please note that this branch is in preview state — we encourage you to try it out and share your feedback. If you encounter 
+any bugs, performance issues, or have suggestions for improvements, please open an issue with the tag ``10.0.0`` so we can continue refining 
+and stabilizing.
+
+
 
 <img src="https://raw.githubusercontent.com/greensopinion/flutter-vector-map-tiles/main/vector_map_tiles-example.png" alt="example screenshot" width="292"/> <img src="https://raw.githubusercontent.com/greensopinion/flutter-vector-map-tiles/main/vector_map_tiles-example-hillshade.png" alt="example screenshot" width="292"/>
 
@@ -11,9 +19,21 @@ See the [gallery](gallery/gallery.md) for more examples.
 
 ## Installing
 
-Details on https://pub.dev/packages/vector_map_tiles
+vector_map_tiles depends on vector_tile_renderer. To set this up, run:
+```
+git clone git@github.com:greensopinion/flutter-vector-map-tiles.git vector_map_tiles
+git clone git@github.com:greensopinion/dart-vector-tile-renderer.git vector_tile_renderer
 
-See [vector_map_tiles/install](https://pub.dev/packages/vector_map_tiles/install) for instructions on installing.
+cd vector_map_tiles
+git fetch origin
+git checkout -b 10.0.0 origin/10.0.0
+cd ..
+
+cd vector_tile_renderer
+git fetch origin
+git checkout -b 7.0.0 origin/7.0.0
+cd ..
+```
 
 ## Usage
 
