@@ -34,44 +34,36 @@ class SpriteStyle {
   SpriteStyle({required this.atlasProvider, required this.index});
 }
 
-class StyleReader {
-  final String uri;
+abstract class BaseStyleReader {
   final String? apiKey;
   final Logger logger;
   final Map<String, String>? httpHeaders;
 
-  StyleReader(
-      {required this.uri, this.apiKey, Logger? logger, this.httpHeaders})
+  BaseStyleReader({this.apiKey, Logger? logger, this.httpHeaders})
       : logger = logger ?? const Logger.noop();
 
-  Future<Style> read() async {
-    final uriMapper = StyleUriMapper(key: apiKey);
-    final url = uriMapper.map(uri);
-    final styleText = await _httpGet(url, httpHeaders);
-    final style = await compute(jsonDecode, styleText);
-    if (style is! Map<String, dynamic>) {
-      throw _invalidStyle(url);
-    }
-    final sources = style['sources'];
-    if (sources is! Map) {
-      throw _invalidStyle(url);
-    }
-    final providerByName = await _readProviderByName(sources);
-    final name = style['name'] as String?;
+  Future<Style> read();
 
+  String? getName(Map<String, dynamic> style) {
+    return style['name'] as String?;
+  }
+
+  LatLng? getCenter(Map<String, dynamic> style) {
     final center = style['center'];
-    LatLng? centerPoint;
     if (center is List && center.length == 2) {
-      centerPoint =
-          LatLng((center[1] as num).toDouble(), (center[0] as num).toDouble());
+      return LatLng(
+          (center[1] as num).toDouble(), (center[0] as num).toDouble());
     }
-    double? zoom = (style['zoom'] as num?)?.toDouble();
-    if (zoom != null && zoom < 2) {
-      zoom = null;
-      centerPoint = null;
-    }
+    return null;
+  }
+
+  double? getZoom(Map<String, dynamic> style) {
+    return (style['zoom'] as num?)?.toDouble();
+  }
+
+  Future<SpriteStyle?> getSprite(
+      String? uri, Map<String, dynamic> style, StyleUriMapper uriMapper) async {
     final spriteUri = style['sprite'];
-    SpriteStyle? sprites;
     if (spriteUri is String && spriteUri.trim().isNotEmpty) {
       final spriteUris = uriMapper.mapSprite(uri, spriteUri);
       for (final spriteUri in spriteUris) {
@@ -83,23 +75,29 @@ class StyleReader {
           logger.log(() => 'error reading sprite uri: ${spriteUri.json}');
           continue;
         }
-        sprites = SpriteStyle(
+        return SpriteStyle(
             atlasProvider: () => _loadBinary(spriteUri.image, httpHeaders),
             index: SpriteIndexReader(logger: logger).read(spritesJson));
-        break;
       }
     }
-    return Style(
-        theme: ThemeReader(logger: logger).read(style),
-        providers: TileProviders(providerByName),
-        sprites: sprites,
-        name: name,
-        center: centerPoint,
-        zoom: zoom);
+
+    return null;
+  }
+
+  Future<TileProviders> getTileProviders(
+      String? uri, Map<String, dynamic> style) async {
+    final sources = style['sources'];
+    if (sources is! Map) {
+      throw _invalidStyle(uri);
+    }
+
+    final providerByName = await _readProviderByName(uri, sources);
+
+    return TileProviders(providerByName);
   }
 
   Future<Map<String, VectorTileProvider>> _readProviderByName(
-      Map sources) async {
+      String? uri, Map sources) async {
     final providers = <String, VectorTileProvider>{};
     final sourceEntries = sources.entries.toList();
     for (final entry in sourceEntries) {
@@ -141,8 +139,75 @@ class StyleReader {
   }
 }
 
-String _invalidStyle(String url) =>
-    'Uri does not appear to be a valid style: $url';
+class StyleReader extends BaseStyleReader {
+  final String uri;
+
+  StyleReader(
+      {required this.uri, super.apiKey, super.logger, super.httpHeaders});
+
+  @override
+  Future<Style> read() async {
+    final uriMapper = StyleUriMapper(key: apiKey);
+    final url = uriMapper.map(uri);
+    final styleText = await _httpGet(url, httpHeaders);
+    final style = await compute(jsonDecode, styleText);
+    if (style is! Map<String, dynamic>) {
+      throw _invalidStyle(url);
+    }
+
+    LatLng? centerPoint = getCenter(style);
+    double? zoom = getZoom(style);
+
+    if (zoom != null && zoom < 2) {
+      zoom = null;
+      centerPoint = null;
+    }
+
+    return Style(
+        theme: ThemeReader(logger: logger).read(style),
+        providers: await getTileProviders(url, style),
+        sprites: await getSprite(uri, style, uriMapper),
+        name: getName(style),
+        center: centerPoint,
+        zoom: zoom);
+  }
+}
+
+class LocalStyleReader extends BaseStyleReader {
+  final Map<String, dynamic> styleJson;
+
+  LocalStyleReader(
+      {required this.styleJson, super.apiKey, super.logger, super.httpHeaders});
+
+  @override
+  Future<Style> read() async {
+    final uriMapper = StyleUriMapper(key: apiKey);
+    final style = styleJson;
+
+    LatLng? centerPoint = getCenter(style);
+    double? zoom = getZoom(style);
+
+    if (zoom != null && zoom < 2) {
+      zoom = null;
+      centerPoint = null;
+    }
+
+    return Style(
+        theme: ThemeReader(logger: logger).read(style),
+        providers: await getTileProviders(null, style),
+        sprites: await getSprite(null, style, uriMapper),
+        name: getName(style),
+        center: centerPoint,
+        zoom: zoom);
+  }
+}
+
+String _invalidStyle(String? url) {
+  if (url != null) {
+    return 'Uri does not appear to be a valid style: $url';
+  }
+  return 'Style json does not appear to be valid.';
+}
 
 Future<String> _httpGet(String url, Map<String, String>? httpHeaders) async {
   final response = await get(Uri.parse(url), headers: httpHeaders);
