@@ -12,14 +12,16 @@ import 'translation_applier.dart';
 class VectorTileTransform {
   final Executor executor;
   final Theme theme;
+  final ThemeRepo themeRepo;
   final double tileSize;
 
   VectorTileTransform({
     required this.executor,
     required this.theme,
     required this.tileSize,
+    required this.themeRepo,
   }) {
-    ThemeRepo.initialize(theme, executor);
+    themeRepo.initialize(theme, executor);
   }
 
   Future<Tile> apply(
@@ -28,8 +30,8 @@ class VectorTileTransform {
     bool Function() cancelled,
   ) async {
     final themeId = theme.id;
-    if (!ThemeRepo.isThemeReady(themeId)) {
-      await ThemeRepo.waitForTheme(themeId);
+    if (!themeRepo.isThemeReady(themeId)) {
+      await themeRepo.waitForTheme(themeId);
     }
     final deduplicationKey =
         '${theme.id}-${theme.version}-${translation.original.key()}-${translation.translated.key()}-${translation.xOffset}-${translation.yOffset}';

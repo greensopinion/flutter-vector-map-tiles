@@ -5,18 +5,18 @@ import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 
 class ThemeRepo {
-  static final _completers = <String, Completer<void>>{};
+  final _completers = <String, Completer<void>>{};
   static final themeById = <String, Theme>{};
 
-  static Future<void> waitForTheme(String themeId) {
+  Future<void> waitForTheme(String themeId) {
     return _completers[themeId]?.future ?? Future.value();
   }
 
-  static bool isThemeReady(String themeId) {
+  bool isThemeReady(String themeId) {
     return _completers[themeId]?.isCompleted ?? false;
   }
 
-  static Future<void> initialize(Theme theme, Executor executor) async {
+  Future<void> initialize(Theme theme, Executor executor) async {
     final themeId = theme.id;
     if (_completers[themeId]?.isCompleted == true) {
       return;

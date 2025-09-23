@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:executor_lib/executor_lib.dart';
+import 'package:vector_map_tiles/src/loader/theme_repo.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../vector_map_tiles.dart';
@@ -15,17 +16,20 @@ class VectorTileLoader {
   final Cache cache;
   late final VectorTileTransform transform;
   final Executor executor;
+  final ThemeRepo themeRepo;
 
   VectorTileLoader({
     required this.tileSize,
     required this.mapProperties,
     required this.executor,
     required this.cache,
+    required this.themeRepo,
   }) {
     transform = VectorTileTransform(
       executor: executor,
       theme: mapProperties.theme,
       tileSize: tileSize,
+      themeRepo: themeRepo
     );
   }
 

@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:vector_map_tiles/src/model/tile_data_model.dart';
 
 import '../executors/executors_std.dart';
+import '../loader/theme_repo.dart';
 import '../loader/tile_loader.dart';
 import '../model/map_properties.dart';
 import '../model/map_tiles.dart';
@@ -10,7 +11,7 @@ import 'flutter_map_adapter.dart';
 
 abstract class AbstractMapLayer extends StatefulWidget {
   final MapProperties mapProperties;
-  final TileLoader Function(MapProperties, Executor) tileLoaderFactory;
+  final TileLoader Function(MapProperties, Executor, ThemeRepo) tileLoaderFactory;
 
   const AbstractMapLayer({
     super.key,
@@ -72,7 +73,7 @@ abstract class AbstractMapLayerState<T extends AbstractMapLayer>
     executor = newConcurrentExecutor(
       concurrency: widget.mapProperties.concurrency,
     );
-    tileLoader = widget.tileLoaderFactory(widget.mapProperties, executor);
+    tileLoader = widget.tileLoaderFactory(widget.mapProperties, executor, ThemeRepo());
     mapTiles = MapTiles(tileLoader: tileLoader);
     _mapAdapter ??= FlutterMapAdapter(
       mapTiles: mapTiles,

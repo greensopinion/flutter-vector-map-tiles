@@ -55,5 +55,5 @@ class TilePositioningDebugLayerState
   }
 }
 
-TileLoader _noOpTileLoader(MapProperties properties, Executor _) =>
+TileLoader _noOpTileLoader(MapProperties properties, Executor _, dynamic _) =>
     const NoOpTileLoader();

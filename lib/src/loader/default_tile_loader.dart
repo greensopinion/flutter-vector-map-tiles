@@ -1,4 +1,5 @@
 import 'package:executor_lib/executor_lib.dart';
+import 'package:vector_map_tiles/src/loader/theme_repo.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../cache/cache.dart';
@@ -13,11 +14,13 @@ class DefaultTileLoader extends TileLoader {
   final MapProperties mapProperties;
   final Cache cache;
   final Executor executor;
-  const DefaultTileLoader({
+  ThemeRepo themeRepo;
+  DefaultTileLoader({
     required this.tileSize,
     required this.mapProperties,
     required this.executor,
     required this.cache,
+    required this.themeRepo
   });
 
   @override
@@ -29,6 +32,7 @@ class DefaultTileLoader extends TileLoader {
         mapProperties: mapProperties,
         executor: executor,
         cache: cache,
+        themeRepo: themeRepo
       ).load(model.tile, cancelled);
       rasterTileset = await RasterTileLoader(
         mapProperties: mapProperties,
