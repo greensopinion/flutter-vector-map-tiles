@@ -120,6 +120,8 @@ class MapTilesPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    canvas.clipRect(Offset.zero & size);
+
     tilesRenderer.render(canvas, size, rotation);
   }
 
