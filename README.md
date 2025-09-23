@@ -8,10 +8,12 @@ Loads vector tiles from a source such as Mapbox or Stadia Maps, and renders them
 
 This version of vector_map_tiles has a new rendering backend which makes use of ``flutter_gpu`` to achieve better performance. 
 Please note that this branch is in preview state — we encourage you to try it out and share your feedback. If you encounter 
-any bugs, performance issues, or have suggestions for improvements, please open an issue with the tag ``10.0.0`` so we can continue refining 
+any bugs, performance issues, or have suggestions for improvements, please [open an issue with this template](https://github.com/greensopinion/flutter-vector-map-tiles/issues/new?template=10-0-0-gpu-issue.md) so we can continue refining 
 and stabilizing.
 
+### Known Issues
 
+Issues for incomplete/unimplemented features, defects, questions and feedback: [issues label:10.0.0](https://github.com/greensopinion/flutter-vector-map-tiles/issues?q=state%3Aopen%20label%3A10.0.0)
 
 <img src="https://raw.githubusercontent.com/greensopinion/flutter-vector-map-tiles/main/vector_map_tiles-example.png" alt="example screenshot" width="292"/> <img src="https://raw.githubusercontent.com/greensopinion/flutter-vector-map-tiles/main/vector_map_tiles-example-hillshade.png" alt="example screenshot" width="292"/>
 
@@ -40,6 +42,9 @@ This version of vector_map_tiles also depends on``flutter_gpu``, which is curren
 ```shell
 flutter channel main && flutter upgrade
 ```
+
+Impeller must be enabled. Read on how to enable impeller [here](https://docs.flutter.dev/perf/impeller#availability).
+
 ## Usage
 
 Read the map style:
