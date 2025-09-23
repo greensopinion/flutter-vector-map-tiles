@@ -27,12 +27,10 @@ git clone git@github.com:greensopinion/flutter-vector-map-tiles.git vector_map_t
 git clone git@github.com:greensopinion/dart-vector-tile-renderer.git vector_tile_renderer
 
 cd vector_map_tiles
-git fetch origin
 git checkout -b 10.0.0 origin/10.0.0
 cd ..
 
 cd vector_tile_renderer
-git fetch origin
 git checkout -b 7.0.0 origin/7.0.0
 cd ..
 ```
