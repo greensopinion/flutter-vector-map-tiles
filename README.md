@@ -23,7 +23,7 @@ See the [gallery](gallery/gallery.md) for more examples.
 
 Setup instructions have changed for the purposes of the 10.0.0 preview. Once released, it will be available on pub.dev.
 
-**Note**: After pulling new commits, run `flutter clean && flutter pub get` in the main folder of the Flutter app (e.g. `/example`) to ensure that shaders are recompiled with the latest changes.
+**Note**: After pulling new commits, run `flutter clean && flutter pub get` in the main folder of the Flutter app (e.g. `./example`) to ensure that shaders are recompiled with the latest changes.
 
 ### Steps
 
