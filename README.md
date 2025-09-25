@@ -23,6 +23,10 @@ See the [gallery](gallery/gallery.md) for more examples.
 
 Setup instructions have changed for the purposes of the 10.0.0 preview. Once released, it will be available on pub.dev.
 
+**Note**: After pulling new commits, run `flutter clean && flutter pub get` in the main folder of the Flutter app (e.g. `/example`) to ensure that shaders are recompiled with the latest changes.
+
+### Steps
+
 vector_map_tiles depends on vector_tile_renderer. To set this up, run:
 ```shell
 git clone git@github.com:greensopinion/flutter-vector-map-tiles.git vector_map_tiles
@@ -43,9 +47,11 @@ This version of vector_map_tiles also depends on``flutter_gpu``, which is curren
 flutter channel main && flutter upgrade
 ```
 
-Impeller must be enabled. Read on how to enable impeller [here](https://docs.flutter.dev/perf/impeller#availability).
+Enable Flutter GPU via the manifest setting. This can be done either via command line argument --enable-flutter-gpu or by adding the FLTEnableFlutterGPU key set to true on iOS / MacOS or io.flutter.embedding.android.EnableFlutterGPU metadata key to true on Android. This is already done in the example project for iOS and MacOS.
 
-Flutter GPU must also be enabled via the Flutter GPU manifest setting. This can be done either via command line argument --enable-flutter-gpu or by adding the FLTEnableFlutterGPU key set to true on iOS / MacOS or io.flutter.embedding.android.EnableFlutterGPU metadata key to true on Android. This is already done in the example project for iOS and MacOS.
+Ensure that Impeller is enabled. Read on how to enable impeller [here](https://docs.flutter.dev/perf/impeller#availability).
+
+If you encounter errors while building the app, install [cmake](https://cmake.org/download/).
 
 ## Usage
 
