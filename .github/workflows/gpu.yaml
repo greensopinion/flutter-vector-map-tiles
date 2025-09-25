@@ -1,0 +1,50 @@
+name: Flutter GPU
+
+on:
+  push:
+    branches: [ "10.0.0" ]
+  pull_request:
+    branches: [ "10.0.0" ]
+  workflow_dispatch:
+
+# Ensure that new pushes/updates cancel running jobs
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  android:
+    name: Build Android
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout vector_map_tiles
+        uses: actions/checkout@v5
+        with:
+          path: vector_map_tiles
+      - name: Checkout vector_tile_renderer
+        uses: actions/checkout@v5
+        with:
+          repository: greensopinion/dart-vector-tile-renderer
+          ref: 7.0.0
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: vector_tile_renderer
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: main
+      - name: Create api_key.dart
+        run: |
+          cat <<'EOF' > vector_map_tiles/example/lib/api_key.dart
+          ${{ secrets.API_KEY_CONTENT }}
+          EOF
+      - name: Install dependencies
+        working-directory: vector_map_tiles/example
+        run: flutter pub get
+      - name: Build APK
+        working-directory: vector_map_tiles/example
+        run: flutter build apk
+      - name: Upload apk as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector_map_tiles_example.apk
+          path: vector_map_tiles/example/build/app/outputs/flutter-apk/app-release.apk
