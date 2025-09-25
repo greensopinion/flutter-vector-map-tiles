@@ -6,7 +6,7 @@ import 'package:vector_map_tiles_example/map_info.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart'
     hide TileLayer, Theme;
 
-import 'local_api_key.dart';
+import 'api_key.dart';
 
 void main() {
   runApp(const MyApp());
