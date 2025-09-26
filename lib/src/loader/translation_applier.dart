@@ -13,13 +13,16 @@ class TranslationApplier {
     var transformedTileData = tileData;
     if (translation.isTranslated) {
       final clipSize = tileSize / translation.fraction;
-      final dx = (translation.xOffset * clipSize);
-      final dy = (translation.yOffset * clipSize);
-      final clip = Rectangle(dx, dy, clipSize, clipSize);
+      final paddingSize = clipSize * 0.25;
+      final halfPaddingSize = paddingSize / 2;
+      final totalSize = clipSize + paddingSize;
+      final dx = (translation.xOffset * clipSize) - halfPaddingSize;
+      final dy = (translation.yOffset * clipSize) - halfPaddingSize;
+      final clip = Rectangle(dx, dy, totalSize, totalSize);
       var transformed = TileClip(bounds: clip).clip(tileData);
       if (clip.left > 0.0 || clip.top > 0.0 || translation.fraction != 1.0) {
         transformedTileData = TileTranslate(
-          clip.topLeft * -1,
+          Point((clip.left * -1) - halfPaddingSize, (clip.top * -1) - halfPaddingSize),
           scale: translation.fraction.toDouble(),
         ).translate(transformed);
       }
