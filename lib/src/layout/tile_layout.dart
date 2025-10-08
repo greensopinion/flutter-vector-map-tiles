@@ -32,7 +32,7 @@ class TileLayout {
     for (int tileX = minTileX; tileX <= maxTileX; tileX++) {
       for (int tileY = minTileY; tileY <= maxTileY; tileY++) {
         final id = TileIdentity(viewport.zoom, tileX, tileY);
-        if (id.isValid()) {
+        if (id.isValidWrapped()) {
           tiles.add(id);
         }
       }
@@ -58,7 +58,23 @@ class TileLayout {
       zoom: zoom.toDouble(),
       zoomScale: zoomScaler.tileScale(tileZoom: zoom),
     );
-    return tiles.map((it) => positioner.positionTile(it)).toList();
+
+    final wrappedOutput = <TilePosition>[];
+    final regularOutput = <TilePosition>[];
+
+    for (final tile in tiles) {
+      if (!tile.isValid()) {
+        wrappedOutput.add(positioner.positionTile(tile));
+      } else {
+        regularOutput.add(positioner.positionTile(tile));
+      }
+    }
+
+    final regularTileIdentities = regularOutput.map((p) => p.tile).toSet();
+    final filteredWrapped = wrappedOutput
+        .where((p) => !regularTileIdentities.contains(p.tile));
+
+    return [...regularOutput, ...filteredWrapped];
   }
 }
 
@@ -95,7 +111,7 @@ class _Positioner {
       toRightPosition.dx + tileOverlap,
       toBottomPosition.dy + tileOverlap,
     );
-    return TilePosition(tile: tile, position: position);
+    return TilePosition(tile: tile.wrapped(), position: position);
   }
 
   Offset _tileOffset(TileIdentity tile) {

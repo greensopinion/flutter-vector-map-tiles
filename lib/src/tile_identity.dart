@@ -25,6 +25,19 @@ class TileIdentity extends Point<int> {
     return x < max && y < max;
   }
 
+  bool isValidWrapped() {
+    if (z < 0 || y < 0) {
+      return false;
+    }
+    final max = pow(2, z).toInt();
+    return y < max;
+  }
+
+  TileIdentity wrapped() {
+    final max = pow(2, z).toInt();
+    return TileIdentity(z, x % max, y % max);
+  }
+
   TileIdentity normalize() {
     final maxX = pow(2, z).toInt();
     if (x >= 0 && x < maxX) {
