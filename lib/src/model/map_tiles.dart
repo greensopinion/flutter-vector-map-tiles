@@ -68,7 +68,7 @@ class MapTiles extends SafeChangeNotifier {
       return obsoleteModels;
     }
     final zoom = neededTileIds.first.z;
-    final maxZoomDifference = 2;
+    const maxZoomDifference = 5;
     final toRetain = obsoleteModels
         .where(
           (it) =>
