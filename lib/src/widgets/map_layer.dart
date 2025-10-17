@@ -23,6 +23,8 @@ class MapLayer extends AbstractMapLayer {
 class MapLayerState extends AbstractMapLayerState<MapLayer> {
   late final TilesRenderer tilesRenderer;
   var _ready = false;
+  List<String> _previousTileKeys = [];
+
   @override
   void initState() {
     super.initState();
@@ -91,6 +93,13 @@ class MapLayerState extends AbstractMapLayerState<MapLayer> {
     final uiTiles = tileModels
         .map((it) => it.toUiModel())
         .toList(growable: false);
+
+    final currentTileKeys = uiTiles.map((it) => it.tileId.key()).toList();
+    if (!_tilesEqual(currentTileKeys, _previousTileKeys)) {
+      _previousTileKeys = currentTileKeys;
+      onTilesChanged();
+    }
+
     tilesRenderer.update(zoom, uiTiles, mapTiles.tileModels.map((it) => it.tile.key()));
 
     return CustomPaint(
@@ -100,6 +109,13 @@ class MapLayerState extends AbstractMapLayerState<MapLayer> {
       painter: MapTilesPainter(widget.mapProperties, tilesRenderer, rotation),
       isComplex: true,
     );
+  }
+
+  bool _tilesEqual(List<String> a, List<String> b) {
+    if (a.length != b.length) return false;
+    final setA = a.toSet();
+    final setB = b.toSet();
+    return setA.length == setB.length && setA.containsAll(setB);
   }
 
   FutureOr _initialized(void value) {
