@@ -11,6 +11,12 @@ Please note that this branch is in preview state — we encourage you to try it 
 any bugs, performance issues, or have suggestions for improvements, please [open an issue with this template](https://github.com/greensopinion/flutter-vector-map-tiles/issues/new?template=10-0-0-gpu-issue.md) so we can continue refining 
 and stabilizing.
 
+### Version 10.0.0-beta
+
+Version 10.0.0 depends on `flutter_gpu` and the Flutter development channel, which are pre-release software and can change at any time. See details on the [official Flutter GPU page](https://github.com/flutter/engine/blob/main/docs/impeller/Flutter-GPU.md).
+
+For production apps, use version 8.0.0 or version 9.0.0-beta.8 of this library.
+
 ### Known Issues
 
 Issues for incomplete/unimplemented features, defects, questions and feedback: [issues label:10.0.0](https://github.com/greensopinion/flutter-vector-map-tiles/issues?q=state%3Aopen%20label%3A10.0.0)

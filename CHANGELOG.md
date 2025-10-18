@@ -1,6 +1,6 @@
-## 10.0.0+beta.1
+## 10.0.0-beta.1
 
-* Simplify to improve maintainability and prepare for GPU-based rendering
+* Improved performance with GPU-based rendering
 
 ## 8.0.0
 
