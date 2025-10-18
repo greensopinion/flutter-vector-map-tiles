@@ -25,9 +25,9 @@ class TileCustomPainter extends CustomPainter {
         tileset: model.tileset!,
         rasterTileset: model.rasterTileset ?? const RasterTileset(tiles: {}),
       ),
-      rotation: 0.0, // FIXME support rotation
+      rotation: 0.0,
       zoomScaleFactor: scale,
-      zoom: model.tile.z.toDouble(), // FIXME support incremental expressions
+      zoom: model.tile.z.toDouble(),
     );
     canvas.restore();
   }
