@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart' hide Theme;
-import 'package:flutter_map/flutter_map.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import 'cache/cache.dart';

@@ -3,10 +3,10 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:executor_lib/executor_lib.dart';
-import 'theme_repo.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../tile_translation.dart';
+import 'theme_repo.dart';
 import 'translation_applier.dart';
 
 class VectorTileTransform {

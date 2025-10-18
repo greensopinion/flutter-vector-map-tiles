@@ -3,13 +3,13 @@ import 'dart:async';
 import 'package:executor_lib/executor_lib.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
-import '../model/tile_data_model.dart';
 
 import '../executors/executors_std.dart';
 import '../loader/theme_repo.dart';
 import '../loader/tile_loader.dart';
 import '../model/map_properties.dart';
 import '../model/map_tiles.dart';
+import '../model/tile_data_model.dart';
 import 'flutter_map_adapter.dart';
 
 abstract class AbstractMapLayer extends StatefulWidget {

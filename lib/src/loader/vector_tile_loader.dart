@@ -1,13 +1,13 @@
 import 'dart:typed_data';
 
 import 'package:executor_lib/executor_lib.dart';
-import 'theme_repo.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../vector_map_tiles.dart';
 import '../cache/cache.dart';
 import '../model/map_properties.dart';
 import '../tile_translation.dart';
+import 'theme_repo.dart';
 import 'vector_tile_transform.dart';
 
 class VectorTileLoader {
