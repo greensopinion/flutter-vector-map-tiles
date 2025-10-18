@@ -1,11 +1,6 @@
-import 'package:executor_lib/executor_lib.dart';
 import 'package:flutter/material.dart';
-import '../loader/caching_tile_loader.dart';
 
-import '../cache/cache_tiered.dart';
-import '../loader/default_tile_loader.dart';
-import '../loader/tile_loader.dart';
-import '../model/map_properties.dart';
+import '../loader/caching_tile_loader.dart';
 import '../model/tile_data_model.dart';
 import 'abstract_map_layer_state.dart';
 import 'tile_widget.dart';

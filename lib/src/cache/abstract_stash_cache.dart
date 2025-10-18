@@ -37,7 +37,7 @@ class AbstractStashCache extends Cache {
           } on PathNotFoundException catch (_) {
             //ignore, expected (why?)
           } catch (e, stack) {
-            Logger.console().warn(() => '$e\n$stack');
+            const Logger.console().warn(() => '$e\n$stack');
           }
           completer.complete(entry);
         } catch (e) {

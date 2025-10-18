@@ -23,7 +23,7 @@ class _MapInfoState extends State<MapInfo> {
   Widget build(BuildContext context) {
     final controller = MapController.maybeOf(context);
     if (controller == null) {
-      return Center(child: Text('No MapController found in context'));
+      return const Center(child: Text('No MapController found in context'));
     } else {
       _subscription ??= controller.mapEventStream.listen((event) {
         if (mounted) {
