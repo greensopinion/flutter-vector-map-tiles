@@ -4,8 +4,8 @@ version: 1.0.0+1
 publish_to: none
 
 environment:
-  sdk: ^3.8.0-70.0
-  flutter: ">=1.17.0"
+  sdk: ">=3.6.0-0 <4.0.0"
+  flutter: '>=3.37.0-0'
 
 dependencies:
   flutter:
@@ -14,8 +14,8 @@ dependencies:
     path: ../
   flutter_map: ^8.2.1
   latlong2: ^0.9.1
-  vector_tile_renderer: 
-    path: ../../vector_tile_renderer
+  vector_tile_renderer: ^7.0.0-beta.1
+    #path: ../../vector_tile_renderer
 
 dev_dependencies:
   flutter_test:

@@ -73,24 +73,25 @@ class VectorTileLayer extends StatelessWidget {
       SizedBox.expand(child: _buildGpu(context));
 
   Widget _buildGpu(BuildContext context) => MapLayer(
-    key: Key('map_layer_${theme.id}_${theme.version}'),
-    mapProperties: _createMapProperties(),
-  );
+        key: Key('map_layer_${theme.id}_${theme.version}'),
+        mapProperties: _createMapProperties(),
+      );
 
+  // ignore: unused_element
   Widget _buildCanvas(BuildContext context) => MapTilesLayer(
-    key: Key('map_tiles_${theme.id}_${theme.version}'),
-    mapProperties: _createMapProperties(),
-  );
+        key: Key('map_tiles_${theme.id}_${theme.version}'),
+        mapProperties: _createMapProperties(),
+      );
 
   MapProperties _createMapProperties() => MapProperties(
-    tileProviders: tileProviders,
-    theme: theme,
-    tileOffset: tileOffset,
-    concurrency: concurrency,
-    cacheProperties: CacheProperties(
-      fileCacheTtl: fileCacheTtl,
-      fileCacheMaximumSizeInBytes: fileCacheMaximumSizeInBytes,
-      cacheFolder: cacheFolder,
-    ),
-  );
+        tileProviders: tileProviders,
+        theme: theme,
+        tileOffset: tileOffset,
+        concurrency: concurrency,
+        cacheProperties: CacheProperties(
+          fileCacheTtl: fileCacheTtl,
+          fileCacheMaximumSizeInBytes: fileCacheMaximumSizeInBytes,
+          cacheFolder: cacheFolder,
+        ),
+      );
 }
