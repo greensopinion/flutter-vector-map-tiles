@@ -3,7 +3,7 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:executor_lib/executor_lib.dart';
-import 'package:vector_map_tiles/src/loader/theme_repo.dart';
+import 'theme_repo.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../tile_translation.dart';
@@ -68,7 +68,8 @@ class _TransformInput {
 
 Tile _apply(_TransformInput input) {
   final theme = ThemeRepo.themeById[input.themeId]!;
-  final vectorTile = VectorTileReader().read(input.bytes.materialize().asUint8List());
+  final vectorTile =
+      VectorTileReader().read(input.bytes.materialize().asUint8List());
   final tileData = TileFactory(
     theme,
     const Logger.noop(),
@@ -78,5 +79,3 @@ Tile _apply(_TransformInput input) {
   ).apply(tileData, input.translation);
   return translated.toTile();
 }
-
-

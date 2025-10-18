@@ -1,6 +1,6 @@
 import 'package:executor_lib/executor_lib.dart';
 import 'package:flutter/material.dart';
-import 'package:vector_map_tiles/src/loader/caching_tile_loader.dart';
+import '../loader/caching_tile_loader.dart';
 
 import '../cache/cache_tiered.dart';
 import '../loader/default_tile_loader.dart';
@@ -12,7 +12,7 @@ import 'tile_widget.dart';
 
 class MapTilesLayer extends AbstractMapLayer {
   const MapTilesLayer({super.key, required super.mapProperties})
-    : super(tileLoaderFactory: createCachingTileLoader);
+      : super(tileLoaderFactory: createCachingTileLoader);
 
   @override
   State<StatefulWidget> createState() => MapTilesLayerState();
@@ -24,11 +24,11 @@ class MapTilesLayerState extends AbstractMapLayerState<MapTilesLayer> {
   @override
   Widget build(BuildContext context) {
     updateTiles(context);
-    final displayReadyModels = mapTiles.tileModels
-        .where((m) => m.isDisplayReady)
-        .toList();
+    final displayReadyModels =
+        mapTiles.tileModels.where((m) => m.isDisplayReady).toList();
 
-    final currentTileKeys = displayReadyModels.map((it) => it.tile.key()).toList();
+    final currentTileKeys =
+        displayReadyModels.map((it) => it.tile.key()).toList();
     if (!_tilesEqual(currentTileKeys, _previousTileKeys)) {
       _previousTileKeys = currentTileKeys;
       onTilesChanged();

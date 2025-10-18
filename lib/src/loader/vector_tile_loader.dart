@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:executor_lib/executor_lib.dart';
-import 'package:vector_map_tiles/src/loader/theme_repo.dart';
+import 'theme_repo.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../vector_map_tiles.dart';
@@ -26,11 +26,10 @@ class VectorTileLoader {
     required this.themeRepo,
   }) {
     transform = VectorTileTransform(
-      executor: executor,
-      theme: mapProperties.theme,
-      tileSize: tileSize,
-      themeRepo: themeRepo
-    );
+        executor: executor,
+        theme: mapProperties.theme,
+        tileSize: tileSize,
+        themeRepo: themeRepo);
   }
 
   Future<Tileset> load(TileIdentity tile, bool Function() cancelled) async {
@@ -52,9 +51,9 @@ class VectorTileLoader {
   }
 
   TileData _emptyTile() => TileFactory(
-    mapProperties.theme,
-    const Logger.noop(),
-  ).createTileData(VectorTile(layers: []));
+        mapProperties.theme,
+        const Logger.noop(),
+      ).createTileData(VectorTile(layers: []));
 
   Future<_SourceTile> _load(
     String source,

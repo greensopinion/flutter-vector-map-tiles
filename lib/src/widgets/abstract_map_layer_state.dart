@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:executor_lib/executor_lib.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
-import 'package:vector_map_tiles/src/model/tile_data_model.dart';
+import '../model/tile_data_model.dart';
 
 import '../executors/executors_std.dart';
 import '../loader/theme_repo.dart';
@@ -14,7 +14,8 @@ import 'flutter_map_adapter.dart';
 
 abstract class AbstractMapLayer extends StatefulWidget {
   final MapProperties mapProperties;
-  final TileLoader Function(MapProperties, Executor, ThemeRepo) tileLoaderFactory;
+  final TileLoader Function(MapProperties, Executor, ThemeRepo)
+      tileLoaderFactory;
 
   const AbstractMapLayer({
     super.key,
@@ -49,9 +50,8 @@ abstract class AbstractMapLayerState<T extends AbstractMapLayer>
   }
 
   void _updateTiles() {
-    for (final tile in mapTiles.tileModels.where(
-      (model) => model.isLoaded && !model.isDisplayReady && !model.preRenderStarted
-    )) {
+    for (final tile in mapTiles.tileModels.where((model) =>
+        model.isLoaded && !model.isDisplayReady && !model.preRenderStarted)) {
       preRender(tile).then((_) {
         if (mounted) {
           setState(() {
@@ -96,8 +96,8 @@ abstract class AbstractMapLayerState<T extends AbstractMapLayer>
   }
 
   Future<void> preRender(TileDataModel tile) => Future.sync(() {
-    tile.preRenderStarted = true;
-  });
+        tile.preRenderStarted = true;
+      });
 
   void resetState() {
     mapTiles.dispose();
@@ -112,7 +112,8 @@ abstract class AbstractMapLayerState<T extends AbstractMapLayer>
     executor = newConcurrentExecutor(
       concurrency: widget.mapProperties.concurrency,
     );
-    tileLoader = widget.tileLoaderFactory(widget.mapProperties, executor, ThemeRepo());
+    tileLoader =
+        widget.tileLoaderFactory(widget.mapProperties, executor, ThemeRepo());
     mapTiles = MapTiles(tileLoader: tileLoader);
     _mapAdapter ??= FlutterMapAdapter(
       mapTiles: mapTiles,

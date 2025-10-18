@@ -2,9 +2,9 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:path_provider/path_provider.dart';
-import 'package:stash/stash_api.dart';
 // ignore: implementation_imports
 import 'package:stash/src/api/cache/stats/default_stats.dart';
+import 'package:stash/stash_api.dart';
 import 'package:vector_map_tiles/src/cache/byte_storage.dart';
 import 'package:vector_map_tiles/src/cache/byte_storage_io.dart';
 import 'package:vector_map_tiles/src/extensions.dart';
@@ -14,7 +14,7 @@ import 'cache.dart';
 
 class CacheIo extends AbstractStashCache {
   CacheIo({required CacheProperties properties})
-    : super(name: 'io', cacheFactory: () => createStashIoCache(properties));
+      : super(name: 'io', cacheFactory: () => createStashIoCache(properties));
 }
 
 Future<BinaryCache> createStashIoCache(CacheProperties properties) async {
