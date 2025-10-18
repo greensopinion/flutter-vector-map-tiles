@@ -181,6 +181,18 @@ CI with GitHub Actions:
 
 [![CI status](https://github.com/greensopinion/flutter-vector-map-tiles/actions/workflows/CI.yaml/badge.svg)](https://github.com/greensopinion/flutter-vector-map-tiles/actions)
 
+## Sponsorship
+
+<a href="https://github.com/EpicRideWeather" target="_blank">
+  <img
+    src="https://www.epicrideweather.com/images/epic-logo-r.svg"
+    alt="Epic Ride Weather logo"
+    width="64px"
+  />
+</a>
+
+Development of this library is supported by [Epic Ride Weather](https://epicrideweather.com), the app that helps cyclists beat the rain and cheat the wind.
+
 ## License
 
 Copyright 2021 David Green
