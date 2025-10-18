@@ -6,6 +6,7 @@ import 'package:vector_map_tiles_example/map_info.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart'
     hide TileLayer, Theme;
 
+// ignore: uri_does_not_exist
 import 'local_api_key.dart';
 
 void main() {
@@ -46,6 +47,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     StyleReader(
       uri: 'mapbox://styles/mapbox/streets-v12?access_token={key}',
+      // ignore: undefined_identifier
       apiKey: mapboxApiKey,
       logger: const Logger.console(),
     ).read().then((style) {
