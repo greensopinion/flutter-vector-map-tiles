@@ -26,8 +26,9 @@ jobs:
       - name: Check formatting
         run: dart format . --output none --set-exit-if-changed
 
+      - name: Run tests
+        run: flutter test -r expanded
+
       - name: Run Dart analyzer
         run: flutter analyze
 
-      - name: Run tests
-        run: flutter test -r expanded
