@@ -44,14 +44,14 @@ void main() {
         final layout = TileLayout(
           offset: TileOffset.DEFAULT,
           viewport: TileViewport(
-            zoom: 1,
+            zoom: 2,
             bounds: const Rect.fromLTRB(0.0, 0.0, 1.5, 1.5),
           ),
           tileSize: 256,
         );
         final mapState = MockMapState(
           center: LatLng(0.0, 0.0),
-          zoom: 1.0,
+          zoom: 2.0,
           pixelOrigin: Offset.zero,
           size: const Size(512, 512),
         );
@@ -61,15 +61,15 @@ void main() {
 
         expect(positions.length, equals(9));
         final tiles = positions.map((p) => p.tile).toSet();
-        expect(tiles, contains(TileIdentity(1, 0, 0)));
-        expect(tiles, contains(TileIdentity(1, 1, 0)));
-        expect(tiles, contains(TileIdentity(1, 2, 0)));
-        expect(tiles, contains(TileIdentity(1, 0, 1)));
-        expect(tiles, contains(TileIdentity(1, 1, 1)));
-        expect(tiles, contains(TileIdentity(1, 2, 1)));
-        expect(tiles, contains(TileIdentity(1, 0, 2)));
-        expect(tiles, contains(TileIdentity(1, 1, 2)));
-        expect(tiles, contains(TileIdentity(1, 2, 2)));
+        expect(tiles, contains(TileIdentity(2, 0, 0)));
+        expect(tiles, contains(TileIdentity(2, 0, 1)));
+        expect(tiles, contains(TileIdentity(2, 0, 2)));
+        expect(tiles, contains(TileIdentity(2, 1, 0)));
+        expect(tiles, contains(TileIdentity(2, 1, 1)));
+        expect(tiles, contains(TileIdentity(2, 1, 2)));
+        expect(tiles, contains(TileIdentity(2, 2, 0)));
+        expect(tiles, contains(TileIdentity(2, 2, 1)));
+        expect(tiles, contains(TileIdentity(2, 2, 2)));
       });
 
       test('calculates correct tile positions with zoom scaling', () {
@@ -177,15 +177,22 @@ void main() {
 
         final positions = layout.computeTilePositions(mapState, zoomScaler);
 
-        expect(positions.length, equals(16));
+        expect(positions.length, equals(12));
         final tiles = positions.map((p) => p.tile).toSet();
-        expect(tiles.length, equals(16));
+        expect(tiles.length, equals(12));
 
-        for (int x = -2; x <= 1; x++) {
-          for (int y = -1; y <= 2; y++) {
-            expect(tiles, contains(TileIdentity(2, x, y)));
-          }
-        }
+        expect(tiles, contains(TileIdentity(2, 0, 0)));
+        expect(tiles, contains(TileIdentity(2, 0, 1)));
+        expect(tiles, contains(TileIdentity(2, 0, 2)));
+        expect(tiles, contains(TileIdentity(2, 1, 0)));
+        expect(tiles, contains(TileIdentity(2, 1, 1)));
+        expect(tiles, contains(TileIdentity(2, 1, 2)));
+        expect(tiles, contains(TileIdentity(2, 2, 0)));
+        expect(tiles, contains(TileIdentity(2, 2, 1)));
+        expect(tiles, contains(TileIdentity(2, 2, 2)));
+        expect(tiles, contains(TileIdentity(2, 3, 0)));
+        expect(tiles, contains(TileIdentity(2, 3, 1)));
+        expect(tiles, contains(TileIdentity(2, 3, 2)));
       });
 
       test('produces consistent results for identical inputs', () {
