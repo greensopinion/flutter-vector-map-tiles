@@ -17,8 +17,8 @@ class MapTiles extends SafeChangeNotifier {
   List<TileDataModel> get obsoleteModels => _latestTileIds.isEmpty
       ? []
       : _tiles.values
-            .where((it) => _latestTileIds.first.z != it.tile.z)
-            .toList();
+          .where((it) => _latestTileIds.first.z != it.tile.z)
+          .toList();
 
   final TileLoader tileLoader;
 
@@ -28,9 +28,8 @@ class MapTiles extends SafeChangeNotifier {
     if (isDisposed) {
       return;
     }
-    final originalTilePositions = _tiles.values
-        .map((e) => e.tilePosition)
-        .toSet();
+    final originalTilePositions =
+        _tiles.values.map((e) => e.tilePosition).toSet();
     _latestTileIds = neededTiles.map((e) => e.tile).toList(growable: false);
     final idToTilePosition = Map.fromEntries(
       neededTiles.map((e) => MapEntry(e.tile, e)),
@@ -58,9 +57,8 @@ class MapTiles extends SafeChangeNotifier {
 
   List<TileDataModel> _computeTilesToRemove() {
     final neededTileIds = _latestTileIds.toSet();
-    final loadingTileModels = _tiles.values
-        .where((it) => !it.isDisplayReady)
-        .toList();
+    final loadingTileModels =
+        _tiles.values.where((it) => !it.isDisplayReady).toList();
     final obsoleteModels = _tiles.values
         .where((model) => !neededTileIds.contains(model.tile))
         .toList();

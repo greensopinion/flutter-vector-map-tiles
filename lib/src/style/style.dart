@@ -20,11 +20,11 @@ class Style {
 
   Style(
       {this.name,
-        required this.theme,
-        required this.providers,
-        this.sprites,
-        this.center,
-        this.zoom});
+      required this.theme,
+      required this.providers,
+      this.sprites,
+      this.center,
+      this.zoom});
 }
 
 class SpriteStyle {
@@ -113,7 +113,7 @@ class StyleReader {
       if (entryUrl != null) {
         final sourceUrl = StyleUriMapper(key: apiKey).mapSource(uri, entryUrl);
         source =
-        await compute(jsonDecode, await _httpGet(sourceUrl, httpHeaders));
+            await compute(jsonDecode, await _httpGet(sourceUrl, httpHeaders));
         if (source is! Map) {
           throw _invalidStyle(sourceUrl);
         }

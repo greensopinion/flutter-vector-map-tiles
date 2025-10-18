@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:executor_lib/executor_lib.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
-
 class ThemeRepo {
   final _completers = <String, Completer<void>>{};
   static final themeById = <String, Theme>{};
@@ -35,7 +34,7 @@ class ThemeRepo {
         _setupTheme,
         theme,
         deduplicationKey:
-        'VectorTileTransform-setup-theme-${theme.id}-${theme.version}',
+            'VectorTileTransform-setup-theme-${theme.id}-${theme.version}',
       ),
     );
     for (final future in futures) {

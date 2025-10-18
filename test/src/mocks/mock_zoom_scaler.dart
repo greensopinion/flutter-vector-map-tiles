@@ -6,8 +6,7 @@ class MockZoomScaler implements ZoomScaler {
   MockZoomScaler(this._scale);
 
   @override
-  double Function(double zoom) get zoomScale =>
-      (zoom) => _scale;
+  double Function(double zoom) get zoomScale => (zoom) => _scale;
 
   @override
   void updateMapZoomScale(double mapZoom) {

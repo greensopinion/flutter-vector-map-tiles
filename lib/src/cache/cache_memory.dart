@@ -6,10 +6,10 @@ import 'cache.dart';
 
 class CacheMemory extends AbstractStashCache {
   CacheMemory({required CacheProperties properties})
-    : super(
-        name: 'memory',
-        cacheFactory: () => createStashMemoryCache(properties),
-      );
+      : super(
+          name: 'memory',
+          cacheFactory: () => createStashMemoryCache(properties),
+        );
 }
 
 Future<BinaryCache> createStashMemoryCache(CacheProperties properties) async {

@@ -7,7 +7,8 @@ import 'cache_memory.dart';
 
 class CacheTiered extends AbstractStashCache {
   CacheTiered({required CacheProperties properties})
-    : super(name: 'tiered', cacheFactory: () => _createTieredCache(properties));
+      : super(
+            name: 'tiered', cacheFactory: () => _createTieredCache(properties));
 }
 
 Future<BinaryCache> _createTieredCache(CacheProperties properties) async {

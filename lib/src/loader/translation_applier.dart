@@ -22,7 +22,8 @@ class TranslationApplier {
       var transformed = TileClip(bounds: clip).clip(tileData);
       if (clip.left > 0.0 || clip.top > 0.0 || translation.fraction != 1.0) {
         transformedTileData = TileTranslate(
-          Point((clip.left * -1) - halfPaddingSize, (clip.top * -1) - halfPaddingSize),
+          Point((clip.left * -1) - halfPaddingSize,
+              (clip.top * -1) - halfPaddingSize),
           scale: translation.fraction.toDouble(),
         ).translate(transformed);
       }

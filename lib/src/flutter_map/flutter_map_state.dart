@@ -14,7 +14,9 @@ class FlutterMapState extends MapState {
   LatLng get center => camera.center;
 
   @override
-  Offset get pixelOrigin => camera.crs.latLngToOffset(center, zoom) - camera.nonRotatedSize.center(Offset.zero);
+  Offset get pixelOrigin =>
+      camera.crs.latLngToOffset(center, zoom) -
+      camera.nonRotatedSize.center(Offset.zero);
 
   @override
   double get zoom => camera.zoom;

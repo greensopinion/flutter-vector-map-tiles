@@ -44,7 +44,8 @@ class TileLayout {
     MapState mapState,
     ZoomScaler zoomScaler,
     TileIdentity tile,
-  ) => _positionTiles(mapState, zoomScaler, tile.z, [tile]).first;
+  ) =>
+      _positionTiles(mapState, zoomScaler, tile.z, [tile]).first;
 
   List<TilePosition> _positionTiles(
     MapState mapState,
@@ -71,8 +72,8 @@ class TileLayout {
     }
 
     final regularTileIdentities = regularOutput.map((p) => p.tile).toSet();
-    final filteredWrapped = wrappedOutput
-        .where((p) => !regularTileIdentities.contains(p.tile));
+    final filteredWrapped =
+        wrappedOutput.where((p) => !regularTileIdentities.contains(p.tile));
 
     return [...regularOutput, ...filteredWrapped];
   }

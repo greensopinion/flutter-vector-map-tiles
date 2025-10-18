@@ -32,10 +32,10 @@ class TileTranslation {
     this.yOffset,
   );
   TileTranslation.identity(this.original)
-    : translated = original,
-      fraction = 1,
-      xOffset = 0,
-      yOffset = 0;
+      : translated = original,
+        fraction = 1,
+        xOffset = 0,
+        yOffset = 0;
 }
 
 /// Translates tiles to a fragment of a tile at a lower zoom level

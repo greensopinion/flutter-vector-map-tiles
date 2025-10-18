@@ -14,7 +14,7 @@ import 'abstract_map_layer_state.dart';
 
 class MapLayer extends AbstractMapLayer {
   const MapLayer({super.key, required super.mapProperties})
-    : super(tileLoaderFactory: createCachingTileLoader);
+      : super(tileLoaderFactory: createCachingTileLoader);
 
   @override
   State<StatefulWidget> createState() => MapLayerState();
@@ -53,18 +53,19 @@ class MapLayerState extends AbstractMapLayerState<MapLayer> {
     return super.preRender(tile).then((_) async {
       final tileset = tile.tileset ?? Tileset({});
       final tileID = tile.tile.key();
-      final jobArguments = (widget.mapProperties.theme.id, zoom, tileset, tileID);
+      final jobArguments =
+          (widget.mapProperties.theme.id, zoom, tileset, tileID);
 
       await tilesRenderer.preRenderUi(zoom, tileset, tileID);
-      await executor.submit(
-        Job(
-          "pre-render",
-          _preRender(),
-          jobArguments,
-          deduplicationKey:
-          "pre-render:${widget.mapProperties.theme.id}-${widget.mapProperties.theme.version}-$zoom-${tile.tile.key()}",
-        )
-      ).then((renderData) {
+      await executor
+          .submit(Job(
+        "pre-render",
+        _preRender(),
+        jobArguments,
+        deduplicationKey:
+            "pre-render:${widget.mapProperties.theme.id}-${widget.mapProperties.theme.version}-$zoom-${tile.tile.key()}",
+      ))
+          .then((renderData) {
         try {
           tile.renderData ??= renderData.materialize().asUint8List();
         } catch (_) {}
@@ -72,14 +73,15 @@ class MapLayerState extends AbstractMapLayerState<MapLayer> {
     });
   }
 
-  TransferableTypedData Function((String, double, Tileset, String) args) _preRender() {
+  TransferableTypedData Function((String, double, Tileset, String) args)
+      _preRender() {
     final preRenderer = tilesRenderer.getPreRenderer();
     return ((String, double, Tileset, String) args) {
       final theme = ThemeRepo.themeById[args.$1]!;
-      return TransferableTypedData.fromList([preRenderer.call(theme, args.$2, args.$3, args.$4)]);
+      return TransferableTypedData.fromList(
+          [preRenderer.call(theme, args.$2, args.$3, args.$4)]);
     };
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -90,9 +92,8 @@ class MapLayerState extends AbstractMapLayerState<MapLayer> {
     final tileModels = mapTiles.tileModels
         .where((it) => it.isDisplayReady)
         .toList(growable: false);
-    final uiTiles = tileModels
-        .map((it) => it.toUiModel())
-        .toList(growable: false);
+    final uiTiles =
+        tileModels.map((it) => it.toUiModel()).toList(growable: false);
 
     final currentTileKeys = uiTiles.map((it) => it.tileId.key()).toList();
     if (!_tilesEqual(currentTileKeys, _previousTileKeys)) {
@@ -100,7 +101,8 @@ class MapLayerState extends AbstractMapLayerState<MapLayer> {
       onTilesChanged();
     }
 
-    tilesRenderer.update(zoom, uiTiles, mapTiles.tileModels.map((it) => it.tile.key()));
+    tilesRenderer.update(
+        zoom, uiTiles, mapTiles.tileModels.map((it) => it.tile.key()));
 
     return CustomPaint(
       key: Key(
@@ -145,12 +147,12 @@ class MapTilesPainter extends CustomPainter {
 
 extension _TileDataModelUiExtension on TileDataModel {
   TileUiModel toUiModel() => TileUiModel(
-    tileId: tile.toTileId(),
-    position: tilePosition.position,
-    tileset: tileset ?? Tileset({}),
-    rasterTileset: rasterTileset ?? const RasterTileset(tiles: {}),
-    renderData: renderData,
-  );
+        tileId: tile.toTileId(),
+        position: tilePosition.position,
+        tileset: tileset ?? Tileset({}),
+        rasterTileset: rasterTileset ?? const RasterTileset(tiles: {}),
+        renderData: renderData,
+      );
 }
 
 extension _TileIdExtension on TileIdentity {

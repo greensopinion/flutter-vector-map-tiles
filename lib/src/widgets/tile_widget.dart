@@ -9,7 +9,7 @@ class TileWidget extends StatefulWidget {
   final MapProperties mapProperties;
 
   TileWidget({required this.model, required this.mapProperties})
-    : super(key: Key('tile_${model.tile.key()}'));
+      : super(key: Key('tile_${model.tile.key()}'));
 
   @override
   State<StatefulWidget> createState() => TileWidgetState();
