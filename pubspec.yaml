@@ -1,7 +1,7 @@
 name: vector_map_tiles
 description: "A new Flutter package project."
 version: 10.0.0-beta.1
-homepage:
+homepage: https://github.com/greensopinion/flutter-vector-map-tiles
 
 environment:
   sdk: ">=3.6.0-0 <4.0.0"
