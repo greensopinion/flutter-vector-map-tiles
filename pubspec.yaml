@@ -1,5 +1,5 @@
 name: vector_map_tiles
-description: "A new Flutter package project."
+description: "A plugin for flutter_map that enables the use of vector tiles with slippy maps and Flutter."
 version: 10.0.0-beta.1
 homepage: https://github.com/greensopinion/flutter-vector-map-tiles
 
