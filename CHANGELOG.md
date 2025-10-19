@@ -1,6 +1,6 @@
-## 10.0.0-beta.1
+## 10.0.0-beta.2
 
-* Improved performance with GPU-based rendering
+* Adds full GPU rendering support for `flutter_map`, delivering smoother animations, higher frame rates, and improved efficiency.
 
 ## 8.0.0
 

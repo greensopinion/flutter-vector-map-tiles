@@ -1,6 +1,6 @@
 # [vector_map_tiles](https://pub.dev/packages/vector_map_tiles)
 
-A plugin for [`flutter_map`](https://pub.dev/packages/flutter_map) that enables the use of vector tiles with slippy maps and Flutter.
+A plugin for [`flutter_map`](https://pub.dev/packages/flutter_map) that enables vector tiles with slippy maps and hardware-accelerated GPU rendering in Flutter.
 
 Loads vector tiles from a source such as Mapbox or Stadia Maps, and renders them as a layer on a `flutter_map`.
 
