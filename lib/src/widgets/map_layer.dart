@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:isolate';
+import 'dart:ui';
+import 'dart:typed_data';
 
 import 'package:executor_lib/executor_lib.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/widgets.dart' hide Image;
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../../vector_map_tiles.dart';
@@ -24,6 +26,8 @@ class MapLayerState extends AbstractMapLayerState<MapLayer> {
   late final TilesRenderer tilesRenderer;
   var _ready = false;
   List<String> _previousTileKeys = [];
+
+  Image? loadedSpriteAtlas;
 
   @override
   void initState() {
@@ -53,8 +57,28 @@ class MapLayerState extends AbstractMapLayerState<MapLayer> {
     return super.preRender(tile).then((_) async {
       final tileset = tile.tileset ?? Tileset({});
       final tileID = tile.tile.key();
-      final jobArguments =
-          (widget.mapProperties.theme.id, zoom, tileset, tileID);
+      final theme = widget.mapProperties.theme;
+
+      final preRenderData = tileset.tiles.values
+          .fold(<Map<String, Uint8List>>[], (a, b) => a..add(b.prerenderData));
+
+      final remainingTheme = Theme(
+          layers: theme.layers
+              .where((layer) => tilesRenderer.isPreRenderLayer(layer.type))
+              .toList(),
+          id: theme.id,
+          version: theme.version);
+
+      final optimizedTileset = Tileset(tileset.tiles.map((key, value) =>
+          MapEntry(key, remainingTheme.optimizeTile(value, zoom))));
+
+      final jobArguments = (
+        theme.id,
+        zoom,
+        optimizedTileset,
+        tileID,
+        widget.mapProperties.tileOffset.zoomOffset
+      );
 
       await tilesRenderer.preRenderUi(zoom, tileset, tileID);
       await executor
@@ -67,19 +91,23 @@ class MapLayerState extends AbstractMapLayerState<MapLayer> {
       ))
           .then((renderData) {
         try {
-          tile.renderData ??= renderData.materialize().asUint8List();
+          tile.renderData = [
+            ...preRenderData,
+            renderData.map((k, v) => MapEntry(k, v.materialize().asUint8List()))
+          ];
         } catch (_) {}
       });
     });
   }
 
-  TransferableTypedData Function((String, double, Tileset, String) args)
-      _preRender() {
+  Map<String, TransferableTypedData> Function(
+      (String, double, Tileset, String, int) args) _preRender() {
     final preRenderer = tilesRenderer.getPreRenderer();
-    return ((String, double, Tileset, String) args) {
+    return ((String, double, Tileset, String, int) args) {
       final theme = ThemeRepo.themeById[args.$1]!;
-      return TransferableTypedData.fromList(
-          [preRenderer.call(theme, args.$2, args.$3, args.$4)]);
+      return preRenderer
+          .call(theme, args.$2, args.$3, args.$4, args.$5)
+          .map((k, v) => MapEntry(k, TransferableTypedData.fromList([v])));
     };
   }
 
@@ -92,8 +120,10 @@ class MapLayerState extends AbstractMapLayerState<MapLayer> {
     final tileModels = mapTiles.tileModels
         .where((it) => it.isDisplayReady)
         .toList(growable: false);
-    final uiTiles =
-        tileModels.map((it) => it.toUiModel()).toList(growable: false);
+    final uiTiles = tileModels
+        .map((it) =>
+            it.toUiModel(widget.mapProperties.sprites, loadedSpriteAtlas))
+        .toList(growable: false);
 
     final currentTileKeys = uiTiles.map((it) => it.tileId.key()).toList();
     if (!_tilesEqual(currentTileKeys, _previousTileKeys)) {
@@ -120,8 +150,9 @@ class MapLayerState extends AbstractMapLayerState<MapLayer> {
     return setA.length == setB.length && setA.containsAll(setB);
   }
 
-  FutureOr _initialized(void value) {
+  FutureOr _initialized(void value) async {
     if (mounted) {
+      loadedSpriteAtlas = await (spriteAtlas!);
       setState(() {
         _ready = true;
       });
@@ -146,11 +177,16 @@ class MapTilesPainter extends CustomPainter {
 }
 
 extension _TileDataModelUiExtension on TileDataModel {
-  TileUiModel toUiModel() => TileUiModel(
+  TileUiModel toUiModel(SpriteStyle? sprites, Image? spriteAtlas) =>
+      TileUiModel(
         tileId: tile.toTileId(),
         position: tilePosition.position,
-        tileset: tileset ?? Tileset({}),
-        rasterTileset: rasterTileset ?? const RasterTileset(tiles: {}),
+        tileSource: TileSource(
+          tileset: tileset ?? Tileset({}),
+          rasterTileset: rasterTileset ?? const RasterTileset(tiles: {}),
+          spriteIndex: sprites?.index,
+          spriteAtlas: spriteAtlas,
+        ),
         renderData: renderData,
       );
 }

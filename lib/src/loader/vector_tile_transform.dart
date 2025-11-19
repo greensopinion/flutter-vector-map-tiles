@@ -3,6 +3,7 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:executor_lib/executor_lib.dart';
+import 'package:vector_map_tiles/src/tile_offset.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import '../tile_translation.dart';
@@ -28,6 +29,8 @@ class VectorTileTransform {
     Uint8List bytes,
     TileTranslation translation,
     bool Function() cancelled,
+    String source,
+    TileOffset tileOffset,
   ) async {
     final themeId = theme.id;
     if (!themeRepo.isThemeReady(themeId)) {
@@ -35,20 +38,22 @@ class VectorTileTransform {
     }
     final deduplicationKey =
         '${theme.id}-${theme.version}-${translation.original.key()}-${translation.translated.key()}-${translation.xOffset}-${translation.yOffset}';
-    return await executor.submit(
+    final tile = await executor.submit(
       Job(
         deduplicationKey,
         _apply,
         _TransformInput(
-          themeId: theme.id,
-          tileSize: tileSize,
-          bytes: TransferableTypedData.fromList([bytes]),
-          translation: translation,
-        ),
+            themeId: theme.id,
+            tileSize: tileSize,
+            bytes: TransferableTypedData.fromList([bytes]),
+            translation: translation,
+            source: source,
+            tileOffset: tileOffset),
         cancelled: cancelled,
         deduplicationKey: deduplicationKey,
       ),
     );
+    return tile.materialize();
   }
 }
 
@@ -57,12 +62,16 @@ class _TransformInput {
   final TransferableTypedData bytes;
   final double tileSize;
   final TileTranslation translation;
+  final String source;
+  final TileOffset tileOffset;
 
   _TransformInput({
     required this.themeId,
     required this.bytes,
     required this.tileSize,
     required this.translation,
+    required this.source,
+    required this.tileOffset,
   });
 }
 
@@ -77,5 +86,12 @@ Tile _apply(_TransformInput input) {
   final translated = TranslationApplier(
     tileSize: input.tileSize,
   ).apply(tileData, input.translation);
-  return translated.toTile();
+
+  final tile = translated.toTile();
+  final zoom = input.translation.original.z.toDouble();
+
+  final optimized = theme.optimizeTile(tile, zoom);
+  optimized.earlyPreRender(
+      theme, zoom, input.tileOffset.zoomOffset, input.source);
+  return optimized;
 }

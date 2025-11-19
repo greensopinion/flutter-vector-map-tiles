@@ -18,8 +18,8 @@ dependencies:
   stash: ^5.2.0
   stash_file: ^5.2.0
   stash_memory: ^5.2.0
-  vector_tile_renderer: ^7.0.0-beta.1
-    #path: ../vector_tile_renderer
+  vector_tile_renderer:
+    path: ../vector_tile_renderer
 
 dev_dependencies:
   test: ^1.24.0

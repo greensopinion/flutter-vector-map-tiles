@@ -13,7 +13,7 @@ class TileDataModel {
   bool preRenderStarted = false;
   Tileset? tileset;
   RasterTileset? rasterTileset;
-  Uint8List? renderData;
+  List<Map<String, Uint8List>>? renderData;
 
   TileDataModel(this.tilePosition) : tile = tilePosition.tile;
 

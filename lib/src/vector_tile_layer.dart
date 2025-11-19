@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart' hide Theme;
+import 'package:vector_map_tiles/src/style/style.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
 import 'cache/cache.dart';
@@ -20,6 +21,8 @@ class VectorTileLayer extends StatelessWidget {
 
   /// the theme used to render tiles
   final Theme theme;
+
+  final SpriteStyle? sprites;
 
   /// the tile offset
   final TileOffset tileOffset;
@@ -65,6 +68,7 @@ class VectorTileLayer extends StatelessWidget {
     this.fileCacheTtl = defaultCacheTtl,
     this.fileCacheMaximumSizeInBytes = defaultCacheMaxSize,
     this.cacheFolder,
+    this.sprites,
   });
 
   @override
@@ -85,6 +89,7 @@ class VectorTileLayer extends StatelessWidget {
   MapProperties _createMapProperties() => MapProperties(
         tileProviders: tileProviders,
         theme: theme,
+        sprites: sprites,
         tileOffset: tileOffset,
         concurrency: concurrency,
         cacheProperties: CacheProperties(

@@ -14,11 +14,14 @@ class MapProperties {
 
   final int concurrency;
 
+  final SpriteStyle? sprites;
+
   const MapProperties({
     required this.tileProviders,
     required this.theme,
     required this.tileOffset,
     required this.concurrency,
     required this.cacheProperties,
+    this.sprites,
   });
 }

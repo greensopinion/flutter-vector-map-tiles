@@ -74,7 +74,8 @@ class _MyHomePageState extends State<MyHomePage> {
             child: VectorTileLayer(
               tileProviders: style!.providers,
               theme: style!.theme,
-              tileOffset: TileOffset.DEFAULT,
+              sprites: style!.sprites,
+              tileOffset: TileOffset.mapbox,
             ),
           ),
           const MapInfo(),

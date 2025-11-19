@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:executor_lib/executor_lib.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/widgets.dart' hide Image;
 
 import '../executors/executors_std.dart';
 import '../loader/theme_repo.dart';
@@ -32,6 +34,8 @@ abstract class AbstractMapLayerState<T extends AbstractMapLayer>
   FlutterMapAdapter? _mapAdapter;
   Ticker? _animationTicker;
   DateTime? _animationEndTime;
+
+  Future<Image?>? spriteAtlas;
 
   @override
   void dispose() {
@@ -109,6 +113,15 @@ abstract class AbstractMapLayerState<T extends AbstractMapLayer>
   @override
   void initState() {
     super.initState();
+
+    spriteAtlas = Future.sync(() async {
+      var bytes = await widget.mapProperties.sprites?.atlasProvider.call();
+      if (bytes == null) {
+        return null;
+      }
+      return await imageFrom(bytes: bytes);
+    });
+
     executor = newConcurrentExecutor(
       concurrency: widget.mapProperties.concurrency,
     );
@@ -127,5 +140,15 @@ abstract class AbstractMapLayerState<T extends AbstractMapLayer>
     if (mounted) {
       setState(() {});
     }
+  }
+}
+
+Future<Image> imageFrom({required Uint8List bytes}) async {
+  final codec = await instantiateImageCodec(bytes);
+  try {
+    final frame = await codec.getNextFrame();
+    return frame.image;
+  } finally {
+    codec.dispose();
   }
 }
