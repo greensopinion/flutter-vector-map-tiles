@@ -89,6 +89,9 @@ class TileLoader {
       final tileResponse = await tileResponseFuture;
       final tileset = tileResponse.tileset;
       if (tileset == null) {
+        if (cancelled()) {
+          throw CancellationException();
+        }
         throw 'No tile: $requestedTile';
       }
       final translator = SlippyMapTranslator(_provider.maximumZoom);
