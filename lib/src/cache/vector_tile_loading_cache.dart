@@ -48,13 +48,21 @@ class VectorTileLoadingCache {
   }
 
   void _initialize() async {
-    final futures = _executor.submitAll(
-        Job('setup theme', _setupTheme, _theme, deduplicationKey: null));
-    for (final future in futures) {
-      await future;
+    try {
+      final futures = _executor.submitAll(
+          Job('setup theme', _setupTheme, _theme, deduplicationKey: null));
+      for (final future in futures) {
+        await future;
+      }
+      _ready = true;
+      _readyCompleter.complete(true);
+    } catch (e) {
+      if (e is CancellationException) {
+        return;
+      }
+      _readyCompleter.completeError(e);
+      rethrow;
     }
-    _ready = true;
-    _readyCompleter.complete(true);
   }
 
   String _toKey(String source, TileIdentity id) =>
