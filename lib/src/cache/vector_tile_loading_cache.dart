@@ -128,7 +128,8 @@ class VectorTileLoadingCache {
       return null;
     }
     final name = '$tileKey/${_theme.id}/$_sourcesKey';
-    final tileData = await _executor.submit(Job(
+    try {
+      final tileData = await _executor.submit(Job(
         name,
         _createTile,
         _ThemeTile(
@@ -138,8 +139,14 @@ class VectorTileLoadingCache {
             translation: translation),
         cancelled: cancelled,
         deduplicationKey: name));
-    _tileDataCache.put(tileKey, tileData);
-    return tileData;
+        _tileDataCache.put(tileKey, tileData);
+        return tileData;
+    } catch (e) {
+      if (e is CancellationException) {
+        return null;
+      }
+      rethrow;
+    }
   }
 
   Future<Uint8List?> _loadBytes(VectorTileProvider provider, String key,
