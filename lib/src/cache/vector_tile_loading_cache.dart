@@ -130,19 +130,20 @@ class VectorTileLoadingCache {
     final name = '$tileKey/${_theme.id}/$_sourcesKey';
     try {
       final tileData = await _executor.submit(Job(
-        name,
-        _createTile,
-        _ThemeTile(
-            source: source,
-            themeId: _theme.id,
-            bytes: bytes,
-            translation: translation),
-        cancelled: cancelled,
-        deduplicationKey: name));
-        _tileDataCache.put(tileKey, tileData);
-        return tileData;
+          name,
+          _createTile,
+          _ThemeTile(
+              source: source,
+              themeId: _theme.id,
+              bytes: bytes,
+              translation: translation),
+          cancelled: cancelled,
+          deduplicationKey: name));
+      _tileDataCache.put(tileKey, tileData);
+      return tileData;
     } catch (e) {
       if (e is CancellationException) {
+        cancelled();
         return null;
       }
       rethrow;
