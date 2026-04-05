@@ -18,14 +18,22 @@ class TilesetExecutorPreprocessor {
   }
 
   void _initialize() async {
-    final futures = _executor.submitAll(Job(
-        'setup preprocessor', _setupPreprocessor, _preprocessor,
-        deduplicationKey: null));
-    for (final future in futures) {
-      await future;
+    try {
+      final futures = _executor.submitAll(Job(
+          'setup preprocessor', _setupPreprocessor, _preprocessor,
+          deduplicationKey: null));
+      for (final future in futures) {
+        await future;
+      }
+      _ready = true;
+      _readyCompleter.complete(true);
+    } catch (e) {
+      if (e is CancellationException) {
+        return;
+      }
+      _readyCompleter.completeError(e);
+      rethrow;
     }
-    _ready = true;
-    _readyCompleter.complete(true);
   }
 
   Future<Tileset> preprocess(TileIdentity identity, Tileset tileset,

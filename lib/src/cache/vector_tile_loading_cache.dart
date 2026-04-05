@@ -48,13 +48,21 @@ class VectorTileLoadingCache {
   }
 
   void _initialize() async {
-    final futures = _executor.submitAll(
-        Job('setup theme', _setupTheme, _theme, deduplicationKey: null));
-    for (final future in futures) {
-      await future;
+    try {
+      final futures = _executor.submitAll(
+          Job('setup theme', _setupTheme, _theme, deduplicationKey: null));
+      for (final future in futures) {
+        await future;
+      }
+      _ready = true;
+      _readyCompleter.complete(true);
+    } catch (e) {
+      if (e is CancellationException) {
+        return;
+      }
+      _readyCompleter.completeError(e);
+      rethrow;
     }
-    _ready = true;
-    _readyCompleter.complete(true);
   }
 
   String _toKey(String source, TileIdentity id) =>
@@ -120,18 +128,26 @@ class VectorTileLoadingCache {
       return null;
     }
     final name = '$tileKey/${_theme.id}/$_sourcesKey';
-    final tileData = await _executor.submit(Job(
-        name,
-        _createTile,
-        _ThemeTile(
-            source: source,
-            themeId: _theme.id,
-            bytes: bytes,
-            translation: translation),
-        cancelled: cancelled,
-        deduplicationKey: name));
-    _tileDataCache.put(tileKey, tileData);
-    return tileData;
+    try {
+      final tileData = await _executor.submit(Job(
+          name,
+          _createTile,
+          _ThemeTile(
+              source: source,
+              themeId: _theme.id,
+              bytes: bytes,
+              translation: translation),
+          cancelled: cancelled,
+          deduplicationKey: name));
+      _tileDataCache.put(tileKey, tileData);
+      return tileData;
+    } catch (e) {
+      if (e is CancellationException) {
+        cancelled();
+        return null;
+      }
+      rethrow;
+    }
   }
 
   Future<Uint8List?> _loadBytes(VectorTileProvider provider, String key,

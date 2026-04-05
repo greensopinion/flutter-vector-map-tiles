@@ -1,6 +1,7 @@
 import 'package:executor_lib/executor_lib.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart';
 
+import '../../extensions.dart';
 import '../tile_model.dart';
 import 'delay_painter.dart';
 import 'tile_options.dart';
@@ -34,7 +35,9 @@ class UpdateTileLabelsJob {
         final painter = _painterProvider.create(symbol);
         _options.textCache.put(symbol, painter);
         Future.delayed(const Duration(milliseconds: 2)).then((value) =>
-            _labelUpdateExecutor.submit(toExecutorJob()).swallowCancellation());
+            _labelUpdateExecutor
+                .submit(toExecutorJob())
+                .swallowCancellationWithDebug());
       }
     }
   }
@@ -51,4 +54,4 @@ void sheduleLabelsUpdate(VectorTileOptions options,
         CreatedTextPainterProvider painterProvider) =>
     _labelUpdateExecutor
         .submit(UpdateTileLabelsJob(options, painterProvider).toExecutorJob())
-        .swallowCancellation();
+        .swallowCancellationWithDebug();
