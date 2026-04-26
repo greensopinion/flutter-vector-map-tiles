@@ -7,10 +7,13 @@ class TileIdentity extends Point<int> {
 
   @override
   operator ==(other) =>
-      other is TileIdentity && x == other.x && y == other.y && z == other.z;
+      other is TileIdentity &&
+      normalize().x == other.normalize().x &&
+      y == other.y &&
+      z == other.z;
 
   @override
-  int get hashCode => Object.hash(x, y, z);
+  int get hashCode => Object.hash(normalize().x, y, z);
 
   @override
   String toString() => key();
