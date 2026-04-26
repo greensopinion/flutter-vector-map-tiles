@@ -299,6 +299,8 @@ class _VectorTileLayerState extends DisposableState<_VectorTileLayer> {
 
   double get _rotation => widget.options.rotation();
 
+  bool get _allowWrap => widget.mapState.crs.replicatesWorldLongitude;
+
   @override
   void initState() {
     super.initState();
@@ -363,11 +365,14 @@ class _VectorTileLayerState extends DisposableState<_VectorTileLayer> {
     }
     _zoomScaler.updateMapZoomScale(_mapCamera.zoom);
 
-    final tileWidgets = <Widget>[];
     var positioner = GridTilePositioner(
         tiles.first.key.z,
         TilePositioningState(
             _zoomScaler.zoomScale(tiles.first.key.z), _mapCamera, _zoom));
+
+    final wrappedOutput = <TileIdentity, Widget>{};
+    final regularOutput = <TileIdentity, Widget>{};
+
     for (final tile in tiles) {
       if (tile.key.z != positioner.tileZoom) {
         positioner = GridTilePositioner(
@@ -375,9 +380,24 @@ class _VectorTileLayerState extends DisposableState<_VectorTileLayer> {
             TilePositioningState(
                 _zoomScaler.zoomScale(tile.key.z), _mapCamera, _zoom));
       }
-      tileWidgets.add(positioner.positionTile(tile.key, tile.value));
+
+      if (!tile.key.isValid()) {
+        wrappedOutput[tile.key.normalize()] =
+            positioner.positionTile(tile.key, tile.value);
+      } else {
+        regularOutput[tile.key.normalize()] =
+            positioner.positionTile(tile.key, tile.value);
+      }
     }
-    return Stack(children: tileWidgets);
+
+    final regularTileIdentities = regularOutput.keys.toSet();
+    final filteredWrapped = Map.fromEntries(wrappedOutput.entries
+        .where((e) => !regularTileIdentities.contains(e.key)));
+
+    return Stack(children: [
+      ...regularOutput.values,
+      ...filteredWrapped.values,
+    ]);
   }
 
   void _update() {
@@ -445,9 +465,9 @@ class _VectorTileLayerState extends DisposableState<_VectorTileLayer> {
 
     for (int x = minX; x <= maxX; ++x) {
       for (int y = minY; y <= maxY; ++y) {
-        if (x >= 0 && y >= 0) {
+        if (_allowWrap || (x >= 0 && y >= 0)) {
           final tile = TileIdentity(viewport.zoom, x, y);
-          if (tile.isValid()) {
+          if (_allowWrap ? tile.isValidWrapped() : tile.isValid()) {
             tiles.add(tile);
           }
         }
