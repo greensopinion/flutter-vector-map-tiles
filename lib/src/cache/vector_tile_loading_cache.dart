@@ -20,7 +20,7 @@ class VectorTileLoadingCache {
   late final String _sourcesKey;
   final MemoryTileDataCache _tileDataCache;
   final MemoryCache _memoryCache;
-  final StorageCache _delegate;
+  final StorageCache? _delegate;
   final TileProviders _providers;
   final Map<String, Future<Uint8List?>> _byteFuturesByKey = {};
   final Map<String, Future<Uint8List?>> _cacheByteFuturesByKey = {};
@@ -136,11 +136,11 @@ class VectorTileLoadingCache {
 
   Future<Uint8List?> _loadBytes(VectorTileProvider provider, String key,
       TileIdentity tile, bool cachedOnly) async {
-    var bytes = _memoryCache.get(key) ?? await _delegate.retrieve(key);
+    var bytes = _memoryCache.get(key) ?? await _delegate?.retrieve(key);
     if (bytes == null && !cachedOnly) {
       bytes = await provider.provide(tile);
       _memoryCache.put(key, bytes);
-      await _delegate.put(key, bytes);
+      await _delegate?.put(key, bytes);
     }
     return bytes;
   }

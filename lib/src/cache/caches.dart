@@ -32,7 +32,8 @@ class Caches {
       required int memoryTileDataCacheMaxSize,
       required int maxSizeInBytes,
       required int maxTextCacheSize,
-      required ByteStorage cacheStorage}) {
+      required ByteStorage cacheStorage,
+      required bool disableVectorTileFileCache}) {
     _storage = cacheStorage;
     final vectorProviders = providers.tileProviderBySource.entries.where((e) =>
         e.value.type == TileProviderType.vector ||
@@ -44,7 +45,7 @@ class Caches {
         MemoryTileDataCache(maxSize: memoryTileDataCacheMaxSize);
     final tileProviders = _createTileProviders(theme, vectorProviders);
     vectorTileCache = VectorTileLoadingCache(
-        storageCache,
+        disableVectorTileFileCache ? null : storageCache,
         memoryVectorTileCache,
         memoryTileDataCache,
         tileProviders,

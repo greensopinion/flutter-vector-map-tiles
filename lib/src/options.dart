@@ -26,6 +26,7 @@ class VectorTileLayerOptions {
   final VectorTileLayerMode layerMode;
   final double? maximumZoom;
   final Future<Directory> Function()? cacheFolder;
+  final bool disableVectorTileFileCache;
 
   VectorTileLayerOptions(vmt.VectorTileLayer layer)
       : tileProviders = layer.tileProviders,
@@ -46,7 +47,8 @@ class VectorTileLayerOptions {
         tileOffset = layer.tileOffset,
         layerMode = layer.layerMode,
         maximumZoom = layer.maximumZoom,
-        cacheFolder = layer.cacheFolder;
+        cacheFolder = layer.cacheFolder,
+        disableVectorTileFileCache = layer.disableVectorTileFileCache;
 
   bool hasRenderDifferences(VectorTileLayerOptions other) =>
       other.theme.id != theme.id ||
