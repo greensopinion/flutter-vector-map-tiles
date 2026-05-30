@@ -11,7 +11,7 @@ import 'package:vector_tile_renderer/vector_tile_renderer.dart' hide TileLayer;
 import '../cache/byte_storage_factory.dart';
 import '../cache/caches.dart';
 import '../vector_tile_controller.dart';
-import '../executors/executors.dart';
+import '../executors/shared_executor.dart';
 import '../options.dart';
 import '../raster/raster_tile_provider.dart';
 import '../stream/caches_tile_provider.dart';
@@ -80,7 +80,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
   @override
   void initState() {
     super.initState();
-    _executor = newConcurrentExecutor(concurrency: widget.options.concurrency);
+    _executor = acquireSharedExecutor(concurrency: widget.options.concurrency);
     _createCaches();
     attachController(widget.options.controller, _caches);
     Future.delayed(const Duration(seconds: 3), () {
@@ -102,7 +102,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
     _caches.dispose();
     _tileProvider?.dispose();
     _tileProvider = null;
-    _executor.dispose();
+    releaseSharedExecutor();
   }
 
   @override
