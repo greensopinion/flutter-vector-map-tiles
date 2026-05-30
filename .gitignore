@@ -10,6 +10,7 @@ api_key.dart
 .buildlog/
 .history
 .svn/
+.kiro/
 
 # IntelliJ related
 *.iml

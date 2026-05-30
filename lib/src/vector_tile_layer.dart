@@ -9,6 +9,7 @@ import 'options.dart';
 import 'style/style.dart';
 import 'tile_offset.dart';
 import 'tile_providers.dart';
+import 'vector_tile_controller.dart';
 import 'vector_tile_layer_mode.dart';
 import 'vector_tile_provider.dart';
 
@@ -16,6 +17,12 @@ import 'vector_tile_provider.dart';
 /// of a [FlutterMap].
 /// See readme for details.
 class VectorTileLayer extends StatelessWidget {
+  /// An optional controller for programmatic access to cache operations.
+  ///
+  /// Use [VectorTileController.clearMemoryCaches] to clear all in-memory
+  /// caches on demand.
+  final VectorTileController? controller;
+
   /// provides vector tiles, by source ID where the source ID corresponds to
   /// a source in the theme
   final TileProviders tileProviders;
@@ -117,6 +124,7 @@ class VectorTileLayer extends StatelessWidget {
 
   VectorTileLayer(
       {super.key,
+      this.controller,
       required this.tileProviders,
       required this.theme,
       this.sprites,

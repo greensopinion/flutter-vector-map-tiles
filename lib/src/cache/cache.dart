@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:math';
 
 import 'cache_stats.dart';
 
@@ -60,7 +61,7 @@ class Cache<K, V> with CacheStats {
   }
 
   void didHaveMemoryPressure() {
-    maxSize = maxSize ~/ 2;
+    maxSize = max(1, maxSize ~/ 2);
     clear();
   }
 

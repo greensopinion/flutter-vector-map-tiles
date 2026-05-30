@@ -4,10 +4,12 @@ import 'io/io.dart';
 import 'style/style.dart';
 import 'tile_offset.dart';
 import 'tile_providers.dart';
+import 'vector_tile_controller.dart';
 import 'vector_tile_layer.dart' as vmt;
 import 'vector_tile_layer_mode.dart';
 
 class VectorTileLayerOptions {
+  final VectorTileController? controller;
   final TileProviders tileProviders;
   final Theme theme;
   final SpriteStyle? sprites;
@@ -28,7 +30,8 @@ class VectorTileLayerOptions {
   final Future<Directory> Function()? cacheFolder;
 
   VectorTileLayerOptions(vmt.VectorTileLayer layer)
-      : tileProviders = layer.tileProviders,
+      : controller = layer.controller,
+        tileProviders = layer.tileProviders,
         theme = layer.theme,
         sprites = layer.sprites,
         fileCacheTtl = layer.fileCacheTtl,

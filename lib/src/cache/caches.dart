@@ -68,6 +68,16 @@ class Caches {
 
   void didHaveMemoryPressure() {
     memoryVectorTileCache.didHaveMemoryPressure();
+    memoryTileDataCache.didHaveMemoryPressure();
+    textCache.didHaveMemoryPressure();
+    imageLoadingCache.memoryCache.didHaveMemoryPressure();
+  }
+
+  void clearMemoryCaches() {
+    memoryVectorTileCache.clear();
+    memoryTileDataCache.clear();
+    textCache.clear();
+    imageLoadingCache.memoryCache.clear();
   }
 
   String stats() {
