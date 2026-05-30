@@ -14,8 +14,8 @@ dependencies:
   http: ^1.0.0
   latlong2: ^0.9.1
   path_provider: ^2.0.2
-  vector_tile_renderer: ^6.0.0
-    #path: ../vector_tile_renderer_6_0
+  vector_tile_renderer: ^6.1.0
+    #path: ../vector_tile_renderer
   async: ^2.8.2
   executor_lib: ^1.1.1
     #path: ../executor_lib
