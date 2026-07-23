@@ -1,3 +1,8 @@
+## 9.0.0-beta.10
+
+* update `latlong2` dependency version
+* fixed flutter_lints errors
+
 ## 9.0.0-beta.8
 
 * udpate `flutter_map` dependency to 8.1.1

@@ -67,7 +67,7 @@ class TileLoader {
         deduplicationKey: 'render $requestedTile ${_theme.id}/$_sourcesKey'));
   }
 
-  Future<ImageInfo> _renderJob(job) => _renderTile(
+  Future<ImageInfo> _renderJob(_TileJob job) => _renderTile(
       job.requestedTile, job.requestZoom, job.tileSize, job.cancelled);
 
   Future<ImageInfo> _renderTile(TileIdentity requestedTile, int requestZoom,

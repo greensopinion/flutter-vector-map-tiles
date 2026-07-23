@@ -1,5 +1,3 @@
-library vector_map_tiles;
-
 export 'src/provider/memory_vector_tile_provider.dart';
 export 'src/provider/network_vector_tile_provider.dart';
 export 'src/provider_exception.dart' show ProviderException, Retryable;

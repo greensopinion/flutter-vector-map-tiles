@@ -69,7 +69,7 @@ class NetworkVectorTileProvider extends VectorTileProvider {
     }
   }
 
-  _isRetryable(int statusCode) => statusCode == 503 || statusCode == 408;
+  bool _isRetryable(int statusCode) => statusCode == 503 || statusCode == 408;
 }
 
 class _UrlProvider {

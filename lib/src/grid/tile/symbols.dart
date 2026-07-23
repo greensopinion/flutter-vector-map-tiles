@@ -40,7 +40,7 @@ class UpdateTileLabelsJob {
   }
 }
 
-bool _updateLabels(job) {
+bool _updateLabels(dynamic job) {
   (job as UpdateTileLabelsJob).updateLabels();
   return true;
 }
