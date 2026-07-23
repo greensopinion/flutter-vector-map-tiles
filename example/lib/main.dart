@@ -87,9 +87,9 @@ class _MyHomePageState extends State<MyHomePage> {
 //   Maptiler - https://api.maptiler.com/maps/outdoor/style.json?key={key}
 //   Stadia Maps - https://tiles.stadiamaps.com/styles/outdoors.json?api_key={key}
   Future<Style> _readStyle() => StyleReader(
-          uri: 'mapbox://styles/mapbox/streets-v12?access_token={key}',
+          uri: 'https://tiles.stadiamaps.com/styles/outdoors.json?api_key=$stadiaMapsApiKey',
           // ignore: undefined_identifier
-          apiKey: mapboxApiKey,
+          apiKey: stadiaMapsApiKey,
           logger: const Logger.console())
       .read();
 
@@ -106,7 +106,7 @@ class _MyHomePageState extends State<MyHomePage> {
               theme: style.theme,
               sprites: style.sprites,
               maximumZoom: 22,
-              tileOffset: TileOffset.mapbox,
+              tileOffset: TileOffset.DEFAULT,
               layerMode: VectorTileLayerMode.vector)
         ],
       );
