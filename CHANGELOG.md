@@ -1,4 +1,4 @@
-## 9.0.0-beta.10
+## 9.0.0-beta.11
 
 * update `latlong2` dependency version
 * fixed flutter_lints errors
