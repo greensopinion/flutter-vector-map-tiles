@@ -1,3 +1,13 @@
+## 9.0.0-beta.12
+
+Memory fixes for `VectorTileLayerMode.raster`, where long sessions could run out of
+memory.
+
+* fix a memory leak when rendering tiles
+* release a map's tile caches when it is disposed
+* reuse an already rendered tile instead of rendering it again
+* invalidate rendered tiles when the theme or its version changes
+
 ## 9.0.0-beta.11
 
 * update `latlong2` dependency version
