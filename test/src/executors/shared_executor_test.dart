@@ -101,8 +101,7 @@ void main() {
             expect(
               sharedExecutorRefCountForTesting,
               equals(expectedRefCount),
-              reason:
-                  'Iteration $iteration, step $i: ref count mismatch',
+              reason: 'Iteration $iteration, step $i: ref count mismatch',
             );
           }
         }
@@ -210,9 +209,11 @@ void main() {
             releaseSharedExecutor();
           }
           expect(sharedExecutorForTesting, isNull,
-              reason: 'Iteration $iteration: executor should be null after full release');
+              reason:
+                  'Iteration $iteration: executor should be null after full release');
           expect(firstExecutor!.disposed, isTrue,
-              reason: 'Iteration $iteration: first executor should be disposed');
+              reason:
+                  'Iteration $iteration: first executor should be disposed');
 
           // Acquire again — should create a new distinct instance
           final newExecutor = acquireSharedExecutor(concurrency: 4);
@@ -223,9 +224,11 @@ void main() {
                 'Iteration $iteration: new executor should be distinct from disposed one',
           );
           expect(newExecutor.disposed, isFalse,
-              reason: 'Iteration $iteration: new executor should not be disposed');
+              reason:
+                  'Iteration $iteration: new executor should not be disposed');
           expect(sharedExecutorRefCountForTesting, equals(1),
-              reason: 'Iteration $iteration: ref count should be 1 after re-creation');
+              reason:
+                  'Iteration $iteration: ref count should be 1 after re-creation');
         }
       },
     );

@@ -25,7 +25,8 @@ TileProvider createRasterTileProvider(
     int concurrency) {
   final loader = createTileLoader(theme, sprites, caches, rasterTileProvider,
       executor, tileOffset, tileDelay, concurrency);
-  return FutureTileProvider(loader: loader.loadTile);
+  return FutureTileProvider(
+      loader: loader.loadTile, themeIdentity: loader.themeIdentity);
 }
 
 TileLoader createTileLoader(

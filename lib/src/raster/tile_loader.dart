@@ -47,6 +47,8 @@ class TileLoader {
         maxQueueSize: _maxOutstandingJobs);
   }
 
+  String get themeIdentity => '${_theme.id}/v${_theme.version}/$_sourcesKey';
+
   Future<ImageInfo> loadTile(TileCoordinates coords, TileLayer options,
       bool Function() cancelled) async {
     final requestedTile =
@@ -64,7 +66,7 @@ class TileLoader {
         options.tileDimension.toDouble(), cancelled);
     return _jobQueue.submit(Job<_TileJob, ImageInfo>(
         'render $requestedTile', _renderJob, job,
-        deduplicationKey: 'render $requestedTile ${_theme.id}/$_sourcesKey'));
+        deduplicationKey: 'render $requestedTile $themeIdentity'));
   }
 
   Future<ImageInfo> _renderJob(dynamic job) => _renderTile(
@@ -120,10 +122,18 @@ class TileLoader {
       renderer.render(canvas, size / _scale);
 
       final picture = recorder.endRecording();
-      final image =
-          await picture.toImage(size.width.toInt(), size.height.toInt());
-      await _cache(translation.original, image);
-      return ImageInfo(image: image, scale: _scale);
+      try {
+        final image =
+            await picture.toImage(size.width.toInt(), size.height.toInt());
+        await _cache(translation.original, image);
+        return ImageInfo(image: image, scale: _scale);
+      } finally {
+        // A Picture holds a native display list. Without an explicit dispose it
+        // is only released when the Dart finalizer runs, and native memory
+        // pressure does not drive Dart GC — so rendering tiles faster than the
+        // collector runs exhausts the native allocator.
+        picture.dispose();
+      }
     } finally {
       rasterTile.dispose();
     }

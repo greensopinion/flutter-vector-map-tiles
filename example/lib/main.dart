@@ -87,7 +87,8 @@ class _MyHomePageState extends State<MyHomePage> {
 //   Maptiler - https://api.maptiler.com/maps/outdoor/style.json?key={key}
 //   Stadia Maps - https://tiles.stadiamaps.com/styles/outdoors.json?api_key={key}
   Future<Style> _readStyle() => StyleReader(
-          uri: 'https://tiles.stadiamaps.com/styles/outdoors.json?api_key=$stadiaMapsApiKey',
+          uri:
+              'https://tiles.stadiamaps.com/styles/outdoors.json?api_key=$stadiaMapsApiKey',
           // ignore: undefined_identifier
           apiKey: stadiaMapsApiKey,
           logger: const Logger.console())
