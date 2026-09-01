@@ -83,14 +83,14 @@ class _FutureImageProvider extends ImageProvider<_TileImageKey> {
           _TileImageKey key,
           // ignore: deprecated_member_use
           DecoderBufferCallback decode) =>
-      _load();
+      _load(key);
 
   @override
   ImageStreamCompleter loadImage(
           _TileImageKey key, ImageDecoderCallback decode) =>
-      _load();
+      _load(key);
 
-  ImageStreamCompleter _load() {
+  ImageStreamCompleter _load(_TileImageKey key) {
     final cancellation = _CancellationState();
     final completer = _ImageStreamCompleter();
     unawaited(cancelLoading.whenComplete(cancellation.cancel));
@@ -100,6 +100,12 @@ class _FutureImageProvider extends ImageProvider<_TileImageKey> {
     }, onError: (Object error, StackTrace stack) {
       if (error is! CancellationException) {
         completer.reportError(exception: error, stack: stack);
+      } else {
+        // ImageCache holds a pending entry until its completer resolves, so
+        // without this a later request for the tile waits forever. Completing
+        // instead would cache a blank tile. Cancellation only happens once the
+        // listeners are gone, so leaving the completer unresolved is safe.
+        PaintingBinding.instance.imageCache.evict(key);
       }
     });
     return completer;

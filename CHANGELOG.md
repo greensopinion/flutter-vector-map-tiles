@@ -1,3 +1,8 @@
+## 9.0.0-beta.13
+
+* fix tiles staying blank after being panned out of view and back again, a
+  regression in 9.0.0-beta.12
+
 ## 9.0.0-beta.12
 
 Memory fixes for `VectorTileLayerMode.raster`, where long sessions could run out of
