@@ -4,8 +4,8 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:vector_map_tiles/vector_map_tiles.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart' hide TileLayer;
-
-const stadiaMapsApiKey = String.fromEnvironment('STADIA_MAPS_API_KEY');
+// ignore: uri_does_not_exist
+import 'api_key.dart';
 
 void main() {
   runApp(const MyApp());
@@ -89,6 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<Style> _readStyle() => StyleReader(
           uri:
               'https://tiles.stadiamaps.com/styles/outdoors.json?api_key=$stadiaMapsApiKey',
+          // ignore: undefined_identifier
           apiKey: stadiaMapsApiKey,
           logger: const Logger.console())
       .read();
