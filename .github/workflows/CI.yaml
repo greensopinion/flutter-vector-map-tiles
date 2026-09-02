@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - main
+      - 9.0.0
   pull_request:
     branches:
       - main
+      - 9.0.0
 
 jobs:
   ci:
@@ -22,6 +24,9 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Configure example API key
+        run: echo "const stadiaMapsApiKey = '';" > example/lib/api_key.dart
 
       - name: Check formatting
         run: dart format . --output none --set-exit-if-changed
