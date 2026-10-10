@@ -2,6 +2,8 @@
 
 * fix tiles staying blank after being panned out of view and back again, a
   regression in 9.0.0-beta.12
+* fix `Unhandled Exception: Cancelled` errors logged when a vector tile is
+  cancelled while it is loading
 
 ## 9.0.0-beta.12
 

@@ -58,6 +58,7 @@ class CachesTileProvider extends TileProvider {
           source, request.tileId,
           cachedOnly: localOnly, cancelled: request.cancelled);
     }
+    _ignoreAbandoned(futureBySource.values);
     Map<String, TileData?> tileBySource = {};
     for (final entry in futureBySource.entries) {
       request.testCancelled();
@@ -73,11 +74,21 @@ class CachesTileProvider extends TileProvider {
             source,
             _tileProcessor.process(
                 request, source, tileData, request.cancelled)));
+    _ignoreAbandoned(sourceToTileFuture.values);
     Map<String, Tile> tileBySource = {};
     for (final entry in sourceToTileFuture.entries) {
       request.testCancelled();
       tileBySource[entry.key] = await entry.value;
     }
     return tileBySource;
+  }
+
+  // A cancelled request stops awaiting part way through, and the executor
+  // fails the abandoned jobs with an error nothing listens for. Awaited
+  // futures still deliver their errors.
+  void _ignoreAbandoned(Iterable<Future> futures) {
+    for (final future in futures) {
+      future.ignore();
+    }
   }
 }
