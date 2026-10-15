@@ -9,13 +9,14 @@ import 'tile_supplier.dart';
 
 class TileProcessor {
   final Executor _executor;
+  final Theme _theme;
 
-  TileProcessor(this._executor);
+  TileProcessor(this._executor, this._theme);
 
   Future<Tile> process(TileRequest request, String source, TileData tileData,
       CancellationCallback cancelled) {
     final key =
-        'process $source ${request.tileId.key()} clip=${request.clip} ${request.tileSources.toList().sorted().join(',')}';
+        'process ${_theme.id}/${_theme.version} $source ${request.tileId.key()} clip=${request.clip} ${request.tileSources.toList().sorted().join(',')}';
     return _executor.submit(Job<_Request, Tile>(
         key, _processTile, _Request(tileData, request.clip),
         cancelled: cancelled, deduplicationKey: key));

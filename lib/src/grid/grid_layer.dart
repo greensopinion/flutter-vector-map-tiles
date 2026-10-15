@@ -215,7 +215,7 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
     _tileSupplier = DelayProvider(
             CachesTileProvider(
                 _caches,
-                TileProcessor(_executor),
+                TileProcessor(_executor, widget.options.theme),
                 TilesetExecutorPreprocessor(
                     TilesetPreprocessor(widget.options.theme), _executor),
                 TilesetUiPreprocessor(TilesetPreprocessor(widget.options.theme,

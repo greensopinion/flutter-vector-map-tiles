@@ -1,5 +1,7 @@
 ## 9.0.0-beta.13
 
+* prevent independently styled layers from sharing processed vector tiles
+
 * fix tiles staying blank after being panned out of view and back again, a
   regression in 9.0.0-beta.12
 
