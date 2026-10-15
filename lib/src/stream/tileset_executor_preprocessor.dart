@@ -34,7 +34,7 @@ class TilesetExecutorPreprocessor {
       await _readyCompleter.future;
     }
     final deduplicationKey =
-        'preprocess: $identity clip=$clip zoom=$zoom sources=${tileset.tiles.keys.toList().sorted().join(',')}';
+        'preprocess: ${_preprocessor.theme.id}/${_preprocessor.theme.version} $identity clip=$clip zoom=$zoom sources=${tileset.tiles.keys.toList().sorted().join(',')}';
     final preprocessed = await _executor.submit(Job(deduplicationKey,
         _preprocessTile, _TilesetAndZoom(_preprocessor.theme.id, tileset, zoom),
         cancelled: cancelled, deduplicationKey: deduplicationKey));

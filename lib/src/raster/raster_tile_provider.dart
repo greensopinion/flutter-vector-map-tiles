@@ -41,7 +41,7 @@ TileLoader createTileLoader(
   final tileSupplier = DelayProvider(
           CachesTileProvider(
               caches,
-              TileProcessor(executor),
+              TileProcessor(executor, theme),
               TilesetExecutorPreprocessor(TilesetPreprocessor(theme), executor),
               TilesetUiPreprocessor(
                   TilesetPreprocessor(theme, initializeGeometry: true))),
