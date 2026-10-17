@@ -211,7 +211,8 @@ class _VectorTileCompositeLayerState extends State<VectorTileCompositeLayer>
         memoryTileDataCacheMaxSize: widget.options.memoryTileDataCacheMaxSize,
         maxSizeInBytes: widget.options.fileCacheMaximumSizeInBytes,
         maxTextCacheSize: widget.options.textCacheMaxSize,
-        cacheStorage: createByteStorage(widget.options.cacheFolder));
+        cacheStorage: createByteStorage(widget.options.cacheFolder),
+        disableVectorTileFileCache: widget.options.disableVectorTileFileCache);
     _tileSupplier = DelayProvider(
             CachesTileProvider(
                 _caches,

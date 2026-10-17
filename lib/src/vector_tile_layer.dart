@@ -122,6 +122,11 @@ class VectorTileLayer extends StatelessWidget {
   /// this function.
   final Future<Directory> Function()? cacheFolder;
 
+  /// Indicates whether to disable writing of vector tiles to the disk cache.
+  /// Disabling the cache can save disk space for implementations serving tiles
+  /// from local files. Generated raster tiles are always cached to disk.
+  final bool disableVectorTileFileCache;
+
   VectorTileLayer(
       {super.key,
       this.controller,
@@ -143,7 +148,8 @@ class VectorTileLayer extends StatelessWidget {
       this.layerMode = VectorTileLayerMode.raster,
       this.maximumZoom,
       this.tileDelay = const Duration(milliseconds: 0),
-      this.cacheFolder}) {
+      this.cacheFolder,
+      this.disableVectorTileFileCache = false}) {
     assert(concurrency >= 0 && concurrency <= 100);
     final providers = theme.tileSources
         .map((source) => tileProviders.tileProviderBySource[source])
