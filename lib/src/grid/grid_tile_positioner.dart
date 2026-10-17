@@ -14,7 +14,7 @@ class GridTilePositioner {
   GridTilePositioner(this.tileZoom, this.state);
 
   Widget positionTile(TileIdentity tile, Widget tileWidget) {
-    final offset = _tileOffset(tile);
+    var offset = _tileOffset(tile);
     final toRightPosition =
         _tileOffset(TileIdentity(tile.z, tile.x + 1, tile.y));
     final toBottomPosition =
@@ -22,8 +22,19 @@ class GridTilePositioner {
     const tileOverlap = 0.5;
     final p = Rect.fromLTRB(offset.dx, offset.dy,
         toRightPosition.dx + tileOverlap, toBottomPosition.dy + tileOverlap);
+
+    if (state.allowWrap) {
+      if (offset.dx < -state.worldWidthPixels / 2) {
+        offset = Offset(offset.dx + state.worldWidthPixels, offset.dy);
+      } else if (offset.dx > state.worldWidthPixels / 2) {
+        offset = Offset(offset.dx - state.worldWidthPixels, offset.dy);
+      }
+    }
+
+    final normalizedTile = tile.normalize();
     return Positioned(
-        key: Key('PositionedGridTile_${tile.z}_${tile.x}_${tile.y}'),
+        key: Key(
+            'PositionedGridTile_${normalizedTile.z}_${normalizedTile.x}_${normalizedTile.y}'),
         top: _roundSize(offset.dy),
         left: _roundSize(offset.dx),
         width: _roundSize(p.width),
@@ -92,6 +103,8 @@ class TilePositioningState {
   final double zoomScale;
   late final Offset origin;
   late final Offset translate;
+  late final double worldWidthPixels;
+  late final bool allowWrap;
 
   TilePositioningState(this.zoomScale, MapCamera mapCamera, double zoom) {
     final pixelOriginPoint =
@@ -104,6 +117,8 @@ class TilePositioningState {
     origin = mapCamera.projectAtZoom(
         mapCamera.unprojectAtZoom(pixelOrigin, zoom), zoom);
     translate = (origin * zoomScale) - pixelOrigin;
+    worldWidthPixels = pow(2, zoom).toDouble() * tileSize.width * zoomScale;
+    allowWrap = mapCamera.crs.replicatesWorldLongitude;
   }
 }
 
