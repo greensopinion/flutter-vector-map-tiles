@@ -39,7 +39,7 @@ class IdbByteStorage extends ByteStorage {
       final tranasaction = database.transaction(
           _storeName, mode == _Mode.read ? idbModeReadOnly : idbModeReadWrite);
       final store = tranasaction.objectStore(_storeName);
-      final v = command(store);
+      final v = await command(store);
       await tranasaction.completed;
       return v;
     } finally {
