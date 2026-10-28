@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Mapigrade
+    url: https://github.com/greensopinion/mapigrade
+    about: vector_map_tiles is minimally maintained, and issues may not get a response. Mapigrade is a newer flutter_map base layer that may eventually replace it.

@@ -4,6 +4,8 @@ A plugin for [`flutter_map`](https://pub.dev/packages/flutter_map) that enables 
 
 Loads vector tiles from a source such as Mapbox or Stadia Maps, and renders them as a layer on a `flutter_map`.
 
+> vector_map_tiles is minimally maintained. Issues and pull requests may not get a response. I'm now working on [Mapigrade](https://github.com/greensopinion/mapigrade), which renders MapLibre Native maps as the base layer of a `flutter_map` map and may eventually replace vector_map_tiles. If you depend on vector_map_tiles and need changes, consider maintaining a fork.
+
 
 <img src="https://raw.githubusercontent.com/greensopinion/flutter-vector-map-tiles/main/vector_map_tiles-example.png" alt="example screenshot" width="292"/> <img src="https://raw.githubusercontent.com/greensopinion/flutter-vector-map-tiles/main/vector_map_tiles-example-hillshade.png" alt="example screenshot" width="292"/>
 
