@@ -85,6 +85,9 @@ class TileLoader {
         cancelled: cancelled);
     final spriteAtlas = await _spriteAtlas?.call();
     final tileResponseFuture = _provider.provide(tileRequest);
+    // It can fail (e.g. cancelled) while the raster tile loads, or be
+    // abandoned if that throws. Awaiting it below still delivers its error.
+    tileResponseFuture.ignore();
     final rasterTile = await _rasterTileProvider
         .retrieve(requestedTile.normalize(), skipMissing: true);
     try {
