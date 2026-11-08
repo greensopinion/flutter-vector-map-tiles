@@ -50,8 +50,12 @@ class VectorTileLoadingCache {
   void _initialize() async {
     final futures = _executor.submitAll(
         Job('setup theme', _setupTheme, _theme, deduplicationKey: null));
-    for (final future in futures) {
-      await future;
+    try {
+      await Future.wait(futures);
+    } on CancellationException {
+      // The executor was disposed before the theme was set up, so this cache
+      // is being discarded. Nothing else listens to this method's errors.
+      return;
     }
     _ready = true;
     _readyCompleter.complete(true);

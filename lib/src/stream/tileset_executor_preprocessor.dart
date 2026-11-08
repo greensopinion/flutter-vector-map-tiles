@@ -21,8 +21,13 @@ class TilesetExecutorPreprocessor {
     final futures = _executor.submitAll(Job(
         'setup preprocessor', _setupPreprocessor, _preprocessor,
         deduplicationKey: null));
-    for (final future in futures) {
-      await future;
+    try {
+      await Future.wait(futures);
+    } on CancellationException {
+      // The executor was disposed before the preprocessor was set up, so
+      // this one is being discarded. Nothing else listens to this method's
+      // errors.
+      return;
     }
     _ready = true;
     _readyCompleter.complete(true);

@@ -6,6 +6,9 @@
   regression in 9.0.0-beta.12
 * fix `Unhandled Exception: Cancelled` errors logged when a vector tile is
   cancelled while it is loading
+* fix the same error when a tile is cancelled while its raster tiles load or
+  during the tile delay, and when the executor is disposed (the theme changes
+  or the map closes) before a theme is set up
 
 ## 9.0.0-beta.12
 

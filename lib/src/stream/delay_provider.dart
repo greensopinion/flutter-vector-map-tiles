@@ -21,11 +21,14 @@ class DelayProvider extends TileProvider {
 
   @override
   Future<TileResponse> provide(TileRequest request) async {
-    final tile = _delegate.provide(request);
     final durationWithJitter =
         Duration(milliseconds: _random.nextInt(_delay.inMilliseconds));
-    await Future.delayed(durationWithJitter);
-    return tile;
+    // Await the tile together with the delay: if the tile fails during the
+    // delay (e.g. it is cancelled), its error has a listener.
+    final results = await Future.wait<Object?>(
+        [_delegate.provide(request), Future<void>.delayed(durationWithJitter)],
+        eagerError: true);
+    return results.first as TileResponse;
   }
 
   @override
