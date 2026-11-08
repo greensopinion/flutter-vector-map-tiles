@@ -191,16 +191,19 @@ class _VectorTileModelLoader {
     if (!model.disposed) {
       try {
         var request = _newRequest();
-        final loading = model.tileProvider.provide(request);
-        final rasterTileset = await model.rasterTileProvider
-            .retrieve(model.tile, skipMissing: true);
-        late final TileResponse tileResponse;
-        try {
-          tileResponse = await loading;
-        } catch (_) {
-          rasterTileset.dispose();
-          rethrow;
-        }
+        // Await both together: awaiting one first leaves the other with no
+        // listener, so its error (e.g. a CancellationException) would be
+        // reported as unhandled.
+        final results = await Future.wait<Object>([
+          model.tileProvider.provide(request),
+          model.rasterTileProvider.retrieve(model.tile, skipMissing: true)
+        ], eagerError: true, cleanUp: (value) {
+          if (value is RasterTileset) {
+            value.dispose();
+          }
+        });
+        final tileResponse = results[0] as TileResponse;
+        final rasterTileset = results[1] as RasterTileset;
         model._receiveTile(tileResponse, rasterTileset, spriteImage);
       } catch (e) {
         if (e is SocketException) {
